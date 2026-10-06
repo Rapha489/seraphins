@@ -32,7 +32,7 @@ const GUILD_ID = '1401231514812809256';
 const ADM_ROLE_ID = '1454153278060367933';
 
 // LINK DO BANNER DOS TICKETS
-const TICKET_BANNER_URL = 'Https://cdn.imagchest.com/files/52cd34cf74ad.png';
+const TICKET_BANNER_URL = 'https://cdn.imgchest.com/files/52cd34cf74ad.png';
 
 // ======================================================
 // ARQUIVOS
