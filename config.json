@@ -1,0 +1,11 @@
+{
+  "1556721294777524335": {
+    "ticketChannelId": "1556755880173637762",
+    "ticketCategoryId": null,
+    "admRoleId": "1556827586309521520",
+    "logsChannelId": null,
+    "welcomeChannelId": null,
+    "antiSpam": true,
+    "antiRaid": true
+  }
+}

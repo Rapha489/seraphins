@@ -1,0 +1,36 @@
+{
+  "1556721294777524335-1791253868653": {
+    "id": "1556721294777524335-1791253868653",
+    "guildId": "1556721294777524335",
+    "channelId": "1556721295373369366",
+    "creatorId": "1554473759145070624",
+    "creatorTag": "sleepy_zn1",
+    "prize": "1 conta nitrada",
+    "winners": 1,
+    "requiredInvites": 5,
+    "participants": [
+      "1554473759145070624"
+    ],
+    "endAt": 1791340268653,
+    "finalizado": false,
+    "winnerIds": [],
+    "messageId": "1556856307653541990"
+  },
+  "1556721294777524335-1791254161264": {
+    "id": "1556721294777524335-1791254161264",
+    "guildId": "1556721294777524335",
+    "channelId": "1556721295373369366",
+    "creatorId": "1554473759145070624",
+    "creatorTag": "sleepy_zn1",
+    "prize": "nitro",
+    "winners": 1,
+    "requiredInvites": 5,
+    "participants": [
+      "1554473759145070624"
+    ],
+    "endAt": 1791340561264,
+    "finalizado": false,
+    "winnerIds": [],
+    "messageId": "1556857535284117608"
+  }
+}
