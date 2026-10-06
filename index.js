@@ -27,10 +27,10 @@ const fs = require('fs');
 const TOKEN = process.env.TOKEN;
 
 const CLIENT_ID = '1556725113188257842';
-const GUILD_ID = '1556721294777524335';
+const GUILD_ID = '1401231514812809256';
 
 // Cargo ADM que você já me passou
-const ADM_ROLE_ID = '1556827586309521520';
+const ADM_ROLE_ID = '1454153278060367933';
 
 // ======================================================
 // ARQUIVOS
