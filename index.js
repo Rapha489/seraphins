@@ -15,7 +15,8 @@ const {
     TextInputBuilder,
     TextInputStyle,
     StringSelectMenuBuilder,
-    StringSelectMenuOptionBuilder
+    StringSelectMenuOptionBuilder,
+    RoleSelectMenuBuilder
 } = require('discord.js');
 
 const fs = require('fs');
@@ -94,6 +95,38 @@ const sorteios =
 
 const convites =
     loadJSON('convites.json', {});
+
+// Configuração do Painel de Compras, separada por servidor.
+const lojas =
+    loadJSON('lojas.json', {});
+
+function getLoja(guildId) {
+    if (!lojas[guildId]) {
+        lojas[guildId] = {
+            canalId: null,
+            messageId: null,
+            cargos: {}
+        };
+    }
+
+    if (!lojas[guildId].cargos) {
+        lojas[guildId].cargos = {};
+    }
+
+    if (!('canalId' in lojas[guildId])) {
+        lojas[guildId].canalId = null;
+    }
+
+    if (!('messageId' in lojas[guildId])) {
+        lojas[guildId].messageId = null;
+    }
+
+    return lojas[guildId];
+}
+
+function saveLojas() {
+    saveJSON('lojas.json', lojas);
+}
 
 const guildConfigs = {};
 
@@ -211,9 +244,18 @@ function mainPanel() {
                 .setStyle(ButtonStyle.Secondary)
         );
 
+    const row3 =
+        new ActionRowBuilder().addComponents(
+            new ButtonBuilder()
+                .setCustomId('panel_compras')
+                .setLabel('Painel de Compras')
+                .setEmoji('🛒')
+                .setStyle(ButtonStyle.Success)
+        );
+
     return {
         embeds: [embed],
-        components: [row1, row2]
+        components: [row1, row2, row3]
     };
 }
 
@@ -756,6 +798,285 @@ async function openTicket(
     return interaction.reply({
         content:
             `Ticket de ${ticketType} criado: ${channel}`,
+        ephemeral: true
+    });
+}
+
+/* =========================
+   PAINEL DE COMPRAS
+========================= */
+
+function purchaseConfigPanel(guild) {
+    const loja = getLoja(guild.id);
+    const channel = loja.canalId
+        ? guild.channels.cache.get(loja.canalId)
+        : null;
+
+    const cargos = Object.entries(loja.cargos || {});
+    const cargoText = cargos.length
+        ? cargos.slice(0, 15).map(([roleId, data]) => {
+            const role = guild.roles.cache.get(roleId);
+            const price = Number(data.price || 0).toFixed(2).replace('.', ',');
+            return `• ${role ? role.name : `Cargo removido (${roleId})`} — R$ ${price}`;
+        }).join('\n')
+        : 'Nenhum cargo configurado ainda.';
+
+    const embed = new EmbedBuilder()
+        .setTitle('🛒 Painel de Compras')
+        .setDescription(
+            `Configure os cargos que serão vendidos e o canal da loja.\n\n` +
+            `**Canal da loja:** ${channel ? channel.toString() : 'Não definido'}\n\n` +
+            `**Cargos e preços:**\n${cargoText}` +
+            (cargos.length > 15 ? `\n... e mais ${cargos.length - 15} cargo(s).` : '')
+        )
+        .setColor('#000000');
+
+    const row1 = new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+            .setCustomId('shop_add_role')
+            .setLabel('Adicionar/Editar Cargo')
+            .setEmoji('➕')
+            .setStyle(ButtonStyle.Primary),
+        new ButtonBuilder()
+            .setCustomId('shop_remove_role')
+            .setLabel('Remover Cargo')
+            .setEmoji('🗑️')
+            .setStyle(ButtonStyle.Danger),
+        new ButtonBuilder()
+            .setCustomId('shop_set_channel')
+            .setLabel('Definir Canal')
+            .setEmoji('📍')
+            .setStyle(ButtonStyle.Secondary)
+    );
+
+    const row2 = new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+            .setCustomId('shop_publish')
+            .setLabel('Publicar/Atualizar Loja')
+            .setEmoji('📢')
+            .setStyle(ButtonStyle.Success),
+        new ButtonBuilder()
+            .setCustomId('shop_back')
+            .setLabel('Voltar')
+            .setStyle(ButtonStyle.Secondary)
+    );
+
+    return {
+        embeds: [embed],
+        components: [row1, row2],
+        ephemeral: true
+    };
+}
+
+function purchaseRoleSelect(guild, mode) {
+    const menu = new RoleSelectMenuBuilder()
+        .setCustomId(
+            mode === 'remove' ? 'shop_select_remove' : 'shop_select_price'
+        )
+        .setPlaceholder(
+            mode === 'remove'
+                ? 'Selecione o cargo que deseja remover'
+                : 'Selecione o cargo que deseja vender'
+        )
+        .setMinValues(1)
+        .setMaxValues(1);
+
+    return {
+        content: mode === 'remove'
+            ? 'Selecione um cargo que já esteja cadastrado na loja.'
+            : 'Selecione o cargo que deseja cadastrar ou editar o preço.',
+        components: [
+            new ActionRowBuilder().addComponents(menu)
+        ],
+        ephemeral: true
+    };
+}
+
+function purchaseStorePanel(guild) {
+    const loja = getLoja(guild.id);
+    const entries = Object.entries(loja.cargos || {})
+        .filter(([roleId]) => {
+            const role = guild.roles.cache.get(roleId);
+            return role && role.id !== guild.id && !role.managed;
+        })
+        .slice(0, 25);
+
+    const embed = new EmbedBuilder()
+        .setTitle(`🛒 Loja de ${guild.name}`)
+        .setDescription(
+            entries.length
+                ? 'Selecione abaixo o cargo que deseja comprar. Um ticket será criado para o atendimento e confirmação do pagamento.'
+                : 'A loja ainda não possui cargos disponíveis.'
+        )
+        .setColor('#000000');
+
+    const components = [];
+
+    if (entries.length) {
+        const menu = new StringSelectMenuBuilder()
+            .setCustomId('shop_customer_select')
+            .setPlaceholder('Escolha um cargo para comprar')
+            .addOptions(
+                entries.map(([roleId, data]) => {
+                    const role = guild.roles.cache.get(roleId);
+                    const price = Number(data.price || 0).toFixed(2).replace('.', ',');
+                    return new StringSelectMenuOptionBuilder()
+                        .setLabel((role.name || 'Cargo').slice(0, 100))
+                        .setDescription(`Preço: R$ ${price}`.slice(0, 100))
+                        .setValue(roleId);
+                })
+            );
+
+        components.push(
+            new ActionRowBuilder().addComponents(menu)
+        );
+    }
+
+    return {
+        embeds: [embed],
+        components
+    };
+}
+
+async function openPurchaseTicket(interaction, roleId) {
+    const guild = interaction.guild;
+    const loja = getLoja(guild.id);
+    const role = guild.roles.cache.get(roleId);
+    const roleData = loja.cargos[roleId];
+
+    if (!role || !roleData) {
+        return interaction.reply({
+            content: 'Esse cargo não está mais disponível na loja.',
+            ephemeral: true
+        });
+    }
+
+    if (role.id === guild.id || role.managed) {
+        return interaction.reply({
+            content: 'Esse cargo não pode ser vendido.',
+            ephemeral: true
+        });
+    }
+
+    const existing = guild.channels.cache.find(channel =>
+        channel.type === ChannelType.GuildText &&
+        channel.topic === `seraphins-purchase:${interaction.user.id}:${roleId}`
+    );
+
+    if (existing) {
+        return interaction.reply({
+            content: `Você já possui um ticket de compra aberto para esse cargo: ${existing}`,
+            ephemeral: true
+        });
+    }
+
+    const config = getConfig(guild.id);
+    const adminRoleId = config.ticketCargo || ADM_ROLE_ID;
+    const adminRole = guild.roles.cache.get(adminRoleId);
+
+    const safeRoleName = role.name
+        .toLowerCase()
+        .replace(/[^a-z0-9-]/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '')
+        .slice(0, 30) || 'cargo';
+
+    const safeUsername = interaction.user.username
+        .toLowerCase()
+        .replace(/[^a-z0-9-]/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '')
+        .slice(0, 30) || 'usuario';
+
+    const overwrites = [
+        {
+            id: guild.roles.everyone.id,
+            deny: [PermissionFlagsBits.ViewChannel]
+        },
+        {
+            id: interaction.user.id,
+            allow: [
+                PermissionFlagsBits.ViewChannel,
+                PermissionFlagsBits.SendMessages,
+                PermissionFlagsBits.ReadMessageHistory,
+                PermissionFlagsBits.AttachFiles,
+                PermissionFlagsBits.EmbedLinks
+            ]
+        },
+        {
+            id: client.user.id,
+            allow: [
+                PermissionFlagsBits.ViewChannel,
+                PermissionFlagsBits.SendMessages,
+                PermissionFlagsBits.ReadMessageHistory,
+                PermissionFlagsBits.ManageChannels
+            ]
+        }
+    ];
+
+    if (adminRole) {
+        overwrites.push({
+            id: adminRole.id,
+            allow: [
+                PermissionFlagsBits.ViewChannel,
+                PermissionFlagsBits.SendMessages,
+                PermissionFlagsBits.ReadMessageHistory
+            ]
+        });
+    }
+
+    let channel;
+
+    try {
+        channel = await guild.channels.create({
+            name: `compra-${safeRoleName}-${safeUsername}`.slice(0, 100),
+            type: ChannelType.GuildText,
+            topic: `seraphins-purchase:${interaction.user.id}:${roleId}`,
+            permissionOverwrites: overwrites
+        });
+    } catch (error) {
+        console.error('Erro ao criar ticket de compra:', error);
+        return interaction.reply({
+            content: 'Não consegui criar o ticket. Verifique as permissões do bot.',
+            ephemeral: true
+        });
+    }
+
+    const price = Number(roleData.price || 0).toFixed(2).replace('.', ',');
+    const embed = new EmbedBuilder()
+        .setTitle('🛒 Solicitação de compra')
+        .setDescription(
+            `**Cliente:** ${interaction.user}\n` +
+            `**Cargo:** ${role}\n` +
+            `**Preço:** R$ ${price}\n\n` +
+            'A equipe deve confirmar o pagamento antes de entregar o cargo. Este bot não confirma pagamentos automaticamente.'
+        )
+        .setColor('#000000')
+        .setTimestamp();
+
+    const buttons = new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+            .setCustomId('ticket_claim')
+            .setLabel('Assumir Ticket')
+            .setStyle(ButtonStyle.Primary),
+        new ButtonBuilder()
+            .setCustomId('ticket_call_adm')
+            .setLabel('Chamar ADM')
+            .setStyle(ButtonStyle.Secondary),
+        new ButtonBuilder()
+            .setCustomId('ticket_close')
+            .setLabel('Fechar Ticket')
+            .setStyle(ButtonStyle.Danger)
+    );
+
+    await channel.send({
+        content: adminRole ? `${adminRole}` : '',
+        embeds: [embed],
+        components: [buttons]
+    });
+
+    return interaction.reply({
+        content: `Seu ticket de compra foi criado: ${channel}`,
         ephemeral: true
     });
 }
@@ -2172,6 +2493,168 @@ client.on(
                     );
                 }
 
+                if (
+                    interaction.customId ===
+                    'panel_compras'
+                ) {
+                    if (!isStaff(interaction.member)) {
+                        return interaction.reply({
+                            content: '❌ Você não possui permissão para configurar a loja.',
+                            ephemeral: true
+                        });
+                    }
+
+                    return interaction.reply(
+                        purchaseConfigPanel(interaction.guild)
+                    );
+                }
+
+                if (
+                    interaction.customId ===
+                    'shop_back'
+                ) {
+                    if (!isStaff(interaction.member)) {
+                        return interaction.reply({
+                            content: '❌ Sem permissão.',
+                            ephemeral: true
+                        });
+                    }
+
+                    return interaction.update(mainPanel());
+                }
+
+                if (
+                    interaction.customId ===
+                    'shop_add_role'
+                ) {
+                    if (!isStaff(interaction.member)) {
+                        return interaction.reply({
+                            content: '❌ Sem permissão.',
+                            ephemeral: true
+                        });
+                    }
+
+                    return interaction.reply(
+                        purchaseRoleSelect(interaction.guild, 'add')
+                    );
+                }
+
+                if (
+                    interaction.customId ===
+                    'shop_remove_role'
+                ) {
+                    if (!isStaff(interaction.member)) {
+                        return interaction.reply({
+                            content: '❌ Sem permissão.',
+                            ephemeral: true
+                        });
+                    }
+
+                    if (!Object.keys(getLoja(interaction.guild.id).cargos).length) {
+                        return interaction.reply({
+                            content: 'Ainda não há cargos cadastrados para remover.',
+                            ephemeral: true
+                        });
+                    }
+
+                    return interaction.reply(
+                        purchaseRoleSelect(interaction.guild, 'remove')
+                    );
+                }
+
+                if (
+                    interaction.customId ===
+                    'shop_set_channel'
+                ) {
+                    if (!isStaff(interaction.member)) {
+                        return interaction.reply({
+                            content: '❌ Sem permissão.',
+                            ephemeral: true
+                        });
+                    }
+
+                    const modal = new ModalBuilder()
+                        .setCustomId('modal_shop_channel')
+                        .setTitle('Definir canal da loja');
+
+                    const input = new TextInputBuilder()
+                        .setCustomId('channel_id')
+                        .setLabel('ID do canal de texto')
+                        .setPlaceholder('Cole o ID do canal')
+                        .setStyle(TextInputStyle.Short)
+                        .setRequired(true);
+
+                    modal.addComponents(
+                        new ActionRowBuilder().addComponents(input)
+                    );
+
+                    return interaction.showModal(modal);
+                }
+
+                if (
+                    interaction.customId ===
+                    'shop_publish'
+                ) {
+                    if (!isStaff(interaction.member)) {
+                        return interaction.reply({
+                            content: '❌ Sem permissão.',
+                            ephemeral: true
+                        });
+                    }
+
+                    const loja = getLoja(interaction.guild.id);
+                    const channel = loja.canalId
+                        ? interaction.guild.channels.cache.get(loja.canalId)
+                        : null;
+
+                    if (!channel || channel.type !== ChannelType.GuildText) {
+                        return interaction.reply({
+                            content: 'Defina primeiro um canal de texto válido para a loja.',
+                            ephemeral: true
+                        });
+                    }
+
+                    const permissions = channel.permissionsFor(client.user);
+                    if (
+                        !permissions ||
+                        !permissions.has(PermissionFlagsBits.ViewChannel) ||
+                        !permissions.has(PermissionFlagsBits.SendMessages) ||
+                        !permissions.has(PermissionFlagsBits.EmbedLinks)
+                    ) {
+                        return interaction.reply({
+                            content: 'Não tenho permissão para publicar a loja nesse canal.',
+                            ephemeral: true
+                        });
+                    }
+
+                    try {
+                        let message = null;
+
+                        if (loja.messageId) {
+                            message = await channel.messages.fetch(loja.messageId).catch(() => null);
+                        }
+
+                        if (message) {
+                            await message.edit(purchaseStorePanel(interaction.guild));
+                        } else {
+                            message = await channel.send(purchaseStorePanel(interaction.guild));
+                            loja.messageId = message.id;
+                            saveLojas();
+                        }
+
+                        return interaction.reply({
+                            content: `Loja publicada/atualizada em ${channel}.`,
+                            ephemeral: true
+                        });
+                    } catch (error) {
+                        console.error('Erro ao publicar loja:', error);
+                        return interaction.reply({
+                            content: 'Não consegui publicar a loja. Confira as permissões do canal.',
+                            ephemeral: true
+                        });
+                    }
+                }
+
                 /* ===== MODERAÇÃO ===== */
 
                 if (
@@ -3146,11 +3629,84 @@ client.on(
                 }
             }
 
+            /* ===== SELETOR DE CARGOS DA LOJA ===== */
+
+            if (
+                interaction.isRoleSelectMenu()
+            ) {
+                if (
+                    interaction.customId === 'shop_select_price' ||
+                    interaction.customId === 'shop_select_remove'
+                ) {
+                    if (!isStaff(interaction.member)) {
+                        return interaction.reply({
+                            content: '❌ Sem permissão.',
+                            ephemeral: true
+                        });
+                    }
+
+                    const role = interaction.roles.first();
+
+                    if (!role || role.id === interaction.guild.id || role.managed) {
+                        return interaction.reply({
+                            content: 'Esse cargo não pode ser configurado para venda.',
+                            ephemeral: true
+                        });
+                    }
+
+                    const loja = getLoja(interaction.guild.id);
+
+                    if (interaction.customId === 'shop_select_remove') {
+                        if (!loja.cargos[role.id]) {
+                            return interaction.reply({
+                                content: 'Esse cargo não está cadastrado na loja.',
+                                ephemeral: true
+                            });
+                        }
+
+                        delete loja.cargos[role.id];
+                        saveLojas();
+
+                        return interaction.reply({
+                            content: `O cargo **${role.name}** foi removido da loja.`,
+                            ephemeral: true
+                        });
+                    }
+
+                    const modal = new ModalBuilder()
+                        .setCustomId(`modal_shop_price_${role.id}`)
+                        .setTitle('Definir preço do cargo');
+
+                    const input = new TextInputBuilder()
+                        .setCustomId('price')
+                        .setLabel('Preço em reais (ex: 9,90)')
+                        .setPlaceholder('9,90')
+                        .setStyle(TextInputStyle.Short)
+                        .setRequired(true)
+                        .setMaxLength(12);
+
+                    modal.addComponents(
+                        new ActionRowBuilder().addComponents(input)
+                    );
+
+                    return interaction.showModal(modal);
+                }
+            }
+
             /* ===== SELECT MENU ===== */
 
             if (
                 interaction.isStringSelectMenu()
             ) {
+                if (
+                    interaction.customId === 'shop_customer_select'
+                ) {
+                    return openPurchaseTicket(
+                        interaction,
+                        interaction.values[0]
+                    );
+                }
+
                 if (
                     interaction.customId ===
                     'select_ticket_adm'
@@ -3190,6 +3746,103 @@ client.on(
             if (
                 interaction.isModalSubmit()
             ) {
+                if (
+                    interaction.customId === 'modal_shop_channel'
+                ) {
+                    if (!isStaff(interaction.member)) {
+                        return interaction.reply({
+                            content: '❌ Sem permissão.',
+                            ephemeral: true
+                        });
+                    }
+
+                    const channelId = interaction.fields.getTextInputValue('channel_id').trim();
+                    const channel = interaction.guild.channels.cache.get(channelId);
+
+                    if (!channel || channel.type !== ChannelType.GuildText) {
+                        return interaction.reply({
+                            content: 'Canal de texto inválido. Confira o ID e tente novamente.',
+                            ephemeral: true
+                        });
+                    }
+
+                    const permissions = channel.permissionsFor(client.user);
+                    if (
+                        !permissions ||
+                        !permissions.has(PermissionFlagsBits.ViewChannel) ||
+                        !permissions.has(PermissionFlagsBits.SendMessages) ||
+                        !permissions.has(PermissionFlagsBits.EmbedLinks)
+                    ) {
+                        return interaction.reply({
+                            content: 'Não tenho permissão para enviar mensagens e embeds nesse canal.',
+                            ephemeral: true
+                        });
+                    }
+
+                    const loja = getLoja(interaction.guild.id);
+                    loja.canalId = channel.id;
+                    // Se o canal mudou, a próxima publicação criará a mensagem nesse novo canal.
+                    loja.messageId = null;
+                    saveLojas();
+
+                    return interaction.reply({
+                        content: `Canal da loja definido como ${channel}.`,
+                        ephemeral: true
+                    });
+                }
+
+                if (
+                    interaction.customId.startsWith('modal_shop_price_')
+                ) {
+                    if (!isStaff(interaction.member)) {
+                        return interaction.reply({
+                            content: '❌ Sem permissão.',
+                            ephemeral: true
+                        });
+                    }
+
+                    const roleId = interaction.customId.slice('modal_shop_price_'.length);
+                    const role = interaction.guild.roles.cache.get(roleId);
+
+                    if (!role || role.id === interaction.guild.id || role.managed) {
+                        return interaction.reply({
+                            content: 'Esse cargo não pode ser vendido.',
+                            ephemeral: true
+                        });
+                    }
+
+                    const rawPrice = interaction.fields
+                        .getTextInputValue('price')
+                        .trim()
+                        .replace(/R\$\s*/gi, '')
+                        .replace(/\s/g, '')
+                        .replace(',', '.');
+
+                    if (!/^\d+(\.\d{1,2})?$/.test(rawPrice)) {
+                        return interaction.reply({
+                            content: 'Preço inválido. Use, por exemplo, 9,90 ou 10.',
+                            ephemeral: true
+                        });
+                    }
+
+                    const price = Number(rawPrice);
+                    if (!Number.isFinite(price) || price < 0) {
+                        return interaction.reply({
+                            content: 'O preço precisa ser um número válido maior ou igual a zero.',
+                            ephemeral: true
+                        });
+                    }
+
+                    const loja = getLoja(interaction.guild.id);
+                    loja.cargos[role.id] = { price };
+                    saveLojas();
+
+                    return interaction.reply({
+                        content: `Cargo **${role.name}** cadastrado por R$ ${price.toFixed(2).replace('.', ',')}.`,
+                        ephemeral: true
+                    });
+                }
+
                 /* ===== MODERAÇÃO ===== */
 
                 if (
