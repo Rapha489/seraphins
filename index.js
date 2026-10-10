@@ -868,26 +868,48 @@ function purchaseConfigPanel(guild) {
     };
 }
 
-function purchaseRoleSelect(guild, mode) {
-    const menu = new RoleSelectMenuBuilder()
-        .setCustomId(
-            mode === 'remove' ? 'shop_select_remove' : 'shop_select_price'
-        )
-        .setPlaceholder(
-            mode === 'remove'
-                ? 'Selecione o cargo que deseja remover'
-                : 'Selecione o cargo que deseja vender'
-        )
-        .setMinValues(1)
-        .setMaxValues(1);
+function purchaseRoleSelect(guild, mode, page = 0) {
+    const loja = getLoja(guild.id);
+    const isRemove = mode === 'remove';
+    const entries = [...guild.roles.cache.values()]
+        .filter(role => role.id !== guild.id && !role.managed)
+        .filter(role => !isRemove || Boolean(loja.cargos?.[role.id]))
+        .sort((a, b) => b.position - a.position);
+    const pageSize = 25;
+    const totalPages = Math.max(1, Math.ceil(entries.length / pageSize));
+    const currentPage = Math.min(Math.max(0, Number(page) || 0), totalPages - 1);
+    const pageEntries = entries.slice(currentPage * pageSize, (currentPage + 1) * pageSize);
+    const components = [];
+
+    if (pageEntries.length) {
+        const menu = new StringSelectMenuBuilder()
+            .setCustomId(`shop_admin_role_select_${isRemove ? 'remove' : 'add'}`)
+            .setPlaceholder(isRemove ? 'Escolha o cargo para remover' : 'Escolha o cargo para configurar')
+            .addOptions(pageEntries.map(role => new StringSelectMenuOptionBuilder()
+                .setLabel(role.name.slice(0, 100))
+                .setValue(role.id)
+                .setDescription(`Cargo do servidor`.slice(0, 100))));
+        components.push(new ActionRowBuilder().addComponents(menu));
+    }
+
+    if (totalPages > 1) {
+        components.push(new ActionRowBuilder().addComponents(
+            new ButtonBuilder()
+                .setCustomId(`shop_admin_role_page_${isRemove ? 'remove' : 'add'}_${currentPage - 1}`)
+                .setLabel('◀ Anterior')
+                .setStyle(ButtonStyle.Secondary)
+                .setDisabled(currentPage === 0),
+            new ButtonBuilder()
+                .setCustomId(`shop_admin_role_page_${isRemove ? 'remove' : 'add'}_${currentPage + 1}`)
+                .setLabel('Próxima ▶')
+                .setStyle(ButtonStyle.Secondary)
+                .setDisabled(currentPage >= totalPages - 1)
+        ));
+    }
 
     return {
-        content: mode === 'remove'
-            ? 'Selecione um cargo que já esteja cadastrado na loja.'
-            : 'Selecione o cargo que deseja cadastrar ou editar o preço.',
-        components: [
-            new ActionRowBuilder().addComponents(menu)
-        ],
+        content: `${isRemove ? 'Selecione um cargo cadastrado na loja para remover.' : 'Selecione o cargo que deseja cadastrar ou editar o preço.'}\n\nPágina **${currentPage + 1}/${totalPages}** · ${entries.length} cargo(s) disponível(is).`,
+        components,
         ephemeral: true
     };
 }
@@ -2435,6 +2457,10 @@ client.on(
             if (
                 interaction.isButton()
             ) {
+                const adminRolePageMatch = interaction.customId.match(/^shop_admin_role_page_(add|remove)_(-?\d+)$/);
+                if (adminRolePageMatch) {
+                    return interaction.update(purchaseRoleSelect(interaction.guild, adminRolePageMatch[1], Number(adminRolePageMatch[2])));
+                }
                 const shopPageMatch = interaction.customId.match(/^shop_customer_page_(\\d+)$/);
                 if (shopPageMatch) {
                     return interaction.update(
@@ -3718,6 +3744,36 @@ client.on(
             if (
                 interaction.isStringSelectMenu()
             ) {
+                if (interaction.customId === 'shop_admin_role_select_add' || interaction.customId === 'shop_admin_role_select_remove') {
+                    if (!isStaff(interaction.member)) {
+                        return interaction.reply({ content: '❌ Sem permissão.', ephemeral: true });
+                    }
+                    const role = interaction.guild.roles.cache.get(interaction.values[0]);
+                    if (!role || role.id === interaction.guild.id || role.managed) {
+                        return interaction.reply({ content: 'Esse cargo não pode ser configurado para venda.', ephemeral: true });
+                    }
+                    const loja = getLoja(interaction.guild.id);
+                    if (interaction.customId.endsWith('_remove')) {
+                        if (!loja.cargos[role.id]) {
+                            return interaction.reply({ content: 'Esse cargo não está cadastrado na loja.', ephemeral: true });
+                        }
+                        delete loja.cargos[role.id];
+                        saveLojas();
+                        return interaction.reply({ content: `O cargo **${role.name}** foi removido da loja.`, ephemeral: true });
+                    }
+                    const modal = new ModalBuilder()
+                        .setCustomId(`modal_shop_price_${role.id}`)
+                        .setTitle('Definir preço do cargo');
+                    const input = new TextInputBuilder()
+                        .setCustomId('price')
+                        .setLabel('Preço em reais (ex: 9,90)')
+                        .setPlaceholder('9,90')
+                        .setStyle(TextInputStyle.Short)
+                        .setRequired(true)
+                        .setMaxLength(12);
+                    modal.addComponents(new ActionRowBuilder().addComponents(input));
+                    return interaction.showModal(modal);
+                }
                 if (
                     interaction.customId === 'shop_customer_select'
                 ) {
