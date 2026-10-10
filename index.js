@@ -898,9 +898,8 @@ function purchaseStorePanel(guild) {
         .filter(([roleId]) => {
             const role = guild.roles.cache.get(roleId);
             return role && role.id !== guild.id && !role.managed;
-        })
-        );
-
+        });
+    
     const embed = new EmbedBuilder()
         .setTitle(`🛒 Loja de ${guild.name}`)
         .setDescription(
