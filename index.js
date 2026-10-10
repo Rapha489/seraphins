@@ -892,19 +892,24 @@ function purchaseRoleSelect(guild, mode) {
     };
 }
 
-function purchaseStorePanel(guild) {
+function purchaseStorePanel(guild, page = 0) {
     const loja = getLoja(guild.id);
-    const entries = Object.entries(loja.cargos || {})
+    const allEntries = Object.entries(loja.cargos || {})
         .filter(([roleId]) => {
             const role = guild.roles.cache.get(roleId);
             return role && role.id !== guild.id && !role.managed;
         });
-    
+
+    const pageSize = 25;
+    const totalPages = Math.max(1, Math.ceil(allEntries.length / pageSize));
+    const currentPage = Math.min(Math.max(0, Number(page) || 0), totalPages - 1);
+    const entries = allEntries.slice(currentPage * pageSize, (currentPage + 1) * pageSize);
+
     const embed = new EmbedBuilder()
         .setTitle(`🛒 Loja de ${guild.name}`)
         .setDescription(
-            entries.length
-                ? 'Selecione abaixo o cargo que deseja comprar. Um ticket será criado para o atendimento e confirmação do pagamento.'
+            allEntries.length
+                ? `Selecione abaixo o cargo que deseja comprar. Um ticket será criado para o atendimento e confirmação do pagamento.\n\nPágina **${currentPage + 1}/${totalPages}** • **${allEntries.length}** cargos disponíveis.`
                 : 'A loja ainda não possui cargos disponíveis.'
         )
         .setColor('#000000');
@@ -926,15 +931,24 @@ function purchaseStorePanel(guild) {
                 })
             );
 
-        components.push(
-            new ActionRowBuilder().addComponents(menu)
-        );
+        components.push(new ActionRowBuilder().addComponents(menu));
+
+        if (totalPages > 1) {
+            const prev = new ButtonBuilder()
+                .setCustomId(`shop_customer_page_${currentPage - 1}`)
+                .setLabel('⬅️ Anterior')
+                .setStyle(ButtonStyle.Secondary)
+                .setDisabled(currentPage === 0);
+            const next = new ButtonBuilder()
+                .setCustomId(`shop_customer_page_${currentPage + 1}`)
+                .setLabel('Próxima ➡️')
+                .setStyle(ButtonStyle.Secondary)
+                .setDisabled(currentPage >= totalPages - 1);
+            components.push(new ActionRowBuilder().addComponents(prev, next));
+        }
     }
 
-    return {
-        embeds: [embed],
-        components
-    };
+    return { embeds: [embed], components };
 }
 
 async function openPurchaseTicket(interaction, roleId) {
@@ -2421,6 +2435,13 @@ client.on(
             if (
                 interaction.isButton()
             ) {
+                const shopPageMatch = interaction.customId.match(/^shop_customer_page_(\\d+)$/);
+                if (shopPageMatch) {
+                    return interaction.update(
+                        purchaseStorePanel(interaction.guild, Number(shopPageMatch[1]))
+                    );
+                }
+
                 /* ===== PAINEL PRINCIPAL ===== */
 
                 if (
