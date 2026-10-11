@@ -25,6 +25,7 @@ const path = require('path');
 const TOKEN = process.env.TOKEN;
 
 const ADM_ROLE_ID = '1454153278060367933';
+const STAFF_ROLE_ID = '1556456154643697797';
 const OFFICIAL_SERVER_ID = '1401231514812809256';
 
 const TICKET_BANNER_URL = 'https://cdn.imgchest.com/files/52cd34cf74ad.png';
@@ -645,6 +646,8 @@ async function openTicket(
             cfg.ticketCargo ||
                 ADM_ROLE_ID
         );
+    const staffRole =
+        guild.roles.cache.get(STAFF_ROLE_ID);
 
     let username =
         interaction.user.username
@@ -723,6 +726,17 @@ async function openTicket(
         );
     }
 
+    if (staffRole && staffRole.id !== role?.id) {
+        await channel.permissionOverwrites.create(
+            staffRole.id,
+            {
+                ViewChannel: true,
+                SendMessages: true,
+                ReadMessageHistory: true
+            }
+        );
+    }
+
     const embed =
         new EmbedBuilder()
             .setTitle(
@@ -786,11 +800,19 @@ async function openTicket(
                     )
             );
 
-    await channel.send({
-        content: role
-            ? `${role} ${interaction.user}`
-            : `${interaction.user}`,
+    const ticketMentions = [role, staffRole]
+        .filter((mentionedRole, index, roles) =>
+            mentionedRole && roles.findIndex(item => item?.id === mentionedRole.id) === index
+        )
+        .map(mentionedRole => `${mentionedRole}`)
+        .join(' ');
 
+    await channel.send({
+        content: `${ticketMentions} ${interaction.user}`.trim(),
+        allowedMentions: {
+            roles: [role?.id, staffRole?.id].filter(Boolean),
+            users: [interaction.user.id]
+        },
         embeds: [embed],
         components: [buttons]
     });
@@ -1008,6 +1030,7 @@ async function openPurchaseTicket(interaction, roleId) {
     const config = getConfig(guild.id);
     const adminRoleId = config.ticketCargo || ADM_ROLE_ID;
     const adminRole = guild.roles.cache.get(adminRoleId);
+    const staffRole = guild.roles.cache.get(STAFF_ROLE_ID);
 
     const safeRoleName = role.name
         .toLowerCase()
@@ -1060,6 +1083,17 @@ async function openPurchaseTicket(interaction, roleId) {
         });
     }
 
+    if (staffRole && staffRole.id !== adminRole?.id) {
+        overwrites.push({
+            id: staffRole.id,
+            allow: [
+                PermissionFlagsBits.ViewChannel,
+                PermissionFlagsBits.SendMessages,
+                PermissionFlagsBits.ReadMessageHistory
+            ]
+        });
+    }
+
     let channel;
 
     try {
@@ -1104,8 +1138,18 @@ async function openPurchaseTicket(interaction, roleId) {
             .setStyle(ButtonStyle.Danger)
     );
 
+    const purchaseTicketMentions = [adminRole, staffRole]
+        .filter((mentionedRole, index, roles) =>
+            mentionedRole && roles.findIndex(item => item?.id === mentionedRole.id) === index
+        )
+        .map(mentionedRole => `${mentionedRole}`)
+        .join(' ');
+
     await channel.send({
-        content: adminRole ? `${adminRole}` : '',
+        content: purchaseTicketMentions,
+        allowedMentions: {
+            roles: [adminRole?.id, staffRole?.id].filter(Boolean)
+        },
         embeds: [embed],
         components: [buttons]
     });
