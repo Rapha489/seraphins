@@ -608,6 +608,8 @@ async function openTicket(
     interaction,
     type = 'duvida'
 ) {
+    const respond = payload => interaction.deferred ? interaction.editReply(payload) : interaction.reply(payload);
+
     const guild =
         interaction.guild;
 
@@ -628,7 +630,7 @@ async function openTicket(
         );
 
     if (existing) {
-        return interaction.reply({
+        return respond({
             content:
                 `VocÃª jÃ¡ possui um ticket aberto: ${existing}`,
             ephemeral: true
@@ -797,7 +799,7 @@ async function openTicket(
         components: [buttons]
     });
 
-    return interaction.reply({
+    return respond({
         content:
             `Ticket de ${ticketType} criado: ${channel}`,
         ephemeral: true
@@ -941,20 +943,22 @@ function purchaseStorePanel(guild) {
 }
 
 async function openPurchaseTicket(interaction, roleId) {
+    const respond = payload => interaction.deferred ? interaction.editReply(payload) : interaction.reply(payload);
+
     const guild = interaction.guild;
     const loja = getLoja(guild.id);
     const role = guild.roles.cache.get(roleId);
     const roleData = loja.cargos[roleId];
 
     if (!role || !roleData) {
-        return interaction.reply({
+        return respond({
             content: 'Esse cargo nÃ£o estÃ¡ mais disponÃ­vel na loja.',
             ephemeral: true
         });
     }
 
     if (role.id === guild.id || role.managed) {
-        return interaction.reply({
+        return respond({
             content: 'Esse cargo nÃ£o pode ser vendido.',
             ephemeral: true
         });
@@ -966,7 +970,7 @@ async function openPurchaseTicket(interaction, roleId) {
     );
 
     if (existing) {
-        return interaction.reply({
+        return respond({
             content: `VocÃª jÃ¡ possui um ticket de compra aberto para esse cargo: ${existing}`,
             ephemeral: true
         });
@@ -1038,7 +1042,7 @@ async function openPurchaseTicket(interaction, roleId) {
         });
     } catch (error) {
         console.error('Erro ao criar ticket de compra:', error);
-        return interaction.reply({
+        return respond({
             content: 'NÃ£o consegui criar o ticket. Verifique as permissÃµes do bot.',
             ephemeral: true
         });
@@ -1077,7 +1081,7 @@ async function openPurchaseTicket(interaction, roleId) {
         components: [buttons]
     });
 
-    return interaction.reply({
+    return respond({
         content: `Seu ticket de compra foi criado: ${channel}`,
         ephemeral: true
     });
@@ -2422,6 +2426,51 @@ client.on(
     'interactionCreate',
     async interaction => {
         try {
+            // Algumas ações fazem operações na API do Discord que podem
+            // levar mais de 3 segundos. Nesses casos, reconhecemos a
+            // interação imediatamente e depois editamos a resposta.
+            const asyncButtonIds = new Set([
+                'ticket_send_panel',
+                'open_ticket_parceria',
+                'open_ticket_duvida',
+                'open_ticket_denuncia',
+                'open_ticket',
+                'ticket_close',
+                'mod_lock',
+                'mod_unlock',
+                'mod_slowmode',
+                'shop_publish'
+            ]);
+
+            const shouldDefer =
+                (interaction.isChatInputCommand() && interaction.commandName === 'convites') ||
+                (interaction.isButton() && (
+                    asyncButtonIds.has(interaction.customId) ||
+                    interaction.customId.startsWith('giveaway_join_') ||
+                    interaction.customId.startsWith('giveaway_reroll_')
+                )) ||
+                (interaction.isStringSelectMenu() && interaction.customId === 'shop_customer_select') ||
+                (interaction.isModalSubmit() && [
+                    'modal_ban',
+                    'modal_kick',
+                    'modal_timeout',
+                    'modal_untimeout',
+                    'modal_warn',
+                    'modal_warns',
+                    'modal_delwarn',
+                    'modal_giveaway'
+                ].includes(interaction.customId));
+
+            if (shouldDefer) {
+                await interaction.deferReply({
+                    ephemeral: interaction.customId !== 'ticket_close'
+                });
+            }
+
+            const respond = payload =>
+                interaction.deferred
+                    ? interaction.editReply(payload)
+                    : interaction.reply(payload);
             /* ===== SLASH COMMANDS ===== */
 
             if (
@@ -2431,7 +2480,7 @@ client.on(
                     interaction.commandName ===
                     'ping'
                 ) {
-                    return interaction.reply(
+                    return respond(
                         {
                             content:
                                 `Pong! ${client.ws.ping}ms`,
@@ -2450,7 +2499,7 @@ client.on(
                             interaction.member
                         )
                     ) {
-                        return interaction.reply(
+                        return respond(
                             {
                                 content:
                                     'âŒ VocÃª nÃ£o possui permissÃ£o para usar este comando.',
@@ -2460,7 +2509,7 @@ client.on(
                         );
                     }
 
-                    return interaction.reply(
+                    return respond(
                         {
                             ...mainPanel(),
                             ephemeral:
@@ -2478,7 +2527,7 @@ client.on(
                             interaction.member
                         )
                     ) {
-                        return interaction.reply(
+                        return respond(
                             {
                                 content:
                                     'VocÃª nÃ£o possui permissÃ£o para configurar o suporte.',
@@ -2494,7 +2543,7 @@ client.on(
                         );
 
                     if (!canal) {
-                        return interaction.reply(
+                        return respond(
                             {
                                 content:
                                     'Canal invÃ¡lido.',
@@ -2521,7 +2570,7 @@ client.on(
                             PermissionFlagsBits.EmbedLinks
                         )
                     ) {
-                        return interaction.reply(
+                        return respond(
                             {
                                 content:
                                     'Eu nÃ£o tenho as permissÃµes necessÃ¡rias nesse canal.',
@@ -2544,7 +2593,7 @@ client.on(
                             ticketOpenPanel()
                         );
 
-                        return interaction.reply(
+                        return respond(
                             {
                                 content:
                                     `Painel de suporte enviado em ${canal}.`,
@@ -2558,7 +2607,7 @@ client.on(
                             error
                         );
 
-                        return interaction.reply(
+                        return respond(
                             {
                                 content:
                                     'NÃ£o foi possÃ­vel enviar o painel nesse canal.',
@@ -2585,7 +2634,7 @@ client.on(
                             user.id
                         );
 
-                    return interaction.reply(
+                    return respond(
                         {
                             content:
                                 `${user} possui **${total}** convite(s).`
@@ -2675,13 +2724,13 @@ client.on(
                     'panel_compras'
                 ) {
                     if (!isStaff(interaction.member)) {
-                        return interaction.reply({
+                        return respond({
                             content: 'âŒ VocÃª nÃ£o possui permissÃ£o para configurar a loja.',
                             ephemeral: true
                         });
                     }
 
-                    return interaction.reply(
+                    return respond(
                         purchaseConfigPanel(interaction.guild)
                     );
                 }
@@ -2691,7 +2740,7 @@ client.on(
                     'shop_back'
                 ) {
                     if (!isStaff(interaction.member)) {
-                        return interaction.reply({
+                        return respond({
                             content: 'âŒ Sem permissÃ£o.',
                             ephemeral: true
                         });
@@ -2705,13 +2754,13 @@ client.on(
                     'shop_add_role'
                 ) {
                     if (!isStaff(interaction.member)) {
-                        return interaction.reply({
+                        return respond({
                             content: 'âŒ Sem permissÃ£o.',
                             ephemeral: true
                         });
                     }
 
-                    return interaction.reply(
+                    return respond(
                         purchaseRoleSelect(interaction.guild, 'add')
                     );
                 }
@@ -2721,20 +2770,20 @@ client.on(
                     'shop_remove_role'
                 ) {
                     if (!isStaff(interaction.member)) {
-                        return interaction.reply({
+                        return respond({
                             content: 'âŒ Sem permissÃ£o.',
                             ephemeral: true
                         });
                     }
 
                     if (!Object.keys(getLoja(interaction.guild.id).cargos).length) {
-                        return interaction.reply({
+                        return respond({
                             content: 'Ainda nÃ£o hÃ¡ cargos cadastrados para remover.',
                             ephemeral: true
                         });
                     }
 
-                    return interaction.reply(
+                    return respond(
                         purchaseRoleSelect(interaction.guild, 'remove')
                     );
                 }
@@ -2744,7 +2793,7 @@ client.on(
                     'shop_set_channel'
                 ) {
                     if (!isStaff(interaction.member)) {
-                        return interaction.reply({
+                        return respond({
                             content: 'âŒ Sem permissÃ£o.',
                             ephemeral: true
                         });
@@ -2773,7 +2822,7 @@ client.on(
                     'shop_publish'
                 ) {
                     if (!isStaff(interaction.member)) {
-                        return interaction.reply({
+                        return respond({
                             content: 'âŒ Sem permissÃ£o.',
                             ephemeral: true
                         });
@@ -2785,7 +2834,7 @@ client.on(
                         : null;
 
                     if (!channel || channel.type !== ChannelType.GuildText) {
-                        return interaction.reply({
+                        return respond({
                             content: 'Defina primeiro um canal de texto vÃ¡lido para a loja.',
                             ephemeral: true
                         });
@@ -2798,7 +2847,7 @@ client.on(
                         !permissions.has(PermissionFlagsBits.SendMessages) ||
                         !permissions.has(PermissionFlagsBits.EmbedLinks)
                     ) {
-                        return interaction.reply({
+                        return respond({
                             content: 'NÃ£o tenho permissÃ£o para publicar a loja nesse canal.',
                             ephemeral: true
                         });
@@ -2819,13 +2868,13 @@ client.on(
                             saveLojas();
                         }
 
-                        return interaction.reply({
+                        return respond({
                             content: `Loja publicada/atualizada em ${channel}.`,
                             ephemeral: true
                         });
                     } catch (error) {
                         console.error('Erro ao publicar loja:', error);
-                        return interaction.reply({
+                        return respond({
                             content: 'NÃ£o consegui publicar a loja. Confira as permissÃµes do canal.',
                             ephemeral: true
                         });
@@ -2852,7 +2901,7 @@ client.on(
                             interaction.member
                         )
                     ) {
-                        return interaction.reply(
+                        return respond(
                             {
                                 content:
                                     'âŒ VocÃª nÃ£o possui permissÃ£o para isso.',
@@ -2884,7 +2933,7 @@ client.on(
                             interaction.member
                         )
                     ) {
-                        return interaction.reply(
+                        return respond(
                             {
                                 content:
                                     'âŒ Sem permissÃ£o.',
@@ -2902,7 +2951,7 @@ client.on(
                         }
                     );
 
-                    return interaction.reply(
+                    return respond(
                         'ðŸ”’ Canal bloqueado.'
                     );
                 }
@@ -2916,7 +2965,7 @@ client.on(
                             interaction.member
                         )
                     ) {
-                        return interaction.reply(
+                        return respond(
                             {
                                 content:
                                     'âŒ Sem permissÃ£o.',
@@ -2934,7 +2983,7 @@ client.on(
                         }
                     );
 
-                    return interaction.reply(
+                    return respond(
                         'ðŸ”“ Canal desbloqueado.'
                     );
                 }
@@ -2948,7 +2997,7 @@ client.on(
                             interaction.member
                         )
                     ) {
-                        return interaction.reply(
+                        return respond(
                             {
                                 content:
                                     'âŒ Sem permissÃ£o.',
@@ -2962,7 +3011,7 @@ client.on(
                         10
                     );
 
-                    return interaction.reply(
+                    return respond(
                         'ðŸ¢ Slowmode definido para 10 segundos.'
                     );
                 }
@@ -2978,7 +3027,7 @@ client.on(
                             interaction.member
                         )
                     ) {
-                        return interaction.reply(
+                        return respond(
                             {
                                 content:
                                     'Sem permissÃ£o.',
@@ -3035,7 +3084,7 @@ client.on(
                             interaction.member
                         )
                     ) {
-                        return interaction.reply(
+                        return respond(
                             {
                                 content:
                                     'Sem permissÃ£o.',
@@ -3092,7 +3141,7 @@ client.on(
                             interaction.member
                         )
                     ) {
-                        return interaction.reply(
+                        return respond(
                             {
                                 content:
                                     'Sem permissÃ£o.',
@@ -3149,7 +3198,7 @@ client.on(
                             interaction.member
                         )
                     ) {
-                        return interaction.reply(
+                        return respond(
                             {
                                 content:
                                     'Sem permissÃ£o.',
@@ -3167,7 +3216,7 @@ client.on(
                     if (
                         !cfg.ticketCanal
                     ) {
-                        return interaction.reply(
+                        return respond(
                             {
                                 content:
                                     'Defina o canal do painel primeiro.',
@@ -3183,7 +3232,7 @@ client.on(
                         );
 
                     if (!channel) {
-                        return interaction.reply(
+                        return respond(
                             {
                                 content:
                                     'O canal configurado nÃ£o existe.',
@@ -3210,7 +3259,7 @@ client.on(
                             PermissionFlagsBits.EmbedLinks
                         )
                     ) {
-                        return interaction.reply(
+                        return respond(
                             {
                                 content:
                                     'Eu nÃ£o tenho as permissÃµes necessÃ¡rias nesse canal.',
@@ -3224,7 +3273,7 @@ client.on(
                         ticketOpenPanel()
                     );
 
-                    return interaction.reply(
+                    return respond(
                         {
                             content:
                                 'Painel de suporte enviado.',
@@ -3287,7 +3336,7 @@ client.on(
                             interaction.member
                         )
                     ) {
-                        return interaction.reply(
+                        return respond(
                             {
                                 content:
                                     'VocÃª nÃ£o possui permissÃ£o para assumir este ticket.',
@@ -3297,7 +3346,7 @@ client.on(
                         );
                     }
 
-                    return interaction.reply(
+                    return respond(
                         `${interaction.user} assumiu este ticket.`
                     );
                 }
@@ -3311,7 +3360,7 @@ client.on(
                             interaction.member
                         )
                     ) {
-                        return interaction.reply(
+                        return respond(
                             {
                                 content:
                                     'VocÃª nÃ£o possui permissÃ£o para chamar a equipe.',
@@ -3333,7 +3382,7 @@ client.on(
                         );
 
                     if (!role) {
-                        return interaction.reply(
+                        return respond(
                             {
                                 content:
                                     'O cargo ADM nÃ£o estÃ¡ configurado.',
@@ -3356,7 +3405,7 @@ client.on(
                     if (
                         !members.length
                     ) {
-                        return interaction.reply(
+                        return respond(
                             {
                                 content:
                                     'Nenhum ADM disponÃ­vel.',
@@ -3387,7 +3436,7 @@ client.on(
                                 )
                             );
 
-                    return interaction.reply(
+                    return respond(
                         {
                             content:
                                 'Escolha o ADM que deseja chamar.',
@@ -3411,7 +3460,7 @@ client.on(
                             interaction.member
                         )
                     ) {
-                        return interaction.reply(
+                        return respond(
                             {
                                 content:
                                     'VocÃª nÃ£o possui permissÃ£o para fechar este ticket.',
@@ -3421,7 +3470,7 @@ client.on(
                         );
                     }
 
-                    await interaction.reply(
+                    await respond(
                         'Ticket serÃ¡ fechado em **5 segundos**...'
                     );
 
@@ -3448,7 +3497,7 @@ client.on(
                             interaction.member
                         )
                     ) {
-                        return interaction.reply(
+                        return respond(
                             {
                                 content:
                                     'âŒ Sem permissÃ£o.',
@@ -3482,7 +3531,7 @@ client.on(
                             interaction.member
                         )
                     ) {
-                        return interaction.reply(
+                        return respond(
                             {
                                 content:
                                     'âŒ Sem permissÃ£o.',
@@ -3518,7 +3567,7 @@ client.on(
                             interaction.member
                         )
                     ) {
-                        return interaction.reply(
+                        return respond(
                             {
                                 content:
                                     'âŒ Sem permissÃ£o.',
@@ -3551,7 +3600,7 @@ client.on(
                     if (
                         !active.length
                     ) {
-                        return interaction.reply(
+                        return respond(
                             {
                                 content:
                                     'NÃ£o existem sorteios ativos.',
@@ -3561,7 +3610,7 @@ client.on(
                         );
                     }
 
-                    return interaction.reply(
+                    return respond(
                         {
                             content:
                                 active
@@ -3590,7 +3639,7 @@ client.on(
                         const giveaway = sorteios[giveawayId];
 
                         if (!giveaway) {
-                            return interaction.reply({
+                            return respond({
                                 content: 'âŒ Esse sorteio nÃ£o estÃ¡ mais disponÃ­vel.',
                                 ephemeral: true
                             });
@@ -3606,13 +3655,13 @@ client.on(
                     const giveaway = sorteios[giveawayId];
 
                     if (!giveaway) {
-                        return interaction.reply({
+                        return respond({
                             content: 'âŒ Esse sorteio nÃ£o estÃ¡ mais disponÃ­vel.',
                             ephemeral: true
                         });
                     }
 
-                    return interaction.reply(
+                    return respond(
                         giveawayParticipantList(interaction.guild, giveaway, 0)
                     );
                 }
@@ -3621,7 +3670,7 @@ client.on(
 
                 if (interaction.customId.startsWith('giveaway_reroll_')) {
                     if (!isStaff(interaction.member)) {
-                        return interaction.reply({
+                        return respond({
                             content: 'âŒ Sem permissÃ£o.',
                             ephemeral: true
                         });
@@ -3631,7 +3680,7 @@ client.on(
                     const giveaway = sorteios[giveawayId];
 
                     if (!giveaway) {
-                        return interaction.reply({
+                        return respond({
                             content: 'âŒ Esse sorteio jÃ¡ foi resolvido.',
                             ephemeral: true
                         });
@@ -3666,7 +3715,7 @@ client.on(
                         ];
 
                     if (!giveaway) {
-                        return interaction.reply(
+                        return respond(
                             {
                                 content:
                                     'âŒ Esse sorteio nÃ£o estÃ¡ mais ativo.',
@@ -3684,7 +3733,7 @@ client.on(
                             giveawayId
                         );
 
-                        return interaction.reply(
+                        return respond(
                             {
                                 content:
                                     'âŒ Esse sorteio jÃ¡ terminou.',
@@ -3708,7 +3757,7 @@ client.on(
                             interaction.user.id
                         )
                     ) {
-                        return interaction.reply(
+                        return respond(
                             {
                                 content:
                                     'âŒ VocÃª jÃ¡ estÃ¡ participando desse sorteio.',
@@ -3732,7 +3781,7 @@ client.on(
                     if (
                         !requirement.ok
                     ) {
-                        return interaction.reply(
+                        return respond(
                             {
                                 content:
                                     `âŒ ${requirement.reason}`,
@@ -3773,7 +3822,7 @@ client.on(
                         );
                     } catch {}
 
-                    return interaction.reply(
+                    return respond(
                         {
                             content:
                                 'ðŸŽ VocÃª entrou no sorteio!',
@@ -3795,7 +3844,7 @@ client.on(
                                 6
                         ) + 1;
 
-                    return interaction.reply(
+                    return respond(
                         `ðŸŽ² VocÃª tirou **${number}**!`
                     );
                 }
@@ -3804,7 +3853,7 @@ client.on(
                     interaction.customId ===
                     'fun_coin'
                 ) {
-                    return interaction.reply(
+                    return respond(
                         `ðŸª™ Deu **${randomItem(
                             [
                                 'cara',
@@ -3818,7 +3867,7 @@ client.on(
                     interaction.customId ===
                     'fun_8ball'
                 ) {
-                    return interaction.reply(
+                    return respond(
                         `ðŸŽ± ${randomItem(
                             [
                                 'Sim.',
@@ -3836,7 +3885,7 @@ client.on(
                     interaction.customId ===
                     'fun_number'
                 ) {
-                    return interaction.reply(
+                    return respond(
                         `ðŸ”¢ NÃºmero escolhido: **${Math.floor(
                             Math.random() *
                                 100
@@ -3848,7 +3897,7 @@ client.on(
                     interaction.customId ===
                     'fun_choose'
                 ) {
-                    return interaction.reply(
+                    return respond(
                         {
                             content:
                                 'ðŸƒ Use `/escolher` quando disponÃ­vel.',
@@ -3862,7 +3911,7 @@ client.on(
                     interaction.customId ===
                     'fun_quiz'
                 ) {
-                    return interaction.reply(
+                    return respond(
                         `ðŸ† ${randomItem(
                             [
                                 'VocÃª consegue!',
@@ -3885,7 +3934,7 @@ client.on(
                     interaction.customId === 'shop_select_remove'
                 ) {
                     if (!isStaff(interaction.member)) {
-                        return interaction.reply({
+                        return respond({
                             content: 'âŒ Sem permissÃ£o.',
                             ephemeral: true
                         });
@@ -3894,7 +3943,7 @@ client.on(
                     const role = interaction.roles.first();
 
                     if (!role || role.id === interaction.guild.id || role.managed) {
-                        return interaction.reply({
+                        return respond({
                             content: 'Esse cargo nÃ£o pode ser configurado para venda.',
                             ephemeral: true
                         });
@@ -3904,7 +3953,7 @@ client.on(
 
                     if (interaction.customId === 'shop_select_remove') {
                         if (!loja.cargos[role.id]) {
-                            return interaction.reply({
+                            return respond({
                                 content: 'Esse cargo nÃ£o estÃ¡ cadastrado na loja.',
                                 ephemeral: true
                             });
@@ -3913,7 +3962,7 @@ client.on(
                         delete loja.cargos[role.id];
                         saveLojas();
 
-                        return interaction.reply({
+                        return respond({
                             content: `O cargo **${role.name}** foi removido da loja.`,
                             ephemeral: true
                         });
@@ -3996,7 +4045,7 @@ client.on(
                     interaction.customId === 'modal_shop_channel'
                 ) {
                     if (!isStaff(interaction.member)) {
-                        return interaction.reply({
+                        return respond({
                             content: 'âŒ Sem permissÃ£o.',
                             ephemeral: true
                         });
@@ -4006,7 +4055,7 @@ client.on(
                     const channel = interaction.guild.channels.cache.get(channelId);
 
                     if (!channel || channel.type !== ChannelType.GuildText) {
-                        return interaction.reply({
+                        return respond({
                             content: 'Canal de texto invÃ¡lido. Confira o ID e tente novamente.',
                             ephemeral: true
                         });
@@ -4019,7 +4068,7 @@ client.on(
                         !permissions.has(PermissionFlagsBits.SendMessages) ||
                         !permissions.has(PermissionFlagsBits.EmbedLinks)
                     ) {
-                        return interaction.reply({
+                        return respond({
                             content: 'NÃ£o tenho permissÃ£o para enviar mensagens e embeds nesse canal.',
                             ephemeral: true
                         });
@@ -4031,7 +4080,7 @@ client.on(
                     loja.messageId = null;
                     saveLojas();
 
-                    return interaction.reply({
+                    return respond({
                         content: `Canal da loja definido como ${channel}.`,
                         ephemeral: true
                     });
@@ -4041,7 +4090,7 @@ client.on(
                     interaction.customId.startsWith('modal_shop_price_')
                 ) {
                     if (!isStaff(interaction.member)) {
-                        return interaction.reply({
+                        return respond({
                             content: 'âŒ Sem permissÃ£o.',
                             ephemeral: true
                         });
@@ -4051,7 +4100,7 @@ client.on(
                     const role = interaction.guild.roles.cache.get(roleId);
 
                     if (!role || role.id === interaction.guild.id || role.managed) {
-                        return interaction.reply({
+                        return respond({
                             content: 'Esse cargo nÃ£o pode ser vendido.',
                             ephemeral: true
                         });
@@ -4065,7 +4114,7 @@ client.on(
                         .replace(',', '.');
 
                     if (!/^\d+(\.\d{1,2})?$/.test(rawPrice)) {
-                        return interaction.reply({
+                        return respond({
                             content: 'PreÃ§o invÃ¡lido. Use, por exemplo, 9,90 ou 10.',
                             ephemeral: true
                         });
@@ -4073,7 +4122,7 @@ client.on(
 
                     const price = Number(rawPrice);
                     if (!Number.isFinite(price) || price < 0) {
-                        return interaction.reply({
+                        return respond({
                             content: 'O preÃ§o precisa ser um nÃºmero vÃ¡lido maior ou igual a zero.',
                             ephemeral: true
                         });
@@ -4083,7 +4132,7 @@ client.on(
                     loja.cargos[role.id] = { price };
                     saveLojas();
 
-                    return interaction.reply({
+                    return respond({
                         content: `Cargo **${role.name}** cadastrado por R$ ${price.toFixed(2).replace('.', ',')}.`,
                         ephemeral: true
                     });
@@ -4109,7 +4158,7 @@ client.on(
                             interaction.member
                         )
                     ) {
-                        return interaction.reply(
+                        return respond(
                             {
                                 content:
                                     'âŒ Sem permissÃ£o.',
@@ -4178,7 +4227,7 @@ client.on(
                             advertencias
                         );
 
-                        return interaction.reply(
+                        return respond(
                             `âš ï¸ UsuÃ¡rio <@${userId}> recebeu uma advertÃªncia.`
                         );
                     }
@@ -4196,12 +4245,12 @@ client.on(
                         if (
                             !warns.length
                         ) {
-                            return interaction.reply(
+                            return respond(
                                 `ðŸ“‹ <@${userId}> nÃ£o possui advertÃªncias.`
                             );
                         }
 
-                        return interaction.reply(
+                        return respond(
                             `ðŸ“‹ <@${userId}> possui **${warns.length}** advertÃªncia(s).`
                         );
                     }
@@ -4219,7 +4268,7 @@ client.on(
                         if (
                             !warns.length
                         ) {
-                            return interaction.reply(
+                            return respond(
                                 `O usuÃ¡rio <@${userId}> nÃ£o possui advertÃªncias.`
                             );
                         }
@@ -4231,7 +4280,7 @@ client.on(
                             advertencias
                         );
 
-                        return interaction.reply(
+                        return respond(
                             `ðŸ—‘ï¸ A Ãºltima advertÃªncia de <@${userId}> foi removida.`
                         );
                     }
@@ -4244,7 +4293,7 @@ client.on(
                             );
 
                     if (!member) {
-                        return interaction.reply(
+                        return respond(
                             {
                                 content:
                                     'âŒ UsuÃ¡rio nÃ£o encontrado no servidor.',
@@ -4262,7 +4311,7 @@ client.on(
                             reason
                         );
 
-                        return interaction.reply(
+                        return respond(
                             `ðŸ‘¢ ${member.user.tag} foi expulso.`
                         );
                     }
@@ -4277,7 +4326,7 @@ client.on(
                             }
                         );
 
-                        return interaction.reply(
+                        return respond(
                             `ðŸ”¨ ${member.user.tag} foi banido.`
                         );
                     }
@@ -4299,7 +4348,7 @@ client.on(
                             ) ||
                             duration <= 0
                         ) {
-                            return interaction.reply(
+                            return respond(
                                 {
                                     content:
                                         'âŒ DuraÃ§Ã£o invÃ¡lida.',
@@ -4315,7 +4364,7 @@ client.on(
                             reason
                         );
 
-                        return interaction.reply(
+                        return respond(
                             `â±ï¸ ${member.user.tag} recebeu timeout por ${duration}s.`
                         );
                     }
@@ -4329,7 +4378,7 @@ client.on(
                             reason
                         );
 
-                        return interaction.reply(
+                        return respond(
                             `ðŸ”“ Timeout de ${member.user.tag} removido.`
                         );
                     }
@@ -4356,7 +4405,7 @@ client.on(
                         channel.type !==
                             ChannelType.GuildText
                     ) {
-                        return interaction.reply(
+                        return respond(
                             {
                                 content:
                                     'Canal invÃ¡lido.',
@@ -4371,7 +4420,7 @@ client.on(
                     ).ticketCanal =
                         id;
 
-                    return interaction.reply(
+                    return respond(
                         {
                             content:
                                 `Canal de suporte definido como ${channel}.`,
@@ -4402,7 +4451,7 @@ client.on(
                         category.type !==
                             ChannelType.GuildCategory
                     ) {
-                        return interaction.reply(
+                        return respond(
                             {
                                 content:
                                     'Categoria invÃ¡lida.',
@@ -4417,7 +4466,7 @@ client.on(
                     ).ticketCategoria =
                         id;
 
-                    return interaction.reply(
+                    return respond(
                         {
                             content:
                                 `Categoria definida como ${category}.`,
@@ -4444,7 +4493,7 @@ client.on(
                         );
 
                     if (!role) {
-                        return interaction.reply(
+                        return respond(
                             {
                                 content:
                                     'Cargo invÃ¡lido.',
@@ -4459,7 +4508,7 @@ client.on(
                     ).ticketCargo =
                         id;
 
-                    return interaction.reply(
+                    return respond(
                         {
                             content:
                                 `Cargo ADM definido como ${role}.`,
@@ -4482,7 +4531,7 @@ client.on(
                             interaction.member
                         )
                     ) {
-                        return interaction.reply(
+                        return respond(
                             {
                                 content:
                                     'âŒ Sem permissÃ£o.',
@@ -4520,7 +4569,7 @@ client.on(
                     if (
                         !prize
                     ) {
-                        return interaction.reply(
+                        return respond(
                             {
                                 content:
                                     'âŒ Informe um prÃªmio.',
@@ -4536,7 +4585,7 @@ client.on(
                         ) ||
                         duration <= 0
                     ) {
-                        return interaction.reply(
+                        return respond(
                             {
                                 content:
                                     'âŒ A duraÃ§Ã£o precisa ser um nÃºmero maior que 0.',
@@ -4552,7 +4601,7 @@ client.on(
                         ) ||
                         winners <= 0
                     ) {
-                        return interaction.reply(
+                        return respond(
                             {
                                 content:
                                     'âŒ A quantidade de vencedores precisa ser um nÃºmero inteiro maior que 0.',
@@ -4573,7 +4622,7 @@ client.on(
                             parsed.roleId
                         )
                     ) {
-                        return interaction.reply(
+                        return respond(
                             {
                                 content:
                                     'âŒ O cargo informado nos requisitos nÃ£o existe neste servidor.',
@@ -4666,7 +4715,7 @@ client.on(
                             giveawayId
                         );
 
-                        return interaction.reply(
+                        return respond(
                             {
                                 content:
                                     'ðŸŽ Sorteio criado com sucesso!',
@@ -4689,7 +4738,7 @@ client.on(
                             sorteios
                         );
 
-                        return interaction.reply(
+                        return respond(
                             {
                                 content:
                                     'âŒ NÃ£o consegui enviar o sorteio neste canal.',
@@ -4711,7 +4760,7 @@ client.on(
                 !interaction.deferred
             ) {
                 try {
-                    await interaction.reply(
+                    await respond(
                         {
                             content:
                                 'âŒ Ocorreu um erro ao executar esta aÃ§Ã£o.',
