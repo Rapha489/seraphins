@@ -16,7 +16,8 @@ const {
     TextInputStyle,
     StringSelectMenuBuilder,
     StringSelectMenuOptionBuilder,
-    RoleSelectMenuBuilder
+    RoleSelectMenuBuilder,
+    MessageFlags
 } = require('discord.js');
 
 const fs = require('fs');
@@ -32,8 +33,8 @@ const TICKET_BANNER_URL = 'https://cdn.imgchest.com/files/52cd34cf74ad.png';
 
 const TICKET_TYPES = {
     parceria: 'Parceria',
-    duvida: 'DÃºvida',
-    denuncia: 'DenÃºncia'
+    duvida: 'DÃƒÂºvida',
+    denuncia: 'DenÃƒÂºncia'
 };
 
 const client = new Client({
@@ -97,7 +98,7 @@ const sorteios =
 const convites =
     loadJSON('convites.json', {});
 
-// ConfiguraÃ§Ã£o do Painel de Compras, separada por servidor.
+// ConfiguraÃƒÂ§ÃƒÂ£o do Painel de Compras, separada por servidor.
 const lojas =
     loadJSON('lojas.json', {});
 
@@ -195,7 +196,7 @@ function mainPanel() {
         .setTitle('Seraphins')
         .setDescription(
             'Painel de gerenciamento do servidor\n\n' +
-            'Escolha uma categoria abaixo para acessar as funÃ§Ãµes disponÃ­veis.'
+            'Escolha uma categoria abaixo para acessar as funÃƒÂ§ÃƒÂµes disponÃƒÂ­veis.'
         )
         .setColor('#000000');
 
@@ -203,8 +204,8 @@ function mainPanel() {
         new ActionRowBuilder().addComponents(
             new ButtonBuilder()
                 .setCustomId('panel_mod')
-                .setLabel('ModeraÃ§Ã£o')
-                .setEmoji('ðŸ›¡ï¸')
+                .setLabel('ModeraÃƒÂ§ÃƒÂ£o')
+                .setEmoji('Ã°Å¸â€ºÂ¡Ã¯Â¸Â')
                 .setStyle(ButtonStyle.Primary),
 
             new ButtonBuilder()
@@ -214,14 +215,14 @@ function mainPanel() {
 
             new ButtonBuilder()
                 .setCustomId('panel_protection')
-                .setLabel('ProteÃ§Ã£o')
-                .setEmoji('ðŸ›¡ï¸')
+                .setLabel('ProteÃƒÂ§ÃƒÂ£o')
+                .setEmoji('Ã°Å¸â€ºÂ¡Ã¯Â¸Â')
                 .setStyle(ButtonStyle.Secondary),
 
             new ButtonBuilder()
                 .setCustomId('panel_giveaway')
                 .setLabel('Sorteios')
-                .setEmoji('ðŸŽ')
+                .setEmoji('Ã°Å¸Å½Â')
                 .setStyle(ButtonStyle.Secondary)
         );
 
@@ -230,19 +231,19 @@ function mainPanel() {
             new ButtonBuilder()
                 .setCustomId('panel_server')
                 .setLabel('Servidor')
-                .setEmoji('ðŸ“Š')
+                .setEmoji('Ã°Å¸â€œÅ ')
                 .setStyle(ButtonStyle.Secondary),
 
             new ButtonBuilder()
                 .setCustomId('panel_fun')
-                .setLabel('DiversÃ£o')
-                .setEmoji('ðŸŽ‰')
+                .setLabel('DiversÃƒÂ£o')
+                .setEmoji('Ã°Å¸Å½â€°')
                 .setStyle(ButtonStyle.Secondary),
 
             new ButtonBuilder()
                 .setCustomId('panel_config')
-                .setLabel('ConfiguraÃ§Ãµes')
-                .setEmoji('âš™ï¸')
+                .setLabel('ConfiguraÃƒÂ§ÃƒÂµes')
+                .setEmoji('Ã¢Å¡â„¢Ã¯Â¸Â')
                 .setStyle(ButtonStyle.Secondary)
         );
 
@@ -251,7 +252,7 @@ function mainPanel() {
             new ButtonBuilder()
                 .setCustomId('panel_compras')
                 .setLabel('Painel de Compras')
-                .setEmoji('ðŸ›’')
+                .setEmoji('Ã°Å¸â€ºâ€™')
                 .setStyle(ButtonStyle.Success)
         );
 
@@ -262,15 +263,15 @@ function mainPanel() {
 }
 
 /* =========================
-   MODERAÃ‡ÃƒO
+   MODERAÃƒâ€¡ÃƒÆ’O
 ========================= */
 
 function moderationPanel() {
     const embed = new EmbedBuilder()
-        .setTitle('ðŸ›¡ï¸ ModeraÃ§Ã£o')
+        .setTitle('Ã°Å¸â€ºÂ¡Ã¯Â¸Â ModeraÃƒÂ§ÃƒÂ£o')
         .setDescription(
-            'Ferramentas de moderaÃ§Ã£o do servidor.\n\n' +
-            'Selecione uma aÃ§Ã£o abaixo.'
+            'Ferramentas de moderaÃƒÂ§ÃƒÂ£o do servidor.\n\n' +
+            'Selecione uma aÃƒÂ§ÃƒÂ£o abaixo.'
         )
         .setColor('#000000');
 
@@ -279,25 +280,25 @@ function moderationPanel() {
             new ButtonBuilder()
                 .setCustomId('mod_ban')
                 .setLabel('Banir')
-                .setEmoji('ðŸ”¨')
+                .setEmoji('Ã°Å¸â€Â¨')
                 .setStyle(ButtonStyle.Danger),
 
             new ButtonBuilder()
                 .setCustomId('mod_kick')
                 .setLabel('Expulsar')
-                .setEmoji('ðŸ‘¢')
+                .setEmoji('Ã°Å¸â€˜Â¢')
                 .setStyle(ButtonStyle.Danger),
 
             new ButtonBuilder()
                 .setCustomId('mod_timeout')
                 .setLabel('Timeout')
-                .setEmoji('â±ï¸')
+                .setEmoji('Ã¢ÂÂ±Ã¯Â¸Â')
                 .setStyle(ButtonStyle.Primary),
 
             new ButtonBuilder()
                 .setCustomId('mod_untimeout')
                 .setLabel('Remover Timeout')
-                .setEmoji('ðŸ”“')
+                .setEmoji('Ã°Å¸â€â€œ')
                 .setStyle(ButtonStyle.Success)
         );
 
@@ -306,31 +307,31 @@ function moderationPanel() {
             new ButtonBuilder()
                 .setCustomId('mod_warn')
                 .setLabel('Advertir')
-                .setEmoji('âš ï¸')
+                .setEmoji('Ã¢Å¡ Ã¯Â¸Â')
                 .setStyle(ButtonStyle.Primary),
 
             new ButtonBuilder()
                 .setCustomId('mod_warns')
-                .setLabel('AdvertÃªncias')
-                .setEmoji('ðŸ“‹')
+                .setLabel('AdvertÃƒÂªncias')
+                .setEmoji('Ã°Å¸â€œâ€¹')
                 .setStyle(ButtonStyle.Secondary),
 
             new ButtonBuilder()
                 .setCustomId('mod_delwarn')
-                .setLabel('Remover AdvertÃªncia')
-                .setEmoji('ðŸ—‘ï¸')
+                .setLabel('Remover AdvertÃƒÂªncia')
+                .setEmoji('Ã°Å¸â€”â€˜Ã¯Â¸Â')
                 .setStyle(ButtonStyle.Secondary),
 
             new ButtonBuilder()
                 .setCustomId('mod_lock')
                 .setLabel('Bloquear Canal')
-                .setEmoji('ðŸ”’')
+                .setEmoji('Ã°Å¸â€â€™')
                 .setStyle(ButtonStyle.Danger),
 
             new ButtonBuilder()
                 .setCustomId('mod_unlock')
                 .setLabel('Desbloquear Canal')
-                .setEmoji('ðŸ”“')
+                .setEmoji('Ã°Å¸â€â€œ')
                 .setStyle(ButtonStyle.Success)
         );
 
@@ -339,7 +340,7 @@ function moderationPanel() {
             new ButtonBuilder()
                 .setCustomId('mod_slowmode')
                 .setLabel('Slowmode')
-                .setEmoji('ðŸ¢')
+                .setEmoji('Ã°Å¸ÂÂ¢')
                 .setStyle(ButtonStyle.Secondary)
         );
 
@@ -356,9 +357,9 @@ function moderationModal(type) {
     const userInput =
         new TextInputBuilder()
             .setCustomId('user_id')
-            .setLabel('ID do usuÃ¡rio')
+            .setLabel('ID do usuÃƒÂ¡rio')
             .setPlaceholder(
-                'Digite o ID do usuÃ¡rio'
+                'Digite o ID do usuÃƒÂ¡rio'
             )
             .setStyle(TextInputStyle.Short)
             .setRequired(true);
@@ -378,7 +379,7 @@ function moderationModal(type) {
     if (type === 'ban') {
         modal
             .setCustomId('modal_ban')
-            .setTitle('Banir usuÃ¡rio')
+            .setTitle('Banir usuÃƒÂ¡rio')
             .addComponents(
                 new ActionRowBuilder()
                     .addComponents(userInput),
@@ -391,7 +392,7 @@ function moderationModal(type) {
     if (type === 'kick') {
         modal
             .setCustomId('modal_kick')
-            .setTitle('Expulsar usuÃ¡rio')
+            .setTitle('Expulsar usuÃƒÂ¡rio')
             .addComponents(
                 new ActionRowBuilder()
                     .addComponents(userInput),
@@ -405,7 +406,7 @@ function moderationModal(type) {
         const durationInput =
             new TextInputBuilder()
                 .setCustomId('duration')
-                .setLabel('DuraÃ§Ã£o em segundos')
+                .setLabel('DuraÃƒÂ§ÃƒÂ£o em segundos')
                 .setPlaceholder('Ex: 60')
                 .setStyle(
                     TextInputStyle.Short
@@ -443,7 +444,7 @@ function moderationModal(type) {
     if (type === 'warn') {
         modal
             .setCustomId('modal_warn')
-            .setTitle('Advertir usuÃ¡rio')
+            .setTitle('Advertir usuÃƒÂ¡rio')
             .addComponents(
                 new ActionRowBuilder()
                     .addComponents(userInput),
@@ -456,7 +457,7 @@ function moderationModal(type) {
     if (type === 'warns') {
         modal
             .setCustomId('modal_warns')
-            .setTitle('Ver advertÃªncias')
+            .setTitle('Ver advertÃƒÂªncias')
             .addComponents(
                 new ActionRowBuilder()
                     .addComponents(userInput)
@@ -466,7 +467,7 @@ function moderationModal(type) {
     if (type === 'delwarn') {
         modal
             .setCustomId('modal_delwarn')
-            .setTitle('Remover advertÃªncia')
+            .setTitle('Remover advertÃƒÂªncia')
             .addComponents(
                 new ActionRowBuilder()
                     .addComponents(userInput)
@@ -486,9 +487,9 @@ function ticketPanel() {
             .setTitle('Tickets')
             .setDescription(
                 'Configure o sistema de tickets do Seraphins.\n\n' +
-                '**Canal:** onde o painel serÃ¡ enviado\n' +
-                '**Categoria:** onde os tickets serÃ£o criados\n' +
-                '**Cargo ADM:** quem terÃ¡ acesso aos tickets'
+                '**Canal:** onde o painel serÃƒÂ¡ enviado\n' +
+                '**Categoria:** onde os tickets serÃƒÂ£o criados\n' +
+                '**Cargo ADM:** quem terÃƒÂ¡ acesso aos tickets'
             )
             .setColor('#000000');
 
@@ -548,13 +549,13 @@ function ticketOpenPanel() {
             .setTitle('Suporte')
             .setDescription(
                 'Precisa de ajuda?\n\n' +
-                'Escolha abaixo o tipo de atendimento que vocÃª precisa.\n\n' +
+                'Escolha abaixo o tipo de atendimento que vocÃƒÂª precisa.\n\n' +
                 '**Parceria**\n' +
                 'Para assuntos relacionados a parcerias.\n\n' +
-                '**DÃºvida**\n' +
-                'Para tirar dÃºvidas ou pedir ajuda.\n\n' +
-                '**DenÃºncia**\n' +
-                'Para denunciar usuÃ¡rios ou situaÃ§Ãµes.'
+                '**DÃƒÂºvida**\n' +
+                'Para tirar dÃƒÂºvidas ou pedir ajuda.\n\n' +
+                '**DenÃƒÂºncia**\n' +
+                'Para denunciar usuÃƒÂ¡rios ou situaÃƒÂ§ÃƒÂµes.'
             )
             .setColor('#000000');
 
@@ -583,7 +584,7 @@ function ticketOpenPanel() {
                 .setCustomId(
                     'open_ticket_duvida'
                 )
-                .setLabel('DÃºvida')
+                .setLabel('DÃƒÂºvida')
                 .setStyle(
                     ButtonStyle.Secondary
                 ),
@@ -592,7 +593,7 @@ function ticketOpenPanel() {
                 .setCustomId(
                     'open_ticket_denuncia'
                 )
-                .setLabel('DenÃºncia')
+                .setLabel('DenÃƒÂºncia')
                 .setStyle(
                     ButtonStyle.Danger
                 )
@@ -608,7 +609,7 @@ async function openTicket(
     interaction,
     type = 'duvida'
 ) {
-    const respond = payload => interaction.deferred ? interaction.editReply(payload) : interaction.reply(payload);
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     const guild =
         interaction.guild;
@@ -630,10 +631,10 @@ async function openTicket(
         );
 
     if (existing) {
-        return respond({
+        return safeInteractionReply(interaction, {
             content:
-                `VocÃª jÃ¡ possui um ticket aberto: ${existing}`,
-            ephemeral: true
+                `VocÃƒÂª jÃƒÂ¡ possui um ticket aberto: ${existing}`,
+            flags: MessageFlags.Ephemeral
         });
     }
 
@@ -730,13 +731,13 @@ async function openTicket(
     const embed =
         new EmbedBuilder()
             .setTitle(
-                `Suporte â€¢ ${ticketType}`
+                `Suporte Ã¢â‚¬Â¢ ${ticketType}`
             )
             .setDescription(
-                `OlÃ¡ ${interaction.user}!\n\n` +
+                `OlÃƒÂ¡ ${interaction.user}!\n\n` +
                 `Seu atendimento foi aberto na categoria **${ticketType}**.\n\n` +
-                'Explique sua situaÃ§Ã£o abaixo.\n' +
-                'Um membro da equipe irÃ¡ atendÃª-lo.\n\n' +
+                'Explique sua situaÃƒÂ§ÃƒÂ£o abaixo.\n' +
+                'Um membro da equipe irÃƒÂ¡ atendÃƒÂª-lo.\n\n' +
                 '**Assumir Ticket**\n' +
                 '**Chamar ADM**\n' +
                 '**Fechar Ticket**'
@@ -799,10 +800,10 @@ async function openTicket(
         components: [buttons]
     });
 
-    return respond({
+    return safeInteractionReply(interaction, {
         content:
             `Ticket de ${ticketType} criado: ${channel}`,
-        ephemeral: true
+        flags: MessageFlags.Ephemeral
     });
 }
 
@@ -821,16 +822,16 @@ function purchaseConfigPanel(guild) {
         ? cargos.slice(0, 15).map(([roleId, data]) => {
             const role = guild.roles.cache.get(roleId);
             const price = Number(data.price || 0).toFixed(2).replace('.', ',');
-            return `â€¢ ${role ? role.name : `Cargo removido (${roleId})`} â€” R$ ${price}`;
+            return `Ã¢â‚¬Â¢ ${role ? role.name : `Cargo removido (${roleId})`} Ã¢â‚¬â€ R$ ${price}`;
         }).join('\n')
         : 'Nenhum cargo configurado ainda.';
 
     const embed = new EmbedBuilder()
-        .setTitle('ðŸ›’ Painel de Compras')
+        .setTitle('Ã°Å¸â€ºâ€™ Painel de Compras')
         .setDescription(
-            `Configure os cargos que serÃ£o vendidos e o canal da loja.\n\n` +
-            `**Canal da loja:** ${channel ? channel.toString() : 'NÃ£o definido'}\n\n` +
-            `**Cargos e preÃ§os:**\n${cargoText}` +
+            `Configure os cargos que serÃƒÂ£o vendidos e o canal da loja.\n\n` +
+            `**Canal da loja:** ${channel ? channel.toString() : 'NÃƒÂ£o definido'}\n\n` +
+            `**Cargos e preÃƒÂ§os:**\n${cargoText}` +
             (cargos.length > 15 ? `\n... e mais ${cargos.length - 15} cargo(s).` : '')
         )
         .setColor('#000000');
@@ -839,17 +840,17 @@ function purchaseConfigPanel(guild) {
         new ButtonBuilder()
             .setCustomId('shop_add_role')
             .setLabel('Adicionar/Editar Cargo')
-            .setEmoji('âž•')
+            .setEmoji('Ã¢Å¾â€¢')
             .setStyle(ButtonStyle.Primary),
         new ButtonBuilder()
             .setCustomId('shop_remove_role')
             .setLabel('Remover Cargo')
-            .setEmoji('ðŸ—‘ï¸')
+            .setEmoji('Ã°Å¸â€”â€˜Ã¯Â¸Â')
             .setStyle(ButtonStyle.Danger),
         new ButtonBuilder()
             .setCustomId('shop_set_channel')
             .setLabel('Definir Canal')
-            .setEmoji('ðŸ“')
+            .setEmoji('Ã°Å¸â€œÂ')
             .setStyle(ButtonStyle.Secondary)
     );
 
@@ -857,7 +858,7 @@ function purchaseConfigPanel(guild) {
         new ButtonBuilder()
             .setCustomId('shop_publish')
             .setLabel('Publicar/Atualizar Loja')
-            .setEmoji('ðŸ“¢')
+            .setEmoji('Ã°Å¸â€œÂ¢')
             .setStyle(ButtonStyle.Success),
         new ButtonBuilder()
             .setCustomId('shop_back')
@@ -868,7 +869,7 @@ function purchaseConfigPanel(guild) {
     return {
         embeds: [embed],
         components: [row1, row2],
-        ephemeral: true
+        flags: MessageFlags.Ephemeral
     };
 }
 
@@ -887,12 +888,12 @@ function purchaseRoleSelect(guild, mode) {
 
     return {
         content: mode === 'remove'
-            ? 'Selecione um cargo que jÃ¡ esteja cadastrado na loja.'
-            : 'Selecione o cargo que deseja cadastrar ou editar o preÃ§o.',
+            ? 'Selecione um cargo que jÃƒÂ¡ esteja cadastrado na loja.'
+            : 'Selecione o cargo que deseja cadastrar ou editar o preÃƒÂ§o.',
         components: [
             new ActionRowBuilder().addComponents(menu)
         ],
-        ephemeral: true
+        flags: MessageFlags.Ephemeral
     };
 }
 
@@ -906,11 +907,11 @@ function purchaseStorePanel(guild) {
         .slice(0, 25);
 
     const embed = new EmbedBuilder()
-        .setTitle(`ðŸ›’ Loja de ${guild.name}`)
+        .setTitle(`Ã°Å¸â€ºâ€™ Loja de ${guild.name}`)
         .setDescription(
             entries.length
-                ? 'Selecione abaixo o cargo que deseja comprar. Um ticket serÃ¡ criado para o atendimento e confirmaÃ§Ã£o do pagamento.'
-                : 'A loja ainda nÃ£o possui cargos disponÃ­veis.'
+                ? 'Selecione abaixo o cargo que deseja comprar. Um ticket serÃƒÂ¡ criado para o atendimento e confirmaÃƒÂ§ÃƒÂ£o do pagamento.'
+                : 'A loja ainda nÃƒÂ£o possui cargos disponÃƒÂ­veis.'
         )
         .setColor('#000000');
 
@@ -926,7 +927,7 @@ function purchaseStorePanel(guild) {
                     const price = Number(data.price || 0).toFixed(2).replace('.', ',');
                     return new StringSelectMenuOptionBuilder()
                         .setLabel((role.name || 'Cargo').slice(0, 100))
-                        .setDescription(`PreÃ§o: R$ ${price}`.slice(0, 100))
+                        .setDescription(`PreÃƒÂ§o: R$ ${price}`.slice(0, 100))
                         .setValue(roleId);
                 })
             );
@@ -943,7 +944,7 @@ function purchaseStorePanel(guild) {
 }
 
 async function openPurchaseTicket(interaction, roleId) {
-    const respond = payload => interaction.deferred ? interaction.editReply(payload) : interaction.reply(payload);
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     const guild = interaction.guild;
     const loja = getLoja(guild.id);
@@ -951,16 +952,16 @@ async function openPurchaseTicket(interaction, roleId) {
     const roleData = loja.cargos[roleId];
 
     if (!role || !roleData) {
-        return respond({
-            content: 'Esse cargo nÃ£o estÃ¡ mais disponÃ­vel na loja.',
-            ephemeral: true
+        return safeInteractionReply(interaction, {
+            content: 'Esse cargo nÃƒÂ£o estÃƒÂ¡ mais disponÃƒÂ­vel na loja.',
+            flags: MessageFlags.Ephemeral
         });
     }
 
     if (role.id === guild.id || role.managed) {
-        return respond({
-            content: 'Esse cargo nÃ£o pode ser vendido.',
-            ephemeral: true
+        return safeInteractionReply(interaction, {
+            content: 'Esse cargo nÃƒÂ£o pode ser vendido.',
+            flags: MessageFlags.Ephemeral
         });
     }
 
@@ -970,9 +971,9 @@ async function openPurchaseTicket(interaction, roleId) {
     );
 
     if (existing) {
-        return respond({
-            content: `VocÃª jÃ¡ possui um ticket de compra aberto para esse cargo: ${existing}`,
-            ephemeral: true
+        return safeInteractionReply(interaction, {
+            content: `VocÃƒÂª jÃƒÂ¡ possui um ticket de compra aberto para esse cargo: ${existing}`,
+            flags: MessageFlags.Ephemeral
         });
     }
 
@@ -1042,20 +1043,20 @@ async function openPurchaseTicket(interaction, roleId) {
         });
     } catch (error) {
         console.error('Erro ao criar ticket de compra:', error);
-        return respond({
-            content: 'NÃ£o consegui criar o ticket. Verifique as permissÃµes do bot.',
-            ephemeral: true
+        return safeInteractionReply(interaction, {
+            content: 'NÃƒÂ£o consegui criar o ticket. Verifique as permissÃƒÂµes do bot.',
+            flags: MessageFlags.Ephemeral
         });
     }
 
     const price = Number(roleData.price || 0).toFixed(2).replace('.', ',');
     const embed = new EmbedBuilder()
-        .setTitle('ðŸ›’ SolicitaÃ§Ã£o de compra')
+        .setTitle('Ã°Å¸â€ºâ€™ SolicitaÃƒÂ§ÃƒÂ£o de compra')
         .setDescription(
             `**Cliente:** ${interaction.user}\n` +
             `**Cargo:** ${role}\n` +
-            `**PreÃ§o:** R$ ${price}\n\n` +
-            'A equipe deve confirmar o pagamento antes de entregar o cargo. Este bot nÃ£o confirma pagamentos automaticamente.'
+            `**PreÃƒÂ§o:** R$ ${price}\n\n` +
+            'A equipe deve confirmar o pagamento antes de entregar o cargo. Este bot nÃƒÂ£o confirma pagamentos automaticamente.'
         )
         .setColor('#000000')
         .setTimestamp();
@@ -1081,9 +1082,9 @@ async function openPurchaseTicket(interaction, roleId) {
         components: [buttons]
     });
 
-    return respond({
+    return safeInteractionReply(interaction, {
         content: `Seu ticket de compra foi criado: ${channel}`,
-        ephemeral: true
+        flags: MessageFlags.Ephemeral
     });
 }
 
@@ -1107,7 +1108,7 @@ function serverPanel(guild) {
     const embed =
         new EmbedBuilder()
             .setTitle(
-                `ðŸ“Š ${guild.name}`
+                `Ã°Å¸â€œÅ  ${guild.name}`
             )
             .setThumbnail(
                 guild.iconURL({
@@ -1117,63 +1118,63 @@ function serverPanel(guild) {
             .setColor('#000000')
             .addFields(
                 {
-                    name: 'ðŸ‘¥ Membros',
+                    name: 'Ã°Å¸â€˜Â¥ Membros',
                     value:
                         `${guild.memberCount}`,
                     inline: true
                 },
 
                 {
-                    name: 'ðŸ‘¤ Humanos',
+                    name: 'Ã°Å¸â€˜Â¤ Humanos',
                     value:
                         `${humans}`,
                     inline: true
                 },
 
                 {
-                    name: 'ðŸ¤– Bots',
+                    name: 'Ã°Å¸Â¤â€“ Bots',
                     value:
                         `${bots}`,
                     inline: true
                 },
 
                 {
-                    name: 'ðŸ’¬ Canais',
+                    name: 'Ã°Å¸â€™Â¬ Canais',
                     value:
                         `${guild.channels.cache.size}`,
                     inline: true
                 },
 
                 {
-                    name: 'ðŸŽ­ Cargos',
+                    name: 'Ã°Å¸Å½Â­ Cargos',
                     value:
                         `${guild.roles.cache.size}`,
                     inline: true
                 },
 
                 {
-                    name: 'ðŸš€ Boosts',
+                    name: 'Ã°Å¸Å¡â‚¬ Boosts',
                     value:
                         `${guild.premiumSubscriptionCount || 0}`,
                     inline: true
                 },
 
                 {
-                    name: 'ðŸ‘‘ Dono',
+                    name: 'Ã°Å¸â€˜â€˜ Dono',
                     value:
                         `<@${guild.ownerId}>`,
                     inline: true
                 },
 
                 {
-                    name: 'ðŸ“… Criado em',
+                    name: 'Ã°Å¸â€œâ€¦ Criado em',
                     value:
                         `<t:${Math.floor(guild.createdTimestamp / 1000)}:D>`,
                     inline: true
                 },
 
                 {
-                    name: 'ðŸ†” ID',
+                    name: 'Ã°Å¸â€ â€ ID',
                     value: guild.id,
                     inline: true
                 }
@@ -1185,15 +1186,15 @@ function serverPanel(guild) {
 }
 
 /* =========================
-   DIVERSÃƒO
+   DIVERSÃƒÆ’O
 ========================= */
 
 function funPanel() {
     const embed =
         new EmbedBuilder()
-            .setTitle('ðŸŽ‰ DiversÃ£o')
+            .setTitle('Ã°Å¸Å½â€° DiversÃƒÂ£o')
             .setDescription(
-                'Escolha uma das opÃ§Ãµes abaixo.'
+                'Escolha uma das opÃƒÂ§ÃƒÂµes abaixo.'
             )
             .setColor('#000000');
 
@@ -1205,7 +1206,7 @@ function funPanel() {
                         'fun_dice'
                     )
                     .setLabel('Dado')
-                    .setEmoji('ðŸŽ²')
+                    .setEmoji('Ã°Å¸Å½Â²')
                     .setStyle(
                         ButtonStyle.Secondary
                     ),
@@ -1215,7 +1216,7 @@ function funPanel() {
                         'fun_coin'
                     )
                     .setLabel('Moeda')
-                    .setEmoji('ðŸª™')
+                    .setEmoji('Ã°Å¸Âªâ„¢')
                     .setStyle(
                         ButtonStyle.Secondary
                     ),
@@ -1225,7 +1226,7 @@ function funPanel() {
                         'fun_8ball'
                     )
                     .setLabel('8Ball')
-                    .setEmoji('ðŸŽ±')
+                    .setEmoji('Ã°Å¸Å½Â±')
                     .setStyle(
                         ButtonStyle.Secondary
                     ),
@@ -1234,8 +1235,8 @@ function funPanel() {
                     .setCustomId(
                         'fun_number'
                     )
-                    .setLabel('NÃºmero')
-                    .setEmoji('ðŸ”¢')
+                    .setLabel('NÃƒÂºmero')
+                    .setEmoji('Ã°Å¸â€Â¢')
                     .setStyle(
                         ButtonStyle.Secondary
                     ),
@@ -1245,7 +1246,7 @@ function funPanel() {
                         'fun_choose'
                     )
                     .setLabel('Escolher')
-                    .setEmoji('ðŸƒ')
+                    .setEmoji('Ã°Å¸Æ’Â')
                     .setStyle(
                         ButtonStyle.Secondary
                     ),
@@ -1255,7 +1256,7 @@ function funPanel() {
                         'fun_quiz'
                     )
                     .setLabel('Quiz')
-                    .setEmoji('ðŸ†')
+                    .setEmoji('Ã°Å¸Ââ€ ')
                     .setStyle(
                         ButtonStyle.Secondary
                     )
@@ -1268,7 +1269,7 @@ function funPanel() {
 }
 
 /* =========================
-   CONFIGURAÃ‡Ã•ES
+   CONFIGURAÃƒâ€¡Ãƒâ€¢ES
 ========================= */
 
 function configPanel(guild) {
@@ -1278,10 +1279,10 @@ function configPanel(guild) {
     const embed =
         new EmbedBuilder()
             .setTitle(
-                'âš™ï¸ ConfiguraÃ§Ãµes'
+                'Ã¢Å¡â„¢Ã¯Â¸Â ConfiguraÃƒÂ§ÃƒÂµes'
             )
             .setDescription(
-                'ConfiguraÃ§Ãµes atuais do Seraphins.'
+                'ConfiguraÃƒÂ§ÃƒÂµes atuais do Seraphins.'
             )
             .setColor('#000000')
             .addFields(
@@ -1291,7 +1292,7 @@ function configPanel(guild) {
                     value:
                         cfg.ticketCanal
                             ? `<#${cfg.ticketCanal}>`
-                            : 'NÃ£o definido',
+                            : 'NÃƒÂ£o definido',
                     inline: true
                 },
 
@@ -1300,7 +1301,7 @@ function configPanel(guild) {
                     value:
                         cfg.ticketCategoria
                             ? `<#${cfg.ticketCategoria}>`
-                            : 'NÃ£o definida',
+                            : 'NÃƒÂ£o definida',
                     inline: true
                 },
 
@@ -1310,13 +1311,13 @@ function configPanel(guild) {
                     value:
                         cfg.ticketCargo
                             ? `<@&${cfg.ticketCargo}>`
-                            : 'NÃ£o definido',
+                            : 'NÃƒÂ£o definido',
                     inline: true
                 },
 
                 {
                     name:
-                        'ðŸ›¡ï¸ Anti-Spam',
+                        'Ã°Å¸â€ºÂ¡Ã¯Â¸Â Anti-Spam',
                     value:
                         cfg.antiSpam
                             ? 'Ativado'
@@ -1326,7 +1327,7 @@ function configPanel(guild) {
 
                 {
                     name:
-                        'ðŸš¨ Anti-Raid',
+                        'Ã°Å¸Å¡Â¨ Anti-Raid',
                     value:
                         cfg.antiRaid
                             ? 'Ativado'
@@ -1351,8 +1352,8 @@ function configPanel(guild) {
                     .setCustomId(
                         'config_protection'
                     )
-                    .setLabel('ProteÃ§Ã£o')
-                    .setEmoji('ðŸ›¡ï¸')
+                    .setLabel('ProteÃƒÂ§ÃƒÂ£o')
+                    .setEmoji('Ã°Å¸â€ºÂ¡Ã¯Â¸Â')
                     .setStyle(
                         ButtonStyle.Secondary
                     )
@@ -1365,7 +1366,7 @@ function configPanel(guild) {
 }
 
 /* =========================
-   PROTEÃ‡ÃƒO
+   PROTEÃƒâ€¡ÃƒÆ’O
 ========================= */
 
 function protectionPanel(guild) {
@@ -1375,10 +1376,10 @@ function protectionPanel(guild) {
     const embed =
         new EmbedBuilder()
             .setTitle(
-                'ðŸ›¡ï¸ ProteÃ§Ã£o'
+                'Ã°Å¸â€ºÂ¡Ã¯Â¸Â ProteÃƒÂ§ÃƒÂ£o'
             )
             .setDescription(
-                'Configure os sistemas de proteÃ§Ã£o do servidor.'
+                'Configure os sistemas de proteÃƒÂ§ÃƒÂ£o do servidor.'
             )
             .setColor('#000000')
             .addFields(
@@ -1387,8 +1388,8 @@ function protectionPanel(guild) {
                         'Anti-Spam',
                     value:
                         cfg.antiSpam
-                            ? 'ðŸŸ¢ Ativado'
-                            : 'ðŸ”´ Desativado',
+                            ? 'Ã°Å¸Å¸Â¢ Ativado'
+                            : 'Ã°Å¸â€Â´ Desativado',
                     inline: true
                 },
 
@@ -1397,8 +1398,8 @@ function protectionPanel(guild) {
                         'Anti-Raid',
                     value:
                         cfg.antiRaid
-                            ? 'ðŸŸ¢ Ativado'
-                            : 'ðŸ”´ Desativado',
+                            ? 'Ã°Å¸Å¸Â¢ Ativado'
+                            : 'Ã°Å¸â€Â´ Desativado',
                     inline: true
                 }
             );
@@ -1442,10 +1443,10 @@ function protectionPanel(guild) {
 function giveawayPanel() {
     const embed =
         new EmbedBuilder()
-            .setTitle('ðŸŽ Sorteios')
+            .setTitle('Ã°Å¸Å½Â Sorteios')
             .setDescription(
                 'Gerencie os sorteios do servidor.\n\n' +
-                'Crie sorteios definindo prÃªmio, duraÃ§Ã£o, vencedores e requisitos.'
+                'Crie sorteios definindo prÃƒÂªmio, duraÃƒÂ§ÃƒÂ£o, vencedores e requisitos.'
             )
             .setColor('#000000');
 
@@ -1459,7 +1460,7 @@ function giveawayPanel() {
                     .setLabel(
                         'Criar Sorteio'
                     )
-                    .setEmoji('ðŸŽ')
+                    .setEmoji('Ã°Å¸Å½Â')
                     .setStyle(
                         ButtonStyle.Success
                     ),
@@ -1471,7 +1472,7 @@ function giveawayPanel() {
                     .setLabel(
                         'Sorteios Ativos'
                     )
-                    .setEmoji('ðŸ“‹')
+                    .setEmoji('Ã°Å¸â€œâ€¹')
                     .setStyle(
                         ButtonStyle.Secondary
                     )
@@ -1496,7 +1497,7 @@ function giveawayCreateModal() {
     const prize =
         new TextInputBuilder()
             .setCustomId('prize')
-            .setLabel('PrÃªmio')
+            .setLabel('PrÃƒÂªmio')
             .setPlaceholder(
                 'Ex: Nitro, Robux, cargo especial'
             )
@@ -1511,7 +1512,7 @@ function giveawayCreateModal() {
                 'duration'
             )
             .setLabel(
-                'DuraÃ§Ã£o em minutos'
+                'DuraÃƒÂ§ÃƒÂ£o em minutos'
             )
             .setPlaceholder(
                 'Ex: 60'
@@ -1624,9 +1625,9 @@ function giveawayMessage(giveaway) {
         'Nenhum requisito';
 
     return new EmbedBuilder()
-        .setTitle('ðŸŽ Sorteio')
+        .setTitle('Ã°Å¸Å½Â Sorteio')
         .setDescription(
-            `**PrÃªmio:** ${giveaway.prize}\n\n` +
+            `**PrÃƒÂªmio:** ${giveaway.prize}\n\n` +
             `**Vencedores:** ${giveaway.winners}\n` +
             `**Requisitos:** ${requirements}\n\n` +
             `**Participantes:** ${
@@ -1635,7 +1636,7 @@ function giveawayMessage(giveaway) {
             `**Termina:** <t:${Math.floor(
                 giveaway.end / 1000
             )}:R>\n\n` +
-            'Clique no botÃ£o abaixo para participar.'
+            'Clique no botÃƒÂ£o abaixo para participar.'
         )
         .setColor('#000000');
 }
@@ -1652,7 +1653,7 @@ function giveawayButtons(
                 .setLabel(
                     'Participar'
                 )
-                .setEmoji('ðŸŽ')
+                .setEmoji('Ã°Å¸Å½Â')
                 .setStyle(
                     ButtonStyle.Success
                 ),
@@ -1662,7 +1663,7 @@ function giveawayButtons(
                     `giveaway_list_${giveawayId}`
                 )
                 .setLabel('Ver participantes')
-                .setEmoji('ðŸ‘¥')
+                .setEmoji('Ã°Å¸â€˜Â¥')
                 .setStyle(ButtonStyle.Secondary)
         );
 }
@@ -1675,7 +1676,7 @@ async function checkGiveawayRequirement(
         return {
             ok: false,
             reason:
-                'VocÃª precisa estar no servidor para participar.'
+                'VocÃƒÂª precisa estar no servidor para participar.'
         };
     }
 
@@ -1683,7 +1684,7 @@ async function checkGiveawayRequirement(
         return {
             ok: false,
             reason:
-                'Bots nÃ£o podem participar de sorteios.'
+                'Bots nÃƒÂ£o podem participar de sorteios.'
         };
     }
 
@@ -1696,7 +1697,7 @@ async function checkGiveawayRequirement(
         return {
             ok: false,
             reason:
-                `VocÃª precisa possuir o cargo <@&${giveaway.requiredRole}> para participar.`
+                `VocÃƒÂª precisa possuir o cargo <@&${giveaway.requiredRole}> para participar.`
         };
     }
 
@@ -1716,7 +1717,7 @@ async function checkGiveawayRequirement(
             return {
                 ok: false,
                 reason:
-                    `VocÃª precisa estar no servidor hÃ¡ pelo menos ${giveaway.minDays} dias.`
+                    `VocÃƒÂª precisa estar no servidor hÃƒÂ¡ pelo menos ${giveaway.minDays} dias.`
             };
         }
     }
@@ -1738,7 +1739,7 @@ async function checkGiveawayWinnerRequirement(
     if (!member) {
         return {
             ok: false,
-            reason: 'A pessoa sorteada nÃ£o estÃ¡ mais no servidor.'
+            reason: 'A pessoa sorteada nÃƒÂ£o estÃƒÂ¡ mais no servidor.'
         };
     }
 
@@ -1776,15 +1777,15 @@ async function updateGiveawayMessage(guild, giveaway, embed, components = []) {
             components
         });
     } catch (error) {
-        console.log('NÃ£o foi possÃ­vel atualizar a mensagem do sorteio:', error.message);
+        console.log('NÃƒÂ£o foi possÃƒÂ­vel atualizar a mensagem do sorteio:', error.message);
     }
 }
 
 function endedGiveawayEmbed(giveaway, winnerText, extra = '') {
     return new EmbedBuilder()
-        .setTitle('ðŸŽ Sorteio Encerrado')
+        .setTitle('Ã°Å¸Å½Â Sorteio Encerrado')
         .setDescription(
-            `**PrÃªmio:** ${giveaway.prize}\n\n` +
+            `**PrÃƒÂªmio:** ${giveaway.prize}\n\n` +
             `**Vencedor:** ${winnerText}\n\n` +
             `**Participantes:** ${giveaway.participants?.length || 0}` +
             (extra ? `\n\n${extra}` : '')
@@ -1880,7 +1881,7 @@ async function finishGiveaway(
             endedGiveawayEmbed(
                 giveaway,
                 'Nenhum vencedor',
-                'NÃ£o houve participantes elegÃ­veis.'
+                'NÃƒÂ£o houve participantes elegÃƒÂ­veis.'
             )
         );
         delete sorteios[giveawayId];
@@ -1905,19 +1906,19 @@ async function finishGiveaway(
             endedGiveawayEmbed(
                 giveaway,
                 `<@${candidate}>`,
-                `âš ï¸ A pessoa sorteada nÃ£o cumpriu o requisito.\n${requirement.reason}\n\nClique em **Girar outra pessoa** para sortear outro participante.`
+                `Ã¢Å¡ Ã¯Â¸Â A pessoa sorteada nÃƒÂ£o cumpriu o requisito.\n${requirement.reason}\n\nClique em **Girar outra pessoa** para sortear outro participante.`
             ),
             [
                 new ActionRowBuilder().addComponents(
                     new ButtonBuilder()
                         .setCustomId(`giveaway_reroll_${giveawayId}`)
                         .setLabel('Girar outra pessoa')
-                        .setEmoji('ðŸŽ²')
+                        .setEmoji('Ã°Å¸Å½Â²')
                         .setStyle(ButtonStyle.Primary),
                     new ButtonBuilder()
                         .setCustomId(`giveaway_list_${giveawayId}`)
                         .setLabel('Ver participantes')
-                        .setEmoji('ðŸ‘¥')
+                        .setEmoji('Ã°Å¸â€˜Â¥')
                         .setStyle(ButtonStyle.Secondary)
                 )
             ]
@@ -1938,7 +1939,7 @@ async function finishGiveaway(
     if (channel) {
         try {
             await channel.send(
-                `ðŸŽ‰ **Sorteio encerrado!**\n\n**PrÃªmio:** ${giveaway.prize}\n**Vencedor:** <@${candidate}>`
+                `Ã°Å¸Å½â€° **Sorteio encerrado!**\n\n**PrÃƒÂªmio:** ${giveaway.prize}\n**Vencedor:** <@${candidate}>`
             );
         } catch {}
     }
@@ -1992,19 +1993,19 @@ async function rerollGiveaway(giveawayId) {
             endedGiveawayEmbed(
                 giveaway,
                 `<@${candidate}>`,
-                `âš ï¸ Essa pessoa tambÃ©m nÃ£o cumpriu o requisito.\n${requirement.reason}\n\nClique em **Girar outra pessoa** para continuar.`
+                `Ã¢Å¡ Ã¯Â¸Â Essa pessoa tambÃƒÂ©m nÃƒÂ£o cumpriu o requisito.\n${requirement.reason}\n\nClique em **Girar outra pessoa** para continuar.`
             ),
             [
                 new ActionRowBuilder().addComponents(
                     new ButtonBuilder()
                         .setCustomId(`giveaway_reroll_${giveawayId}`)
                         .setLabel('Girar outra pessoa')
-                        .setEmoji('ðŸŽ²')
+                        .setEmoji('Ã°Å¸Å½Â²')
                         .setStyle(ButtonStyle.Primary),
                     new ButtonBuilder()
                         .setCustomId(`giveaway_list_${giveawayId}`)
                         .setLabel('Ver participantes')
-                        .setEmoji('ðŸ‘¥')
+                        .setEmoji('Ã°Å¸â€˜Â¥')
                         .setStyle(ButtonStyle.Secondary)
                 )
             ]
@@ -2025,7 +2026,7 @@ async function rerollGiveaway(giveawayId) {
     if (channel) {
         try {
             await channel.send(
-                `ðŸŽ‰ **Novo sorteio!**\n\n**PrÃªmio:** ${giveaway.prize}\n**Vencedor:** <@${candidate}>`
+                `Ã°Å¸Å½â€° **Novo sorteio!**\n\n**PrÃƒÂªmio:** ${giveaway.prize}\n**Vencedor:** <@${candidate}>`
             );
         } catch {}
     }
@@ -2048,17 +2049,17 @@ function giveawayParticipantList(guild, giveaway, page = 0) {
     const lines = slice.length
         ? slice.map((id, index) => {
             const member = guild.members.cache.get(id);
-            const name = member ? member.displayName : `UsuÃ¡rio ${id}`;
+            const name = member ? member.displayName : `UsuÃƒÂ¡rio ${id}`;
             return `**${start + index + 1}.** ${member ? `${member}` : name}`;
         }).join('\n')
-        : 'Nenhuma pessoa estÃ¡ participando.';
+        : 'Nenhuma pessoa estÃƒÂ¡ participando.';
 
     const embed = new EmbedBuilder()
-        .setTitle('ðŸ‘¥ Participantes do sorteio')
+        .setTitle('Ã°Å¸â€˜Â¥ Participantes do sorteio')
         .setDescription(
-            `**PrÃªmio:** ${giveaway.prize}\n` +
+            `**PrÃƒÂªmio:** ${giveaway.prize}\n` +
             `**Total:** ${participants.length}\n` +
-            `**PÃ¡gina:** ${currentPage + 1}/${totalPages}\n\n` +
+            `**PÃƒÂ¡gina:** ${currentPage + 1}/${totalPages}\n\n` +
             lines
         )
         .setColor('#000000');
@@ -2071,12 +2072,12 @@ function giveawayParticipantList(guild, giveaway, page = 0) {
             .setDisabled(currentPage <= 0),
         new ButtonBuilder()
             .setCustomId(`giveaway_list_next_${giveaway.id}_${currentPage}`)
-            .setLabel('PrÃ³xima')
+            .setLabel('PrÃƒÂ³xima')
             .setStyle(ButtonStyle.Secondary)
             .setDisabled(currentPage >= totalPages - 1)
     );
 
-    return { embeds: [embed], components: [row], ephemeral: true };
+    return { embeds: [embed], components: [row], flags: MessageFlags.Ephemeral };
 }
 
 function scheduleGiveaway(
@@ -2194,7 +2195,7 @@ async function loadInvites(
         );
     } catch (error) {
         console.log(
-            `NÃ£o foi possÃ­vel carregar convites de ${guild.name}`
+            `NÃƒÂ£o foi possÃƒÂ­vel carregar convites de ${guild.name}`
         );
     }
 }
@@ -2287,7 +2288,7 @@ client.on(
                         role.name
                             .toLowerCase()
                             .includes(
-                                'verificaÃ§Ã£o'
+                                'verificaÃƒÂ§ÃƒÂ£o'
                             )
                 );
 
@@ -2312,7 +2313,7 @@ client.once(
     'clientReady',
     async () => {
         console.log(
-            `ðŸ¤– ${client.user.tag} estÃ¡ online!`
+            `Ã°Å¸Â¤â€“ ${client.user.tag} estÃƒÂ¡ online!`
         );
 
         client.user.setActivity(
@@ -2334,11 +2335,11 @@ client.once(
         scheduleAllGiveaways();
 
         console.log(
-            'ðŸ“¨ Sistema de convites carregado.'
+            'Ã°Å¸â€œÂ¨ Sistema de convites carregado.'
         );
 
         console.log(
-            'ðŸŽ Sistema de sorteios carregado.'
+            'Ã°Å¸Å½Â Sistema de sorteios carregado.'
         );
     }
 );
@@ -2351,7 +2352,7 @@ const commands = [
     {
         name: 'ping',
         description:
-            'Verifica a latÃªncia do bot'
+            'Verifica a latÃƒÂªncia do bot'
     },
 
     {
@@ -2369,7 +2370,7 @@ const commands = [
             {
                 name: 'canal',
                 description:
-                    'Canal onde o painel serÃ¡ enviado',
+                    'Canal onde o painel serÃƒÂ¡ enviado',
                 type: 7,
                 required: true
             }
@@ -2379,13 +2380,13 @@ const commands = [
     {
         name: 'convites',
         description:
-            'Mostra os convites de um usuÃ¡rio',
+            'Mostra os convites de um usuÃƒÂ¡rio',
 
         options: [
             {
                 name: 'usuario',
                 description:
-                    'UsuÃ¡rio',
+                    'UsuÃƒÂ¡rio',
                 type: 6,
                 required: false
             }
@@ -2397,17 +2398,12 @@ client.once(
     'clientReady',
     async () => {
         try {
-            const targetGuild = client.guilds.cache.get(OFFICIAL_SERVER_ID);
-            if (targetGuild) {
-                await targetGuild.commands.set(commands);
-                console.log(`✅ Comandos registrados no servidor ${targetGuild.name}!`);
-            } else {
-                await client.application.commands.set(commands);
-                console.log('⚠️ Servidor oficial não encontrado; comandos registrados globalmente.');
-            }
+            await client.application.commands.set(
+                commands
+            );
 
             console.log(
-                'âœ… Comandos registrados!'
+                'Ã¢Å“â€¦ Comandos registrados!'
             );
         } catch (error) {
             console.error(
@@ -2419,58 +2415,19 @@ client.once(
 );
 
 /* =========================
-   INTERAÃ‡Ã•ES
+   INTERAÃƒâ€¡Ãƒâ€¢ES
 ========================= */
+
+function safeInteractionReply(interaction, payload) {
+    if (interaction.deferred) return interaction.editReply(payload);
+    if (interaction.replied) return interaction.followUp(payload);
+    return safeInteractionReply(interaction, payload);
+}
 
 client.on(
     'interactionCreate',
     async interaction => {
         try {
-            // Algumas ações fazem operações na API do Discord que podem
-            // levar mais de 3 segundos. Nesses casos, reconhecemos a
-            // interação imediatamente e depois editamos a resposta.
-            const asyncButtonIds = new Set([
-                'ticket_send_panel',
-                'open_ticket_parceria',
-                'open_ticket_duvida',
-                'open_ticket_denuncia',
-                'open_ticket',
-                'ticket_close',
-                'mod_lock',
-                'mod_unlock',
-                'mod_slowmode',
-                'shop_publish'
-            ]);
-
-            const shouldDefer =
-                (interaction.isChatInputCommand() && interaction.commandName === 'convites') ||
-                (interaction.isButton() && (
-                    asyncButtonIds.has(interaction.customId) ||
-                    interaction.customId.startsWith('giveaway_join_') ||
-                    interaction.customId.startsWith('giveaway_reroll_')
-                )) ||
-                (interaction.isStringSelectMenu() && interaction.customId === 'shop_customer_select') ||
-                (interaction.isModalSubmit() && [
-                    'modal_ban',
-                    'modal_kick',
-                    'modal_timeout',
-                    'modal_untimeout',
-                    'modal_warn',
-                    'modal_warns',
-                    'modal_delwarn',
-                    'modal_giveaway'
-                ].includes(interaction.customId));
-
-            if (shouldDefer) {
-                await interaction.deferReply({
-                    ephemeral: interaction.customId !== 'ticket_close'
-                });
-            }
-
-            const respond = payload =>
-                interaction.deferred
-                    ? interaction.editReply(payload)
-                    : interaction.reply(payload);
             /* ===== SLASH COMMANDS ===== */
 
             if (
@@ -2480,12 +2437,11 @@ client.on(
                     interaction.commandName ===
                     'ping'
                 ) {
-                    return respond(
+                    return safeInteractionReply(interaction, 
                         {
                             content:
                                 `Pong! ${client.ws.ping}ms`,
-                            ephemeral:
-                                true
+                            flags: MessageFlags.Ephemeral
                         }
                     );
                 }
@@ -2499,21 +2455,19 @@ client.on(
                             interaction.member
                         )
                     ) {
-                        return respond(
+                        return safeInteractionReply(interaction, 
                             {
                                 content:
-                                    'âŒ VocÃª nÃ£o possui permissÃ£o para usar este comando.',
-                                ephemeral:
-                                    true
+                                    'Ã¢ÂÅ’ VocÃƒÂª nÃƒÂ£o possui permissÃƒÂ£o para usar este comando.',
+                                flags: MessageFlags.Ephemeral
                             }
                         );
                     }
 
-                    return respond(
+                    return safeInteractionReply(interaction, 
                         {
                             ...mainPanel(),
-                            ephemeral:
-                                true
+                            flags: MessageFlags.Ephemeral
                         }
                     );
                 }
@@ -2527,12 +2481,11 @@ client.on(
                             interaction.member
                         )
                     ) {
-                        return respond(
+                        return safeInteractionReply(interaction, 
                             {
                                 content:
-                                    'VocÃª nÃ£o possui permissÃ£o para configurar o suporte.',
-                                ephemeral:
-                                    true
+                                    'VocÃƒÂª nÃƒÂ£o possui permissÃƒÂ£o para configurar o suporte.',
+                                flags: MessageFlags.Ephemeral
                             }
                         );
                     }
@@ -2543,12 +2496,11 @@ client.on(
                         );
 
                     if (!canal) {
-                        return respond(
+                        return safeInteractionReply(interaction, 
                             {
                                 content:
-                                    'Canal invÃ¡lido.',
-                                ephemeral:
-                                    true
+                                    'Canal invÃƒÂ¡lido.',
+                                flags: MessageFlags.Ephemeral
                             }
                         );
                     }
@@ -2570,12 +2522,11 @@ client.on(
                             PermissionFlagsBits.EmbedLinks
                         )
                     ) {
-                        return respond(
+                        return safeInteractionReply(interaction, 
                             {
                                 content:
-                                    'Eu nÃ£o tenho as permissÃµes necessÃ¡rias nesse canal.',
-                                ephemeral:
-                                    true
+                                    'Eu nÃƒÂ£o tenho as permissÃƒÂµes necessÃƒÂ¡rias nesse canal.',
+                                flags: MessageFlags.Ephemeral
                             }
                         );
                     }
@@ -2589,16 +2540,16 @@ client.on(
                         canal.id;
 
                     try {
+                        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
                         await canal.send(
                             ticketOpenPanel()
                         );
 
-                        return respond(
+                        return safeInteractionReply(interaction, 
                             {
                                 content:
                                     `Painel de suporte enviado em ${canal}.`,
-                                ephemeral:
-                                    true
+                                flags: MessageFlags.Ephemeral
                             }
                         );
                     } catch (error) {
@@ -2607,12 +2558,11 @@ client.on(
                             error
                         );
 
-                        return respond(
+                        return safeInteractionReply(interaction, 
                             {
                                 content:
-                                    'NÃ£o foi possÃ­vel enviar o painel nesse canal.',
-                                ephemeral:
-                                    true
+                                    'NÃƒÂ£o foi possÃƒÂ­vel enviar o painel nesse canal.',
+                                flags: MessageFlags.Ephemeral
                             }
                         );
                     }
@@ -2628,13 +2578,15 @@ client.on(
                         ) ||
                         interaction.user;
 
+                    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+
                     const total =
                         await getUserInvites(
                             interaction.guild,
                             user.id
                         );
 
-                    return respond(
+                    return safeInteractionReply(interaction, 
                         {
                             content:
                                 `${user} possui **${total}** convite(s).`
@@ -2643,7 +2595,7 @@ client.on(
                 }
             }
 
-            /* ===== BOTÃ•ES ===== */
+            /* ===== BOTÃƒâ€¢ES ===== */
 
             if (
                 interaction.isButton()
@@ -2724,13 +2676,13 @@ client.on(
                     'panel_compras'
                 ) {
                     if (!isStaff(interaction.member)) {
-                        return respond({
-                            content: 'âŒ VocÃª nÃ£o possui permissÃ£o para configurar a loja.',
-                            ephemeral: true
+                        return safeInteractionReply(interaction, {
+                            content: 'Ã¢ÂÅ’ VocÃƒÂª nÃƒÂ£o possui permissÃƒÂ£o para configurar a loja.',
+                            flags: MessageFlags.Ephemeral
                         });
                     }
 
-                    return respond(
+                    return safeInteractionReply(interaction, 
                         purchaseConfigPanel(interaction.guild)
                     );
                 }
@@ -2740,9 +2692,9 @@ client.on(
                     'shop_back'
                 ) {
                     if (!isStaff(interaction.member)) {
-                        return respond({
-                            content: 'âŒ Sem permissÃ£o.',
-                            ephemeral: true
+                        return safeInteractionReply(interaction, {
+                            content: 'Ã¢ÂÅ’ Sem permissÃƒÂ£o.',
+                            flags: MessageFlags.Ephemeral
                         });
                     }
 
@@ -2754,13 +2706,13 @@ client.on(
                     'shop_add_role'
                 ) {
                     if (!isStaff(interaction.member)) {
-                        return respond({
-                            content: 'âŒ Sem permissÃ£o.',
-                            ephemeral: true
+                        return safeInteractionReply(interaction, {
+                            content: 'Ã¢ÂÅ’ Sem permissÃƒÂ£o.',
+                            flags: MessageFlags.Ephemeral
                         });
                     }
 
-                    return respond(
+                    return safeInteractionReply(interaction, 
                         purchaseRoleSelect(interaction.guild, 'add')
                     );
                 }
@@ -2770,20 +2722,20 @@ client.on(
                     'shop_remove_role'
                 ) {
                     if (!isStaff(interaction.member)) {
-                        return respond({
-                            content: 'âŒ Sem permissÃ£o.',
-                            ephemeral: true
+                        return safeInteractionReply(interaction, {
+                            content: 'Ã¢ÂÅ’ Sem permissÃƒÂ£o.',
+                            flags: MessageFlags.Ephemeral
                         });
                     }
 
                     if (!Object.keys(getLoja(interaction.guild.id).cargos).length) {
-                        return respond({
-                            content: 'Ainda nÃ£o hÃ¡ cargos cadastrados para remover.',
-                            ephemeral: true
+                        return safeInteractionReply(interaction, {
+                            content: 'Ainda nÃƒÂ£o hÃƒÂ¡ cargos cadastrados para remover.',
+                            flags: MessageFlags.Ephemeral
                         });
                     }
 
-                    return respond(
+                    return safeInteractionReply(interaction, 
                         purchaseRoleSelect(interaction.guild, 'remove')
                     );
                 }
@@ -2793,9 +2745,9 @@ client.on(
                     'shop_set_channel'
                 ) {
                     if (!isStaff(interaction.member)) {
-                        return respond({
-                            content: 'âŒ Sem permissÃ£o.',
-                            ephemeral: true
+                        return safeInteractionReply(interaction, {
+                            content: 'Ã¢ÂÅ’ Sem permissÃƒÂ£o.',
+                            flags: MessageFlags.Ephemeral
                         });
                     }
 
@@ -2822,9 +2774,9 @@ client.on(
                     'shop_publish'
                 ) {
                     if (!isStaff(interaction.member)) {
-                        return respond({
-                            content: 'âŒ Sem permissÃ£o.',
-                            ephemeral: true
+                        return safeInteractionReply(interaction, {
+                            content: 'Ã¢ÂÅ’ Sem permissÃƒÂ£o.',
+                            flags: MessageFlags.Ephemeral
                         });
                     }
 
@@ -2834,9 +2786,9 @@ client.on(
                         : null;
 
                     if (!channel || channel.type !== ChannelType.GuildText) {
-                        return respond({
-                            content: 'Defina primeiro um canal de texto vÃ¡lido para a loja.',
-                            ephemeral: true
+                        return safeInteractionReply(interaction, {
+                            content: 'Defina primeiro um canal de texto vÃƒÂ¡lido para a loja.',
+                            flags: MessageFlags.Ephemeral
                         });
                     }
 
@@ -2847,13 +2799,14 @@ client.on(
                         !permissions.has(PermissionFlagsBits.SendMessages) ||
                         !permissions.has(PermissionFlagsBits.EmbedLinks)
                     ) {
-                        return respond({
-                            content: 'NÃ£o tenho permissÃ£o para publicar a loja nesse canal.',
-                            ephemeral: true
+                        return safeInteractionReply(interaction, {
+                            content: 'NÃƒÂ£o tenho permissÃƒÂ£o para publicar a loja nesse canal.',
+                            flags: MessageFlags.Ephemeral
                         });
                     }
 
                     try {
+                        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
                         let message = null;
 
                         if (loja.messageId) {
@@ -2868,20 +2821,20 @@ client.on(
                             saveLojas();
                         }
 
-                        return respond({
+                        return safeInteractionReply(interaction, {
                             content: `Loja publicada/atualizada em ${channel}.`,
-                            ephemeral: true
+                            flags: MessageFlags.Ephemeral
                         });
                     } catch (error) {
                         console.error('Erro ao publicar loja:', error);
-                        return respond({
-                            content: 'NÃ£o consegui publicar a loja. Confira as permissÃµes do canal.',
-                            ephemeral: true
+                        return safeInteractionReply(interaction, {
+                            content: 'NÃƒÂ£o consegui publicar a loja. Confira as permissÃƒÂµes do canal.',
+                            flags: MessageFlags.Ephemeral
                         });
                     }
                 }
 
-                /* ===== MODERAÃ‡ÃƒO ===== */
+                /* ===== MODERAÃƒâ€¡ÃƒÆ’O ===== */
 
                 if (
                     [
@@ -2901,12 +2854,11 @@ client.on(
                             interaction.member
                         )
                     ) {
-                        return respond(
+                        return safeInteractionReply(interaction, 
                             {
                                 content:
-                                    'âŒ VocÃª nÃ£o possui permissÃ£o para isso.',
-                                ephemeral:
-                                    true
+                                    'Ã¢ÂÅ’ VocÃƒÂª nÃƒÂ£o possui permissÃƒÂ£o para isso.',
+                                flags: MessageFlags.Ephemeral
                             }
                         );
                     }
@@ -2933,16 +2885,16 @@ client.on(
                             interaction.member
                         )
                     ) {
-                        return respond(
+                        return safeInteractionReply(interaction, 
                             {
                                 content:
-                                    'âŒ Sem permissÃ£o.',
-                                ephemeral:
-                                    true
+                                    'Ã¢ÂÅ’ Sem permissÃƒÂ£o.',
+                                flags: MessageFlags.Ephemeral
                             }
                         );
                     }
 
+                    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
                     await interaction.channel.permissionOverwrites.edit(
                         interaction.guild.roles.everyone,
                         {
@@ -2951,8 +2903,8 @@ client.on(
                         }
                     );
 
-                    return respond(
-                        'ðŸ”’ Canal bloqueado.'
+                    return safeInteractionReply(interaction, 
+                        'Ã°Å¸â€â€™ Canal bloqueado.'
                     );
                 }
 
@@ -2965,16 +2917,16 @@ client.on(
                             interaction.member
                         )
                     ) {
-                        return respond(
+                        return safeInteractionReply(interaction, 
                             {
                                 content:
-                                    'âŒ Sem permissÃ£o.',
-                                ephemeral:
-                                    true
+                                    'Ã¢ÂÅ’ Sem permissÃƒÂ£o.',
+                                flags: MessageFlags.Ephemeral
                             }
                         );
                     }
 
+                    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
                     await interaction.channel.permissionOverwrites.edit(
                         interaction.guild.roles.everyone,
                         {
@@ -2983,8 +2935,8 @@ client.on(
                         }
                     );
 
-                    return respond(
-                        'ðŸ”“ Canal desbloqueado.'
+                    return safeInteractionReply(interaction, 
+                        'Ã°Å¸â€â€œ Canal desbloqueado.'
                     );
                 }
 
@@ -2997,22 +2949,22 @@ client.on(
                             interaction.member
                         )
                     ) {
-                        return respond(
+                        return safeInteractionReply(interaction, 
                             {
                                 content:
-                                    'âŒ Sem permissÃ£o.',
-                                ephemeral:
-                                    true
+                                    'Ã¢ÂÅ’ Sem permissÃƒÂ£o.',
+                                flags: MessageFlags.Ephemeral
                             }
                         );
                     }
 
+                    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
                     await interaction.channel.setRateLimitPerUser(
                         10
                     );
 
-                    return respond(
-                        'ðŸ¢ Slowmode definido para 10 segundos.'
+                    return safeInteractionReply(interaction, 
+                        'Ã°Å¸ÂÂ¢ Slowmode definido para 10 segundos.'
                     );
                 }
 
@@ -3027,12 +2979,11 @@ client.on(
                             interaction.member
                         )
                     ) {
-                        return respond(
+                        return safeInteractionReply(interaction, 
                             {
                                 content:
-                                    'Sem permissÃ£o.',
-                                ephemeral:
-                                    true
+                                    'Sem permissÃƒÂ£o.',
+                                flags: MessageFlags.Ephemeral
                             }
                         );
                     }
@@ -3084,12 +3035,11 @@ client.on(
                             interaction.member
                         )
                     ) {
-                        return respond(
+                        return safeInteractionReply(interaction, 
                             {
                                 content:
-                                    'Sem permissÃ£o.',
-                                ephemeral:
-                                    true
+                                    'Sem permissÃƒÂ£o.',
+                                flags: MessageFlags.Ephemeral
                             }
                         );
                     }
@@ -3141,12 +3091,11 @@ client.on(
                             interaction.member
                         )
                     ) {
-                        return respond(
+                        return safeInteractionReply(interaction, 
                             {
                                 content:
-                                    'Sem permissÃ£o.',
-                                ephemeral:
-                                    true
+                                    'Sem permissÃƒÂ£o.',
+                                flags: MessageFlags.Ephemeral
                             }
                         );
                     }
@@ -3198,12 +3147,11 @@ client.on(
                             interaction.member
                         )
                     ) {
-                        return respond(
+                        return safeInteractionReply(interaction, 
                             {
                                 content:
-                                    'Sem permissÃ£o.',
-                                ephemeral:
-                                    true
+                                    'Sem permissÃƒÂ£o.',
+                                flags: MessageFlags.Ephemeral
                             }
                         );
                     }
@@ -3216,12 +3164,11 @@ client.on(
                     if (
                         !cfg.ticketCanal
                     ) {
-                        return respond(
+                        return safeInteractionReply(interaction, 
                             {
                                 content:
                                     'Defina o canal do painel primeiro.',
-                                ephemeral:
-                                    true
+                                flags: MessageFlags.Ephemeral
                             }
                         );
                     }
@@ -3232,12 +3179,11 @@ client.on(
                         );
 
                     if (!channel) {
-                        return respond(
+                        return safeInteractionReply(interaction, 
                             {
                                 content:
-                                    'O canal configurado nÃ£o existe.',
-                                ephemeral:
-                                    true
+                                    'O canal configurado nÃƒÂ£o existe.',
+                                flags: MessageFlags.Ephemeral
                             }
                         );
                     }
@@ -3259,12 +3205,11 @@ client.on(
                             PermissionFlagsBits.EmbedLinks
                         )
                     ) {
-                        return respond(
+                        return safeInteractionReply(interaction, 
                             {
                                 content:
-                                    'Eu nÃ£o tenho as permissÃµes necessÃ¡rias nesse canal.',
-                                ephemeral:
-                                    true
+                                    'Eu nÃƒÂ£o tenho as permissÃƒÂµes necessÃƒÂ¡rias nesse canal.',
+                                flags: MessageFlags.Ephemeral
                             }
                         );
                     }
@@ -3273,12 +3218,11 @@ client.on(
                         ticketOpenPanel()
                     );
 
-                    return respond(
+                    return safeInteractionReply(interaction, 
                         {
                             content:
                                 'Painel de suporte enviado.',
-                            ephemeral:
-                                true
+                            flags: MessageFlags.Ephemeral
                         }
                     );
                 }
@@ -3325,7 +3269,7 @@ client.on(
                     );
                 }
 
-                /* ===== AÃ‡Ã•ES TICKETS ===== */
+                /* ===== AÃƒâ€¡Ãƒâ€¢ES TICKETS ===== */
 
                 if (
                     interaction.customId ===
@@ -3336,17 +3280,16 @@ client.on(
                             interaction.member
                         )
                     ) {
-                        return respond(
+                        return safeInteractionReply(interaction, 
                             {
                                 content:
-                                    'VocÃª nÃ£o possui permissÃ£o para assumir este ticket.',
-                                ephemeral:
-                                    true
+                                    'VocÃƒÂª nÃƒÂ£o possui permissÃƒÂ£o para assumir este ticket.',
+                                flags: MessageFlags.Ephemeral
                             }
                         );
                     }
 
-                    return respond(
+                    return safeInteractionReply(interaction, 
                         `${interaction.user} assumiu este ticket.`
                     );
                 }
@@ -3360,12 +3303,11 @@ client.on(
                             interaction.member
                         )
                     ) {
-                        return respond(
+                        return safeInteractionReply(interaction, 
                             {
                                 content:
-                                    'VocÃª nÃ£o possui permissÃ£o para chamar a equipe.',
-                                ephemeral:
-                                    true
+                                    'VocÃƒÂª nÃƒÂ£o possui permissÃƒÂ£o para chamar a equipe.',
+                                flags: MessageFlags.Ephemeral
                             }
                         );
                     }
@@ -3382,12 +3324,11 @@ client.on(
                         );
 
                     if (!role) {
-                        return respond(
+                        return safeInteractionReply(interaction, 
                             {
                                 content:
-                                    'O cargo ADM nÃ£o estÃ¡ configurado.',
-                                ephemeral:
-                                    true
+                                    'O cargo ADM nÃƒÂ£o estÃƒÂ¡ configurado.',
+                                flags: MessageFlags.Ephemeral
                             }
                         );
                     }
@@ -3405,12 +3346,11 @@ client.on(
                     if (
                         !members.length
                     ) {
-                        return respond(
+                        return safeInteractionReply(interaction, 
                             {
                                 content:
-                                    'Nenhum ADM disponÃ­vel.',
-                                ephemeral:
-                                    true
+                                    'Nenhum ADM disponÃƒÂ­vel.',
+                                flags: MessageFlags.Ephemeral
                             }
                         );
                     }
@@ -3436,7 +3376,7 @@ client.on(
                                 )
                             );
 
-                    return respond(
+                    return safeInteractionReply(interaction, 
                         {
                             content:
                                 'Escolha o ADM que deseja chamar.',
@@ -3445,8 +3385,7 @@ client.on(
                                     menu
                                 )
                             ],
-                            ephemeral:
-                                true
+                            flags: MessageFlags.Ephemeral
                         }
                     );
                 }
@@ -3460,18 +3399,17 @@ client.on(
                             interaction.member
                         )
                     ) {
-                        return respond(
+                        return safeInteractionReply(interaction, 
                             {
                                 content:
-                                    'VocÃª nÃ£o possui permissÃ£o para fechar este ticket.',
-                                ephemeral:
-                                    true
+                                    'VocÃƒÂª nÃƒÂ£o possui permissÃƒÂ£o para fechar este ticket.',
+                                flags: MessageFlags.Ephemeral
                             }
                         );
                     }
 
-                    await respond(
-                        'Ticket serÃ¡ fechado em **5 segundos**...'
+                    await interaction.reply(
+                        'Ticket serÃƒÂ¡ fechado em **5 segundos**...'
                     );
 
                     setTimeout(
@@ -3486,7 +3424,7 @@ client.on(
                     return;
                 }
 
-                /* ===== PROTEÃ‡ÃƒO ===== */
+                /* ===== PROTEÃƒâ€¡ÃƒÆ’O ===== */
 
                 if (
                     interaction.customId ===
@@ -3497,12 +3435,11 @@ client.on(
                             interaction.member
                         )
                     ) {
-                        return respond(
+                        return safeInteractionReply(interaction, 
                             {
                                 content:
-                                    'âŒ Sem permissÃ£o.',
-                                ephemeral:
-                                    true
+                                    'Ã¢ÂÅ’ Sem permissÃƒÂ£o.',
+                                flags: MessageFlags.Ephemeral
                             }
                         );
                     }
@@ -3531,12 +3468,11 @@ client.on(
                             interaction.member
                         )
                     ) {
-                        return respond(
+                        return safeInteractionReply(interaction, 
                             {
                                 content:
-                                    'âŒ Sem permissÃ£o.',
-                                ephemeral:
-                                    true
+                                    'Ã¢ÂÅ’ Sem permissÃƒÂ£o.',
+                                flags: MessageFlags.Ephemeral
                             }
                         );
                     }
@@ -3567,12 +3503,11 @@ client.on(
                             interaction.member
                         )
                     ) {
-                        return respond(
+                        return safeInteractionReply(interaction, 
                             {
                                 content:
-                                    'âŒ Sem permissÃ£o.',
-                                ephemeral:
-                                    true
+                                    'Ã¢ÂÅ’ Sem permissÃƒÂ£o.',
+                                flags: MessageFlags.Ephemeral
                             }
                         );
                     }
@@ -3600,29 +3535,27 @@ client.on(
                     if (
                         !active.length
                     ) {
-                        return respond(
+                        return safeInteractionReply(interaction, 
                             {
                                 content:
-                                    'NÃ£o existem sorteios ativos.',
-                                ephemeral:
-                                    true
+                                    'NÃƒÂ£o existem sorteios ativos.',
+                                flags: MessageFlags.Ephemeral
                             }
                         );
                     }
 
-                    return respond(
+                    return safeInteractionReply(interaction, 
                         {
                             content:
                                 active
                                     .map(
                                         giveaway =>
-                                            `ðŸŽ **${giveaway.prize}** â€” **${giveaway.winners} vencedor(es)** â€” <t:${Math.floor(giveaway.end / 1000)}:R>\n> Participantes: **${giveaway.participants?.length || 0}**`
+                                            `Ã°Å¸Å½Â **${giveaway.prize}** Ã¢â‚¬â€ **${giveaway.winners} vencedor(es)** Ã¢â‚¬â€ <t:${Math.floor(giveaway.end / 1000)}:R>\n> Participantes: **${giveaway.participants?.length || 0}**`
                                     )
                                     .join(
                                         '\n\n'
                                     ),
-                            ephemeral:
-                                true
+                            flags: MessageFlags.Ephemeral
                         }
                     );
                 }
@@ -3639,9 +3572,9 @@ client.on(
                         const giveaway = sorteios[giveawayId];
 
                         if (!giveaway) {
-                            return respond({
-                                content: 'âŒ Esse sorteio nÃ£o estÃ¡ mais disponÃ­vel.',
-                                ephemeral: true
+                            return safeInteractionReply(interaction, {
+                                content: 'Ã¢ÂÅ’ Esse sorteio nÃƒÂ£o estÃƒÂ¡ mais disponÃƒÂ­vel.',
+                                flags: MessageFlags.Ephemeral
                             });
                         }
 
@@ -3655,13 +3588,13 @@ client.on(
                     const giveaway = sorteios[giveawayId];
 
                     if (!giveaway) {
-                        return respond({
-                            content: 'âŒ Esse sorteio nÃ£o estÃ¡ mais disponÃ­vel.',
-                            ephemeral: true
+                        return safeInteractionReply(interaction, {
+                            content: 'Ã¢ÂÅ’ Esse sorteio nÃƒÂ£o estÃƒÂ¡ mais disponÃƒÂ­vel.',
+                            flags: MessageFlags.Ephemeral
                         });
                     }
 
-                    return respond(
+                    return safeInteractionReply(interaction, 
                         giveawayParticipantList(interaction.guild, giveaway, 0)
                     );
                 }
@@ -3670,9 +3603,9 @@ client.on(
 
                 if (interaction.customId.startsWith('giveaway_reroll_')) {
                     if (!isStaff(interaction.member)) {
-                        return respond({
-                            content: 'âŒ Sem permissÃ£o.',
-                            ephemeral: true
+                        return safeInteractionReply(interaction, {
+                            content: 'Ã¢ÂÅ’ Sem permissÃƒÂ£o.',
+                            flags: MessageFlags.Ephemeral
                         });
                     }
 
@@ -3680,20 +3613,20 @@ client.on(
                     const giveaway = sorteios[giveawayId];
 
                     if (!giveaway) {
-                        return respond({
-                            content: 'âŒ Esse sorteio jÃ¡ foi resolvido.',
-                            ephemeral: true
+                        return safeInteractionReply(interaction, {
+                            content: 'Ã¢ÂÅ’ Esse sorteio jÃƒÂ¡ foi resolvido.',
+                            flags: MessageFlags.Ephemeral
                         });
                     }
 
-                    await interaction.deferReply({ ephemeral: true });
+                    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
                     const winner = await rerollGiveaway(giveawayId);
 
                     if (winner) {
-                        return interaction.editReply(`ðŸŽ‰ Novo vencedor: <@${winner}>`);
+                        return interaction.editReply(`Ã°Å¸Å½â€° Novo vencedor: <@${winner}>`);
                     }
 
-                    return interaction.editReply('ðŸŽ² O sorteio foi girado novamente. Confira a mensagem do sorteio.');
+                    return interaction.editReply('Ã°Å¸Å½Â² O sorteio foi girado novamente. Confira a mensagem do sorteio.');
                 }
 
                 /* ===== PARTICIPAR ===== */
@@ -3715,12 +3648,11 @@ client.on(
                         ];
 
                     if (!giveaway) {
-                        return respond(
+                        return safeInteractionReply(interaction, 
                             {
                                 content:
-                                    'âŒ Esse sorteio nÃ£o estÃ¡ mais ativo.',
-                                ephemeral:
-                                    true
+                                    'Ã¢ÂÅ’ Esse sorteio nÃƒÂ£o estÃƒÂ¡ mais ativo.',
+                                flags: MessageFlags.Ephemeral
                             }
                         );
                     }
@@ -3733,12 +3665,11 @@ client.on(
                             giveawayId
                         );
 
-                        return respond(
+                        return safeInteractionReply(interaction, 
                             {
                                 content:
-                                    'âŒ Esse sorteio jÃ¡ terminou.',
-                                ephemeral:
-                                    true
+                                    'Ã¢ÂÅ’ Esse sorteio jÃƒÂ¡ terminou.',
+                                flags: MessageFlags.Ephemeral
                             }
                         );
                     }
@@ -3757,15 +3688,16 @@ client.on(
                             interaction.user.id
                         )
                     ) {
-                        return respond(
+                        return safeInteractionReply(interaction, 
                             {
                                 content:
-                                    'âŒ VocÃª jÃ¡ estÃ¡ participando desse sorteio.',
-                                ephemeral:
-                                    true
+                                    'Ã¢ÂÅ’ VocÃƒÂª jÃƒÂ¡ estÃƒÂ¡ participando desse sorteio.',
+                                flags: MessageFlags.Ephemeral
                             }
                         );
                     }
+
+                    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
                     const member =
                         interaction.guild.members.cache.get(
@@ -3781,12 +3713,11 @@ client.on(
                     if (
                         !requirement.ok
                     ) {
-                        return respond(
+                        return safeInteractionReply(interaction, 
                             {
                                 content:
-                                    `âŒ ${requirement.reason}`,
-                                ephemeral:
-                                    true
+                                    `Ã¢ÂÅ’ ${requirement.reason}`,
+                                flags: MessageFlags.Ephemeral
                             }
                         );
                     }
@@ -3822,17 +3753,16 @@ client.on(
                         );
                     } catch {}
 
-                    return respond(
+                    return safeInteractionReply(interaction, 
                         {
                             content:
-                                'ðŸŽ VocÃª entrou no sorteio!',
-                            ephemeral:
-                                true
+                                'Ã°Å¸Å½Â VocÃƒÂª entrou no sorteio!',
+                            flags: MessageFlags.Ephemeral
                         }
                     );
                 }
 
-                /* ===== DIVERSÃƒO ===== */
+                /* ===== DIVERSÃƒÆ’O ===== */
 
                 if (
                     interaction.customId ===
@@ -3844,8 +3774,8 @@ client.on(
                                 6
                         ) + 1;
 
-                    return respond(
-                        `ðŸŽ² VocÃª tirou **${number}**!`
+                    return safeInteractionReply(interaction, 
+                        `Ã°Å¸Å½Â² VocÃƒÂª tirou **${number}**!`
                     );
                 }
 
@@ -3853,8 +3783,8 @@ client.on(
                     interaction.customId ===
                     'fun_coin'
                 ) {
-                    return respond(
-                        `ðŸª™ Deu **${randomItem(
+                    return safeInteractionReply(interaction, 
+                        `Ã°Å¸Âªâ„¢ Deu **${randomItem(
                             [
                                 'cara',
                                 'coroa'
@@ -3867,15 +3797,15 @@ client.on(
                     interaction.customId ===
                     'fun_8ball'
                 ) {
-                    return respond(
-                        `ðŸŽ± ${randomItem(
+                    return safeInteractionReply(interaction, 
+                        `Ã°Å¸Å½Â± ${randomItem(
                             [
                                 'Sim.',
-                                'NÃ£o.',
+                                'NÃƒÂ£o.',
                                 'Talvez.',
                                 'Com certeza.',
                                 'Provavelmente.',
-                                'NÃ£o conte com isso.'
+                                'NÃƒÂ£o conte com isso.'
                             ]
                         )}`
                     );
@@ -3885,8 +3815,8 @@ client.on(
                     interaction.customId ===
                     'fun_number'
                 ) {
-                    return respond(
-                        `ðŸ”¢ NÃºmero escolhido: **${Math.floor(
+                    return safeInteractionReply(interaction, 
+                        `Ã°Å¸â€Â¢ NÃƒÂºmero escolhido: **${Math.floor(
                             Math.random() *
                                 100
                         ) + 1}**`
@@ -3897,12 +3827,11 @@ client.on(
                     interaction.customId ===
                     'fun_choose'
                 ) {
-                    return respond(
+                    return safeInteractionReply(interaction, 
                         {
                             content:
-                                'ðŸƒ Use `/escolher` quando disponÃ­vel.',
-                            ephemeral:
-                                true
+                                'Ã°Å¸Æ’Â Use `/escolher` quando disponÃƒÂ­vel.',
+                            flags: MessageFlags.Ephemeral
                         }
                     );
                 }
@@ -3911,13 +3840,13 @@ client.on(
                     interaction.customId ===
                     'fun_quiz'
                 ) {
-                    return respond(
-                        `ðŸ† ${randomItem(
+                    return safeInteractionReply(interaction, 
+                        `Ã°Å¸Ââ€  ${randomItem(
                             [
-                                'VocÃª consegue!',
+                                'VocÃƒÂª consegue!',
                                 'Boa sorte!',
                                 'Hora do desafio!',
-                                'Mostre o que vocÃª sabe!'
+                                'Mostre o que vocÃƒÂª sabe!'
                             ]
                         )}`
                     );
@@ -3934,18 +3863,18 @@ client.on(
                     interaction.customId === 'shop_select_remove'
                 ) {
                     if (!isStaff(interaction.member)) {
-                        return respond({
-                            content: 'âŒ Sem permissÃ£o.',
-                            ephemeral: true
+                        return safeInteractionReply(interaction, {
+                            content: 'Ã¢ÂÅ’ Sem permissÃƒÂ£o.',
+                            flags: MessageFlags.Ephemeral
                         });
                     }
 
                     const role = interaction.roles.first();
 
                     if (!role || role.id === interaction.guild.id || role.managed) {
-                        return respond({
-                            content: 'Esse cargo nÃ£o pode ser configurado para venda.',
-                            ephemeral: true
+                        return safeInteractionReply(interaction, {
+                            content: 'Esse cargo nÃƒÂ£o pode ser configurado para venda.',
+                            flags: MessageFlags.Ephemeral
                         });
                     }
 
@@ -3953,28 +3882,28 @@ client.on(
 
                     if (interaction.customId === 'shop_select_remove') {
                         if (!loja.cargos[role.id]) {
-                            return respond({
-                                content: 'Esse cargo nÃ£o estÃ¡ cadastrado na loja.',
-                                ephemeral: true
+                            return safeInteractionReply(interaction, {
+                                content: 'Esse cargo nÃƒÂ£o estÃƒÂ¡ cadastrado na loja.',
+                                flags: MessageFlags.Ephemeral
                             });
                         }
 
                         delete loja.cargos[role.id];
                         saveLojas();
 
-                        return respond({
+                        return safeInteractionReply(interaction, {
                             content: `O cargo **${role.name}** foi removido da loja.`,
-                            ephemeral: true
+                            flags: MessageFlags.Ephemeral
                         });
                     }
 
                     const modal = new ModalBuilder()
                         .setCustomId(`modal_shop_price_${role.id}`)
-                        .setTitle('Definir preÃ§o do cargo');
+                        .setTitle('Definir preÃƒÂ§o do cargo');
 
                     const input = new TextInputBuilder()
                         .setCustomId('price')
-                        .setLabel('PreÃ§o em reais (ex: 9,90)')
+                        .setLabel('PreÃƒÂ§o em reais (ex: 9,90)')
                         .setPlaceholder('9,90')
                         .setStyle(TextInputStyle.Short)
                         .setRequired(true)
@@ -4018,7 +3947,7 @@ client.on(
                         return interaction.update(
                             {
                                 content:
-                                    'ADM nÃ£o encontrado.',
+                                    'ADM nÃƒÂ£o encontrado.',
                                 components:
                                     []
                             }
@@ -4045,9 +3974,9 @@ client.on(
                     interaction.customId === 'modal_shop_channel'
                 ) {
                     if (!isStaff(interaction.member)) {
-                        return respond({
-                            content: 'âŒ Sem permissÃ£o.',
-                            ephemeral: true
+                        return safeInteractionReply(interaction, {
+                            content: 'Ã¢ÂÅ’ Sem permissÃƒÂ£o.',
+                            flags: MessageFlags.Ephemeral
                         });
                     }
 
@@ -4055,9 +3984,9 @@ client.on(
                     const channel = interaction.guild.channels.cache.get(channelId);
 
                     if (!channel || channel.type !== ChannelType.GuildText) {
-                        return respond({
-                            content: 'Canal de texto invÃ¡lido. Confira o ID e tente novamente.',
-                            ephemeral: true
+                        return safeInteractionReply(interaction, {
+                            content: 'Canal de texto invÃƒÂ¡lido. Confira o ID e tente novamente.',
+                            flags: MessageFlags.Ephemeral
                         });
                     }
 
@@ -4068,21 +3997,21 @@ client.on(
                         !permissions.has(PermissionFlagsBits.SendMessages) ||
                         !permissions.has(PermissionFlagsBits.EmbedLinks)
                     ) {
-                        return respond({
-                            content: 'NÃ£o tenho permissÃ£o para enviar mensagens e embeds nesse canal.',
-                            ephemeral: true
+                        return safeInteractionReply(interaction, {
+                            content: 'NÃƒÂ£o tenho permissÃƒÂ£o para enviar mensagens e embeds nesse canal.',
+                            flags: MessageFlags.Ephemeral
                         });
                     }
 
                     const loja = getLoja(interaction.guild.id);
                     loja.canalId = channel.id;
-                    // Se o canal mudou, a prÃ³xima publicaÃ§Ã£o criarÃ¡ a mensagem nesse novo canal.
+                    // Se o canal mudou, a prÃƒÂ³xima publicaÃƒÂ§ÃƒÂ£o criarÃƒÂ¡ a mensagem nesse novo canal.
                     loja.messageId = null;
                     saveLojas();
 
-                    return respond({
+                    return safeInteractionReply(interaction, {
                         content: `Canal da loja definido como ${channel}.`,
-                        ephemeral: true
+                        flags: MessageFlags.Ephemeral
                     });
                 }
 
@@ -4090,9 +4019,9 @@ client.on(
                     interaction.customId.startsWith('modal_shop_price_')
                 ) {
                     if (!isStaff(interaction.member)) {
-                        return respond({
-                            content: 'âŒ Sem permissÃ£o.',
-                            ephemeral: true
+                        return safeInteractionReply(interaction, {
+                            content: 'Ã¢ÂÅ’ Sem permissÃƒÂ£o.',
+                            flags: MessageFlags.Ephemeral
                         });
                     }
 
@@ -4100,9 +4029,9 @@ client.on(
                     const role = interaction.guild.roles.cache.get(roleId);
 
                     if (!role || role.id === interaction.guild.id || role.managed) {
-                        return respond({
-                            content: 'Esse cargo nÃ£o pode ser vendido.',
-                            ephemeral: true
+                        return safeInteractionReply(interaction, {
+                            content: 'Esse cargo nÃƒÂ£o pode ser vendido.',
+                            flags: MessageFlags.Ephemeral
                         });
                     }
 
@@ -4114,17 +4043,17 @@ client.on(
                         .replace(',', '.');
 
                     if (!/^\d+(\.\d{1,2})?$/.test(rawPrice)) {
-                        return respond({
-                            content: 'PreÃ§o invÃ¡lido. Use, por exemplo, 9,90 ou 10.',
-                            ephemeral: true
+                        return safeInteractionReply(interaction, {
+                            content: 'PreÃƒÂ§o invÃƒÂ¡lido. Use, por exemplo, 9,90 ou 10.',
+                            flags: MessageFlags.Ephemeral
                         });
                     }
 
                     const price = Number(rawPrice);
                     if (!Number.isFinite(price) || price < 0) {
-                        return respond({
-                            content: 'O preÃ§o precisa ser um nÃºmero vÃ¡lido maior ou igual a zero.',
-                            ephemeral: true
+                        return safeInteractionReply(interaction, {
+                            content: 'O preÃƒÂ§o precisa ser um nÃƒÂºmero vÃƒÂ¡lido maior ou igual a zero.',
+                            flags: MessageFlags.Ephemeral
                         });
                     }
 
@@ -4132,13 +4061,13 @@ client.on(
                     loja.cargos[role.id] = { price };
                     saveLojas();
 
-                    return respond({
+                    return safeInteractionReply(interaction, {
                         content: `Cargo **${role.name}** cadastrado por R$ ${price.toFixed(2).replace('.', ',')}.`,
-                        ephemeral: true
+                        flags: MessageFlags.Ephemeral
                     });
                 }
 
-                /* ===== MODERAÃ‡ÃƒO ===== */
+                /* ===== MODERAÃƒâ€¡ÃƒÆ’O ===== */
 
                 if (
                     [
@@ -4158,12 +4087,11 @@ client.on(
                             interaction.member
                         )
                     ) {
-                        return respond(
+                        return safeInteractionReply(interaction, 
                             {
                                 content:
-                                    'âŒ Sem permissÃ£o.',
-                                ephemeral:
-                                    true
+                                    'Ã¢ÂÅ’ Sem permissÃƒÂ£o.',
+                                flags: MessageFlags.Ephemeral
                             }
                         );
                     }
@@ -4227,8 +4155,8 @@ client.on(
                             advertencias
                         );
 
-                        return respond(
-                            `âš ï¸ UsuÃ¡rio <@${userId}> recebeu uma advertÃªncia.`
+                        return safeInteractionReply(interaction, 
+                            `Ã¢Å¡ Ã¯Â¸Â UsuÃƒÂ¡rio <@${userId}> recebeu uma advertÃƒÂªncia.`
                         );
                     }
 
@@ -4245,13 +4173,13 @@ client.on(
                         if (
                             !warns.length
                         ) {
-                            return respond(
-                                `ðŸ“‹ <@${userId}> nÃ£o possui advertÃªncias.`
+                            return safeInteractionReply(interaction, 
+                                `Ã°Å¸â€œâ€¹ <@${userId}> nÃƒÂ£o possui advertÃƒÂªncias.`
                             );
                         }
 
-                        return respond(
-                            `ðŸ“‹ <@${userId}> possui **${warns.length}** advertÃªncia(s).`
+                        return safeInteractionReply(interaction, 
+                            `Ã°Å¸â€œâ€¹ <@${userId}> possui **${warns.length}** advertÃƒÂªncia(s).`
                         );
                     }
 
@@ -4268,8 +4196,8 @@ client.on(
                         if (
                             !warns.length
                         ) {
-                            return respond(
-                                `O usuÃ¡rio <@${userId}> nÃ£o possui advertÃªncias.`
+                            return safeInteractionReply(interaction, 
+                                `O usuÃƒÂ¡rio <@${userId}> nÃƒÂ£o possui advertÃƒÂªncias.`
                             );
                         }
 
@@ -4280,10 +4208,12 @@ client.on(
                             advertencias
                         );
 
-                        return respond(
-                            `ðŸ—‘ï¸ A Ãºltima advertÃªncia de <@${userId}> foi removida.`
+                        return safeInteractionReply(interaction, 
+                            `Ã°Å¸â€”â€˜Ã¯Â¸Â A ÃƒÂºltima advertÃƒÂªncia de <@${userId}> foi removida.`
                         );
                     }
+
+                    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
                     const member =
                         await guild.members
@@ -4293,12 +4223,11 @@ client.on(
                             );
 
                     if (!member) {
-                        return respond(
+                        return safeInteractionReply(interaction, 
                             {
                                 content:
-                                    'âŒ UsuÃ¡rio nÃ£o encontrado no servidor.',
-                                ephemeral:
-                                    true
+                                    'Ã¢ÂÅ’ UsuÃƒÂ¡rio nÃƒÂ£o encontrado no servidor.',
+                                flags: MessageFlags.Ephemeral
                             }
                         );
                     }
@@ -4311,8 +4240,8 @@ client.on(
                             reason
                         );
 
-                        return respond(
-                            `ðŸ‘¢ ${member.user.tag} foi expulso.`
+                        return safeInteractionReply(interaction, 
+                            `Ã°Å¸â€˜Â¢ ${member.user.tag} foi expulso.`
                         );
                     }
 
@@ -4326,8 +4255,8 @@ client.on(
                             }
                         );
 
-                        return respond(
-                            `ðŸ”¨ ${member.user.tag} foi banido.`
+                        return safeInteractionReply(interaction, 
+                            `Ã°Å¸â€Â¨ ${member.user.tag} foi banido.`
                         );
                     }
 
@@ -4348,12 +4277,11 @@ client.on(
                             ) ||
                             duration <= 0
                         ) {
-                            return respond(
+                            return safeInteractionReply(interaction, 
                                 {
                                     content:
-                                        'âŒ DuraÃ§Ã£o invÃ¡lida.',
-                                    ephemeral:
-                                        true
+                                        'Ã¢ÂÅ’ DuraÃƒÂ§ÃƒÂ£o invÃƒÂ¡lida.',
+                                    flags: MessageFlags.Ephemeral
                                 }
                             );
                         }
@@ -4364,8 +4292,8 @@ client.on(
                             reason
                         );
 
-                        return respond(
-                            `â±ï¸ ${member.user.tag} recebeu timeout por ${duration}s.`
+                        return safeInteractionReply(interaction, 
+                            `Ã¢ÂÂ±Ã¯Â¸Â ${member.user.tag} recebeu timeout por ${duration}s.`
                         );
                     }
 
@@ -4378,8 +4306,8 @@ client.on(
                             reason
                         );
 
-                        return respond(
-                            `ðŸ”“ Timeout de ${member.user.tag} removido.`
+                        return safeInteractionReply(interaction, 
+                            `Ã°Å¸â€â€œ Timeout de ${member.user.tag} removido.`
                         );
                     }
                 }
@@ -4405,12 +4333,11 @@ client.on(
                         channel.type !==
                             ChannelType.GuildText
                     ) {
-                        return respond(
+                        return safeInteractionReply(interaction, 
                             {
                                 content:
-                                    'Canal invÃ¡lido.',
-                                ephemeral:
-                                    true
+                                    'Canal invÃƒÂ¡lido.',
+                                flags: MessageFlags.Ephemeral
                             }
                         );
                     }
@@ -4420,12 +4347,11 @@ client.on(
                     ).ticketCanal =
                         id;
 
-                    return respond(
+                    return safeInteractionReply(interaction, 
                         {
                             content:
                                 `Canal de suporte definido como ${channel}.`,
-                            ephemeral:
-                                true
+                            flags: MessageFlags.Ephemeral
                         }
                     );
                 }
@@ -4451,12 +4377,11 @@ client.on(
                         category.type !==
                             ChannelType.GuildCategory
                     ) {
-                        return respond(
+                        return safeInteractionReply(interaction, 
                             {
                                 content:
-                                    'Categoria invÃ¡lida.',
-                                ephemeral:
-                                    true
+                                    'Categoria invÃƒÂ¡lida.',
+                                flags: MessageFlags.Ephemeral
                             }
                         );
                     }
@@ -4466,12 +4391,11 @@ client.on(
                     ).ticketCategoria =
                         id;
 
-                    return respond(
+                    return safeInteractionReply(interaction, 
                         {
                             content:
                                 `Categoria definida como ${category}.`,
-                            ephemeral:
-                                true
+                            flags: MessageFlags.Ephemeral
                         }
                     );
                 }
@@ -4493,12 +4417,11 @@ client.on(
                         );
 
                     if (!role) {
-                        return respond(
+                        return safeInteractionReply(interaction, 
                             {
                                 content:
-                                    'Cargo invÃ¡lido.',
-                                ephemeral:
-                                    true
+                                    'Cargo invÃƒÂ¡lido.',
+                                flags: MessageFlags.Ephemeral
                             }
                         );
                     }
@@ -4508,18 +4431,17 @@ client.on(
                     ).ticketCargo =
                         id;
 
-                    return respond(
+                    return safeInteractionReply(interaction, 
                         {
                             content:
                                 `Cargo ADM definido como ${role}.`,
-                            ephemeral:
-                                true
+                            flags: MessageFlags.Ephemeral
                         }
                     );
                 }
 
                 /* =========================
-                   CRIAÃ‡ÃƒO DO SORTEIO
+                   CRIAÃƒâ€¡ÃƒÆ’O DO SORTEIO
                 ========================= */
 
                 if (
@@ -4531,12 +4453,11 @@ client.on(
                             interaction.member
                         )
                     ) {
-                        return respond(
+                        return safeInteractionReply(interaction, 
                             {
                                 content:
-                                    'âŒ Sem permissÃ£o.',
-                                ephemeral:
-                                    true
+                                    'Ã¢ÂÅ’ Sem permissÃƒÂ£o.',
+                                flags: MessageFlags.Ephemeral
                             }
                         );
                     }
@@ -4569,12 +4490,11 @@ client.on(
                     if (
                         !prize
                     ) {
-                        return respond(
+                        return safeInteractionReply(interaction, 
                             {
                                 content:
-                                    'âŒ Informe um prÃªmio.',
-                                ephemeral:
-                                    true
+                                    'Ã¢ÂÅ’ Informe um prÃƒÂªmio.',
+                                flags: MessageFlags.Ephemeral
                             }
                         );
                     }
@@ -4585,12 +4505,11 @@ client.on(
                         ) ||
                         duration <= 0
                     ) {
-                        return respond(
+                        return safeInteractionReply(interaction, 
                             {
                                 content:
-                                    'âŒ A duraÃ§Ã£o precisa ser um nÃºmero maior que 0.',
-                                ephemeral:
-                                    true
+                                    'Ã¢ÂÅ’ A duraÃƒÂ§ÃƒÂ£o precisa ser um nÃƒÂºmero maior que 0.',
+                                flags: MessageFlags.Ephemeral
                             }
                         );
                     }
@@ -4601,12 +4520,11 @@ client.on(
                         ) ||
                         winners <= 0
                     ) {
-                        return respond(
+                        return safeInteractionReply(interaction, 
                             {
                                 content:
-                                    'âŒ A quantidade de vencedores precisa ser um nÃºmero inteiro maior que 0.',
-                                ephemeral:
-                                    true
+                                    'Ã¢ÂÅ’ A quantidade de vencedores precisa ser um nÃƒÂºmero inteiro maior que 0.',
+                                flags: MessageFlags.Ephemeral
                             }
                         );
                     }
@@ -4622,12 +4540,11 @@ client.on(
                             parsed.roleId
                         )
                     ) {
-                        return respond(
+                        return safeInteractionReply(interaction, 
                             {
                                 content:
-                                    'âŒ O cargo informado nos requisitos nÃ£o existe neste servidor.',
-                                ephemeral:
-                                    true
+                                    'Ã¢ÂÅ’ O cargo informado nos requisitos nÃƒÂ£o existe neste servidor.',
+                                flags: MessageFlags.Ephemeral
                             }
                         );
                     }
@@ -4715,12 +4632,11 @@ client.on(
                             giveawayId
                         );
 
-                        return respond(
+                        return safeInteractionReply(interaction, 
                             {
                                 content:
-                                    'ðŸŽ Sorteio criado com sucesso!',
-                                ephemeral:
-                                    true
+                                    'Ã°Å¸Å½Â Sorteio criado com sucesso!',
+                                flags: MessageFlags.Ephemeral
                             }
                         );
                     } catch (error) {
@@ -4738,12 +4654,11 @@ client.on(
                             sorteios
                         );
 
-                        return respond(
+                        return safeInteractionReply(interaction, 
                             {
                                 content:
-                                    'âŒ NÃ£o consegui enviar o sorteio neste canal.',
-                                ephemeral:
-                                    true
+                                    'Ã¢ÂÅ’ NÃƒÂ£o consegui enviar o sorteio neste canal.',
+                                flags: MessageFlags.Ephemeral
                             }
                         );
                     }
@@ -4751,7 +4666,7 @@ client.on(
             }
         } catch (error) {
             console.error(
-                'Erro na interaÃ§Ã£o:',
+                'Erro na interaÃƒÂ§ÃƒÂ£o:',
                 error
             );
 
@@ -4760,12 +4675,11 @@ client.on(
                 !interaction.deferred
             ) {
                 try {
-                    await respond(
+                    await interaction.reply(
                         {
                             content:
-                                'âŒ Ocorreu um erro ao executar esta aÃ§Ã£o.',
-                            ephemeral:
-                                true
+                                'Ã¢ÂÅ’ Ocorreu um erro ao executar esta aÃƒÂ§ÃƒÂ£o.',
+                            flags: MessageFlags.Ephemeral
                         }
                     );
                 } catch {}
@@ -4850,7 +4764,7 @@ client.on(
                     );
 
                     await message.channel.send(
-                        `ðŸ›¡ï¸ ${member} recebeu timeout por spam.`
+                        `Ã°Å¸â€ºÂ¡Ã¯Â¸Â ${member} recebeu timeout por spam.`
                     );
 
                     spamTracker.delete(
@@ -4863,28 +4777,7 @@ client.on(
 );
 
 /* =========================
-   DIAGNÓSTICOS / LOGIN
+   LOGIN
 ========================= */
 
-client.on('error', error => {
-    console.error('❌ Erro do Discord:', error);
-});
-
-client.on('shardError', error => {
-    console.error('❌ Erro de conexão com o Discord:', error);
-});
-
-client.on('warn', warning => {
-    console.warn('⚠️ Discord:', warning);
-});
-
-if (!TOKEN) {
-    console.error('❌ TOKEN não encontrado. Verifique se o arquivo .env existe e contém: TOKEN=SEU_TOKEN');
-    process.exit(1);
-}
-
-client.login(TOKEN).catch(error => {
-    console.error('❌ Não foi possível iniciar o bot.');
-    console.error(error);
-    process.exit(1);
-});
+client.login(TOKEN);
