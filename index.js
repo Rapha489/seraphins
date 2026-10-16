@@ -32,8 +32,8 @@ const TICKET_BANNER_URL = 'https://cdn.imgchest.com/files/52cd34cf74ad.png';
 
 const TICKET_TYPES = {
     parceria: 'Parceria',
-    duvida: 'Dúvida',
-    denuncia: 'Denúncia'
+    duvida: 'DÃºvida',
+    denuncia: 'DenÃºncia'
 };
 
 const client = new Client({
@@ -97,7 +97,7 @@ const sorteios =
 const convites =
     loadJSON('convites.json', {});
 
-// Configuração do Painel de Compras, separada por servidor.
+// ConfiguraÃ§Ã£o do Painel de Compras, separada por servidor.
 const lojas =
     loadJSON('lojas.json', {});
 
@@ -152,7 +152,8 @@ function isStaff(member) {
         member.permissions.has(
             PermissionFlagsBits.Administrator
         ) ||
-        member.roles.cache.has(ADM_ROLE_ID)
+        member.roles.cache.has(ADM_ROLE_ID) ||
+        member.roles.cache.has(STAFF_ROLE_ID)
     );
 }
 
@@ -194,7 +195,7 @@ function mainPanel() {
         .setTitle('Seraphins')
         .setDescription(
             'Painel de gerenciamento do servidor\n\n' +
-            'Escolha uma categoria abaixo para acessar as funções disponíveis.'
+            'Escolha uma categoria abaixo para acessar as funÃ§Ãµes disponÃ­veis.'
         )
         .setColor('#000000');
 
@@ -202,8 +203,8 @@ function mainPanel() {
         new ActionRowBuilder().addComponents(
             new ButtonBuilder()
                 .setCustomId('panel_mod')
-                .setLabel('Moderação')
-                .setEmoji('🛡️')
+                .setLabel('ModeraÃ§Ã£o')
+                .setEmoji('ðŸ›¡ï¸')
                 .setStyle(ButtonStyle.Primary),
 
             new ButtonBuilder()
@@ -213,14 +214,14 @@ function mainPanel() {
 
             new ButtonBuilder()
                 .setCustomId('panel_protection')
-                .setLabel('Proteção')
-                .setEmoji('🛡️')
+                .setLabel('ProteÃ§Ã£o')
+                .setEmoji('ðŸ›¡ï¸')
                 .setStyle(ButtonStyle.Secondary),
 
             new ButtonBuilder()
                 .setCustomId('panel_giveaway')
                 .setLabel('Sorteios')
-                .setEmoji('🎁')
+                .setEmoji('ðŸŽ')
                 .setStyle(ButtonStyle.Secondary)
         );
 
@@ -229,19 +230,19 @@ function mainPanel() {
             new ButtonBuilder()
                 .setCustomId('panel_server')
                 .setLabel('Servidor')
-                .setEmoji('📊')
+                .setEmoji('ðŸ“Š')
                 .setStyle(ButtonStyle.Secondary),
 
             new ButtonBuilder()
                 .setCustomId('panel_fun')
-                .setLabel('Diversão')
-                .setEmoji('🎉')
+                .setLabel('DiversÃ£o')
+                .setEmoji('ðŸŽ‰')
                 .setStyle(ButtonStyle.Secondary),
 
             new ButtonBuilder()
                 .setCustomId('panel_config')
-                .setLabel('Configurações')
-                .setEmoji('⚙️')
+                .setLabel('ConfiguraÃ§Ãµes')
+                .setEmoji('âš™ï¸')
                 .setStyle(ButtonStyle.Secondary)
         );
 
@@ -250,7 +251,7 @@ function mainPanel() {
             new ButtonBuilder()
                 .setCustomId('panel_compras')
                 .setLabel('Painel de Compras')
-                .setEmoji('🛒')
+                .setEmoji('ðŸ›’')
                 .setStyle(ButtonStyle.Success)
         );
 
@@ -261,15 +262,15 @@ function mainPanel() {
 }
 
 /* =========================
-   MODERAÇÃO
+   MODERAÃ‡ÃƒO
 ========================= */
 
 function moderationPanel() {
     const embed = new EmbedBuilder()
-        .setTitle('🛡️ Moderação')
+        .setTitle('ðŸ›¡ï¸ ModeraÃ§Ã£o')
         .setDescription(
-            'Ferramentas de moderação do servidor.\n\n' +
-            'Selecione uma ação abaixo.'
+            'Ferramentas de moderaÃ§Ã£o do servidor.\n\n' +
+            'Selecione uma aÃ§Ã£o abaixo.'
         )
         .setColor('#000000');
 
@@ -278,25 +279,25 @@ function moderationPanel() {
             new ButtonBuilder()
                 .setCustomId('mod_ban')
                 .setLabel('Banir')
-                .setEmoji('🔨')
+                .setEmoji('ðŸ”¨')
                 .setStyle(ButtonStyle.Danger),
 
             new ButtonBuilder()
                 .setCustomId('mod_kick')
                 .setLabel('Expulsar')
-                .setEmoji('👢')
+                .setEmoji('ðŸ‘¢')
                 .setStyle(ButtonStyle.Danger),
 
             new ButtonBuilder()
                 .setCustomId('mod_timeout')
                 .setLabel('Timeout')
-                .setEmoji('⏱️')
+                .setEmoji('â±ï¸')
                 .setStyle(ButtonStyle.Primary),
 
             new ButtonBuilder()
                 .setCustomId('mod_untimeout')
                 .setLabel('Remover Timeout')
-                .setEmoji('🔓')
+                .setEmoji('ðŸ”“')
                 .setStyle(ButtonStyle.Success)
         );
 
@@ -305,31 +306,31 @@ function moderationPanel() {
             new ButtonBuilder()
                 .setCustomId('mod_warn')
                 .setLabel('Advertir')
-                .setEmoji('⚠️')
+                .setEmoji('âš ï¸')
                 .setStyle(ButtonStyle.Primary),
 
             new ButtonBuilder()
                 .setCustomId('mod_warns')
-                .setLabel('Advertências')
-                .setEmoji('📋')
+                .setLabel('AdvertÃªncias')
+                .setEmoji('ðŸ“‹')
                 .setStyle(ButtonStyle.Secondary),
 
             new ButtonBuilder()
                 .setCustomId('mod_delwarn')
-                .setLabel('Remover Advertência')
-                .setEmoji('🗑️')
+                .setLabel('Remover AdvertÃªncia')
+                .setEmoji('ðŸ—‘ï¸')
                 .setStyle(ButtonStyle.Secondary),
 
             new ButtonBuilder()
                 .setCustomId('mod_lock')
                 .setLabel('Bloquear Canal')
-                .setEmoji('🔒')
+                .setEmoji('ðŸ”’')
                 .setStyle(ButtonStyle.Danger),
 
             new ButtonBuilder()
                 .setCustomId('mod_unlock')
                 .setLabel('Desbloquear Canal')
-                .setEmoji('🔓')
+                .setEmoji('ðŸ”“')
                 .setStyle(ButtonStyle.Success)
         );
 
@@ -338,7 +339,7 @@ function moderationPanel() {
             new ButtonBuilder()
                 .setCustomId('mod_slowmode')
                 .setLabel('Slowmode')
-                .setEmoji('🐢')
+                .setEmoji('ðŸ¢')
                 .setStyle(ButtonStyle.Secondary)
         );
 
@@ -355,9 +356,9 @@ function moderationModal(type) {
     const userInput =
         new TextInputBuilder()
             .setCustomId('user_id')
-            .setLabel('ID do usuário')
+            .setLabel('ID do usuÃ¡rio')
             .setPlaceholder(
-                'Digite o ID do usuário'
+                'Digite o ID do usuÃ¡rio'
             )
             .setStyle(TextInputStyle.Short)
             .setRequired(true);
@@ -377,7 +378,7 @@ function moderationModal(type) {
     if (type === 'ban') {
         modal
             .setCustomId('modal_ban')
-            .setTitle('Banir usuário')
+            .setTitle('Banir usuÃ¡rio')
             .addComponents(
                 new ActionRowBuilder()
                     .addComponents(userInput),
@@ -390,7 +391,7 @@ function moderationModal(type) {
     if (type === 'kick') {
         modal
             .setCustomId('modal_kick')
-            .setTitle('Expulsar usuário')
+            .setTitle('Expulsar usuÃ¡rio')
             .addComponents(
                 new ActionRowBuilder()
                     .addComponents(userInput),
@@ -404,7 +405,7 @@ function moderationModal(type) {
         const durationInput =
             new TextInputBuilder()
                 .setCustomId('duration')
-                .setLabel('Duração em segundos')
+                .setLabel('DuraÃ§Ã£o em segundos')
                 .setPlaceholder('Ex: 60')
                 .setStyle(
                     TextInputStyle.Short
@@ -442,7 +443,7 @@ function moderationModal(type) {
     if (type === 'warn') {
         modal
             .setCustomId('modal_warn')
-            .setTitle('Advertir usuário')
+            .setTitle('Advertir usuÃ¡rio')
             .addComponents(
                 new ActionRowBuilder()
                     .addComponents(userInput),
@@ -455,7 +456,7 @@ function moderationModal(type) {
     if (type === 'warns') {
         modal
             .setCustomId('modal_warns')
-            .setTitle('Ver advertências')
+            .setTitle('Ver advertÃªncias')
             .addComponents(
                 new ActionRowBuilder()
                     .addComponents(userInput)
@@ -465,7 +466,7 @@ function moderationModal(type) {
     if (type === 'delwarn') {
         modal
             .setCustomId('modal_delwarn')
-            .setTitle('Remover advertência')
+            .setTitle('Remover advertÃªncia')
             .addComponents(
                 new ActionRowBuilder()
                     .addComponents(userInput)
@@ -485,9 +486,9 @@ function ticketPanel() {
             .setTitle('Tickets')
             .setDescription(
                 'Configure o sistema de tickets do Seraphins.\n\n' +
-                '**Canal:** onde o painel será enviado\n' +
-                '**Categoria:** onde os tickets serão criados\n' +
-                '**Cargo ADM:** quem terá acesso aos tickets'
+                '**Canal:** onde o painel serÃ¡ enviado\n' +
+                '**Categoria:** onde os tickets serÃ£o criados\n' +
+                '**Cargo ADM:** quem terÃ¡ acesso aos tickets'
             )
             .setColor('#000000');
 
@@ -547,13 +548,13 @@ function ticketOpenPanel() {
             .setTitle('Suporte')
             .setDescription(
                 'Precisa de ajuda?\n\n' +
-                'Escolha abaixo o tipo de atendimento que você precisa.\n\n' +
+                'Escolha abaixo o tipo de atendimento que vocÃª precisa.\n\n' +
                 '**Parceria**\n' +
                 'Para assuntos relacionados a parcerias.\n\n' +
-                '**Dúvida**\n' +
-                'Para tirar dúvidas ou pedir ajuda.\n\n' +
-                '**Denúncia**\n' +
-                'Para denunciar usuários ou situações.'
+                '**DÃºvida**\n' +
+                'Para tirar dÃºvidas ou pedir ajuda.\n\n' +
+                '**DenÃºncia**\n' +
+                'Para denunciar usuÃ¡rios ou situaÃ§Ãµes.'
             )
             .setColor('#000000');
 
@@ -582,7 +583,7 @@ function ticketOpenPanel() {
                 .setCustomId(
                     'open_ticket_duvida'
                 )
-                .setLabel('Dúvida')
+                .setLabel('DÃºvida')
                 .setStyle(
                     ButtonStyle.Secondary
                 ),
@@ -591,7 +592,7 @@ function ticketOpenPanel() {
                 .setCustomId(
                     'open_ticket_denuncia'
                 )
-                .setLabel('Denúncia')
+                .setLabel('DenÃºncia')
                 .setStyle(
                     ButtonStyle.Danger
                 )
@@ -629,7 +630,7 @@ async function openTicket(
     if (existing) {
         return interaction.reply({
             content:
-                `Você já possui um ticket aberto: ${existing}`,
+                `VocÃª jÃ¡ possui um ticket aberto: ${existing}`,
             ephemeral: true
         });
     }
@@ -646,8 +647,6 @@ async function openTicket(
             cfg.ticketCargo ||
                 ADM_ROLE_ID
         );
-    const staffRole =
-        guild.roles.cache.get(STAFF_ROLE_ID);
 
     let username =
         interaction.user.username
@@ -726,27 +725,16 @@ async function openTicket(
         );
     }
 
-    if (staffRole && staffRole.id !== role?.id) {
-        await channel.permissionOverwrites.create(
-            staffRole.id,
-            {
-                ViewChannel: true,
-                SendMessages: true,
-                ReadMessageHistory: true
-            }
-        );
-    }
-
     const embed =
         new EmbedBuilder()
             .setTitle(
-                `Suporte • ${ticketType}`
+                `Suporte â€¢ ${ticketType}`
             )
             .setDescription(
-                `Olá ${interaction.user}!\n\n` +
+                `OlÃ¡ ${interaction.user}!\n\n` +
                 `Seu atendimento foi aberto na categoria **${ticketType}**.\n\n` +
-                'Explique sua situação abaixo.\n' +
-                'Um membro da equipe irá atendê-lo.\n\n' +
+                'Explique sua situaÃ§Ã£o abaixo.\n' +
+                'Um membro da equipe irÃ¡ atendÃª-lo.\n\n' +
                 '**Assumir Ticket**\n' +
                 '**Chamar ADM**\n' +
                 '**Fechar Ticket**'
@@ -800,19 +788,11 @@ async function openTicket(
                     )
             );
 
-    const ticketMentions = [role, staffRole]
-        .filter((mentionedRole, index, roles) =>
-            mentionedRole && roles.findIndex(item => item?.id === mentionedRole.id) === index
-        )
-        .map(mentionedRole => `${mentionedRole}`)
-        .join(' ');
-
     await channel.send({
-        content: `${ticketMentions} ${interaction.user}`.trim(),
-        allowedMentions: {
-            roles: [role?.id, staffRole?.id].filter(Boolean),
-            users: [interaction.user.id]
-        },
+        content: role
+            ? `${role} ${interaction.user}`
+            : `${interaction.user}`,
+
         embeds: [embed],
         components: [buttons]
     });
@@ -839,16 +819,16 @@ function purchaseConfigPanel(guild) {
         ? cargos.slice(0, 15).map(([roleId, data]) => {
             const role = guild.roles.cache.get(roleId);
             const price = Number(data.price || 0).toFixed(2).replace('.', ',');
-            return `• ${role ? role.name : `Cargo removido (${roleId})`} — R$ ${price}`;
+            return `â€¢ ${role ? role.name : `Cargo removido (${roleId})`} â€” R$ ${price}`;
         }).join('\n')
         : 'Nenhum cargo configurado ainda.';
 
     const embed = new EmbedBuilder()
-        .setTitle('🛒 Painel de Compras')
+        .setTitle('ðŸ›’ Painel de Compras')
         .setDescription(
-            `Configure os cargos que serão vendidos e o canal da loja.\n\n` +
-            `**Canal da loja:** ${channel ? channel.toString() : 'Não definido'}\n\n` +
-            `**Cargos e preços:**\n${cargoText}` +
+            `Configure os cargos que serÃ£o vendidos e o canal da loja.\n\n` +
+            `**Canal da loja:** ${channel ? channel.toString() : 'NÃ£o definido'}\n\n` +
+            `**Cargos e preÃ§os:**\n${cargoText}` +
             (cargos.length > 15 ? `\n... e mais ${cargos.length - 15} cargo(s).` : '')
         )
         .setColor('#000000');
@@ -857,17 +837,17 @@ function purchaseConfigPanel(guild) {
         new ButtonBuilder()
             .setCustomId('shop_add_role')
             .setLabel('Adicionar/Editar Cargo')
-            .setEmoji('➕')
+            .setEmoji('âž•')
             .setStyle(ButtonStyle.Primary),
         new ButtonBuilder()
             .setCustomId('shop_remove_role')
             .setLabel('Remover Cargo')
-            .setEmoji('🗑️')
+            .setEmoji('ðŸ—‘ï¸')
             .setStyle(ButtonStyle.Danger),
         new ButtonBuilder()
             .setCustomId('shop_set_channel')
             .setLabel('Definir Canal')
-            .setEmoji('📍')
+            .setEmoji('ðŸ“')
             .setStyle(ButtonStyle.Secondary)
     );
 
@@ -875,7 +855,7 @@ function purchaseConfigPanel(guild) {
         new ButtonBuilder()
             .setCustomId('shop_publish')
             .setLabel('Publicar/Atualizar Loja')
-            .setEmoji('📢')
+            .setEmoji('ðŸ“¢')
             .setStyle(ButtonStyle.Success),
         new ButtonBuilder()
             .setCustomId('shop_back')
@@ -890,71 +870,45 @@ function purchaseConfigPanel(guild) {
     };
 }
 
-function purchaseRoleSelect(guild, mode, page = 0) {
-    const loja = getLoja(guild.id);
-    const isRemove = mode === 'remove';
-    const entries = [...guild.roles.cache.values()]
-        .filter(role => role.id !== guild.id && !role.managed)
-        .filter(role => !isRemove || Boolean(loja.cargos?.[role.id]))
-        .sort((a, b) => b.position - a.position);
-    const pageSize = 25;
-    const totalPages = Math.max(1, Math.ceil(entries.length / pageSize));
-    const currentPage = Math.min(Math.max(0, Number(page) || 0), totalPages - 1);
-    const pageEntries = entries.slice(currentPage * pageSize, (currentPage + 1) * pageSize);
-    const components = [];
-
-    if (pageEntries.length) {
-        const menu = new StringSelectMenuBuilder()
-            .setCustomId(`shop_admin_role_select_${isRemove ? 'remove' : 'add'}`)
-            .setPlaceholder(isRemove ? 'Escolha o cargo para remover' : 'Escolha o cargo para configurar')
-            .addOptions(pageEntries.map(role => new StringSelectMenuOptionBuilder()
-                .setLabel(role.name.slice(0, 100))
-                .setValue(role.id)
-                .setDescription(`Cargo do servidor`.slice(0, 100))));
-        components.push(new ActionRowBuilder().addComponents(menu));
-    }
-
-    if (totalPages > 1) {
-        components.push(new ActionRowBuilder().addComponents(
-            new ButtonBuilder()
-                .setCustomId(`shop_admin_role_page_${isRemove ? 'remove' : 'add'}_${currentPage - 1}`)
-                .setLabel('◀ Anterior')
-                .setStyle(ButtonStyle.Secondary)
-                .setDisabled(currentPage === 0),
-            new ButtonBuilder()
-                .setCustomId(`shop_admin_role_page_${isRemove ? 'remove' : 'add'}_${currentPage + 1}`)
-                .setLabel('Próxima ▶')
-                .setStyle(ButtonStyle.Secondary)
-                .setDisabled(currentPage >= totalPages - 1)
-        ));
-    }
+function purchaseRoleSelect(guild, mode) {
+    const menu = new RoleSelectMenuBuilder()
+        .setCustomId(
+            mode === 'remove' ? 'shop_select_remove' : 'shop_select_price'
+        )
+        .setPlaceholder(
+            mode === 'remove'
+                ? 'Selecione o cargo que deseja remover'
+                : 'Selecione o cargo que deseja vender'
+        )
+        .setMinValues(1)
+        .setMaxValues(1);
 
     return {
-        content: `${isRemove ? 'Selecione um cargo cadastrado na loja para remover.' : 'Selecione o cargo que deseja cadastrar ou editar o preço.'}\n\nPágina **${currentPage + 1}/${totalPages}** · ${entries.length} cargo(s) disponível(is).`,
-        components,
+        content: mode === 'remove'
+            ? 'Selecione um cargo que jÃ¡ esteja cadastrado na loja.'
+            : 'Selecione o cargo que deseja cadastrar ou editar o preÃ§o.',
+        components: [
+            new ActionRowBuilder().addComponents(menu)
+        ],
         ephemeral: true
     };
 }
 
-function purchaseStorePanel(guild, page = 0) {
+function purchaseStorePanel(guild) {
     const loja = getLoja(guild.id);
-    const allEntries = Object.entries(loja.cargos || {})
+    const entries = Object.entries(loja.cargos || {})
         .filter(([roleId]) => {
             const role = guild.roles.cache.get(roleId);
             return role && role.id !== guild.id && !role.managed;
-        });
-
-    const pageSize = 25;
-    const totalPages = Math.max(1, Math.ceil(allEntries.length / pageSize));
-    const currentPage = Math.min(Math.max(0, Number(page) || 0), totalPages - 1);
-    const entries = allEntries.slice(currentPage * pageSize, (currentPage + 1) * pageSize);
+        })
+        .slice(0, 25);
 
     const embed = new EmbedBuilder()
-        .setTitle(`🛒 Loja de ${guild.name}`)
+        .setTitle(`ðŸ›’ Loja de ${guild.name}`)
         .setDescription(
-            allEntries.length
-                ? `Selecione abaixo o cargo que deseja comprar. Um ticket será criado para o atendimento e confirmação do pagamento.\n\nPágina **${currentPage + 1}/${totalPages}** • **${allEntries.length}** cargos disponíveis.`
-                : 'A loja ainda não possui cargos disponíveis.'
+            entries.length
+                ? 'Selecione abaixo o cargo que deseja comprar. Um ticket serÃ¡ criado para o atendimento e confirmaÃ§Ã£o do pagamento.'
+                : 'A loja ainda nÃ£o possui cargos disponÃ­veis.'
         )
         .setColor('#000000');
 
@@ -970,29 +924,20 @@ function purchaseStorePanel(guild, page = 0) {
                     const price = Number(data.price || 0).toFixed(2).replace('.', ',');
                     return new StringSelectMenuOptionBuilder()
                         .setLabel((role.name || 'Cargo').slice(0, 100))
-                        .setDescription(`Preço: R$ ${price}`.slice(0, 100))
+                        .setDescription(`PreÃ§o: R$ ${price}`.slice(0, 100))
                         .setValue(roleId);
                 })
             );
 
-        components.push(new ActionRowBuilder().addComponents(menu));
-
-        if (totalPages > 1) {
-            const prev = new ButtonBuilder()
-                .setCustomId(`shop_customer_page_${currentPage - 1}`)
-                .setLabel('⬅️ Anterior')
-                .setStyle(ButtonStyle.Secondary)
-                .setDisabled(currentPage === 0);
-            const next = new ButtonBuilder()
-                .setCustomId(`shop_customer_page_${currentPage + 1}`)
-                .setLabel('Próxima ➡️')
-                .setStyle(ButtonStyle.Secondary)
-                .setDisabled(currentPage >= totalPages - 1);
-            components.push(new ActionRowBuilder().addComponents(prev, next));
-        }
+        components.push(
+            new ActionRowBuilder().addComponents(menu)
+        );
     }
 
-    return { embeds: [embed], components };
+    return {
+        embeds: [embed],
+        components
+    };
 }
 
 async function openPurchaseTicket(interaction, roleId) {
@@ -1003,14 +948,14 @@ async function openPurchaseTicket(interaction, roleId) {
 
     if (!role || !roleData) {
         return interaction.reply({
-            content: 'Esse cargo não está mais disponível na loja.',
+            content: 'Esse cargo nÃ£o estÃ¡ mais disponÃ­vel na loja.',
             ephemeral: true
         });
     }
 
     if (role.id === guild.id || role.managed) {
         return interaction.reply({
-            content: 'Esse cargo não pode ser vendido.',
+            content: 'Esse cargo nÃ£o pode ser vendido.',
             ephemeral: true
         });
     }
@@ -1022,7 +967,7 @@ async function openPurchaseTicket(interaction, roleId) {
 
     if (existing) {
         return interaction.reply({
-            content: `Você já possui um ticket de compra aberto para esse cargo: ${existing}`,
+            content: `VocÃª jÃ¡ possui um ticket de compra aberto para esse cargo: ${existing}`,
             ephemeral: true
         });
     }
@@ -1030,7 +975,6 @@ async function openPurchaseTicket(interaction, roleId) {
     const config = getConfig(guild.id);
     const adminRoleId = config.ticketCargo || ADM_ROLE_ID;
     const adminRole = guild.roles.cache.get(adminRoleId);
-    const staffRole = guild.roles.cache.get(STAFF_ROLE_ID);
 
     const safeRoleName = role.name
         .toLowerCase()
@@ -1083,17 +1027,6 @@ async function openPurchaseTicket(interaction, roleId) {
         });
     }
 
-    if (staffRole && staffRole.id !== adminRole?.id) {
-        overwrites.push({
-            id: staffRole.id,
-            allow: [
-                PermissionFlagsBits.ViewChannel,
-                PermissionFlagsBits.SendMessages,
-                PermissionFlagsBits.ReadMessageHistory
-            ]
-        });
-    }
-
     let channel;
 
     try {
@@ -1106,19 +1039,19 @@ async function openPurchaseTicket(interaction, roleId) {
     } catch (error) {
         console.error('Erro ao criar ticket de compra:', error);
         return interaction.reply({
-            content: 'Não consegui criar o ticket. Verifique as permissões do bot.',
+            content: 'NÃ£o consegui criar o ticket. Verifique as permissÃµes do bot.',
             ephemeral: true
         });
     }
 
     const price = Number(roleData.price || 0).toFixed(2).replace('.', ',');
     const embed = new EmbedBuilder()
-        .setTitle('🛒 Solicitação de compra')
+        .setTitle('ðŸ›’ SolicitaÃ§Ã£o de compra')
         .setDescription(
             `**Cliente:** ${interaction.user}\n` +
             `**Cargo:** ${role}\n` +
-            `**Preço:** R$ ${price}\n\n` +
-            'A equipe deve confirmar o pagamento antes de entregar o cargo. Este bot não confirma pagamentos automaticamente.'
+            `**PreÃ§o:** R$ ${price}\n\n` +
+            'A equipe deve confirmar o pagamento antes de entregar o cargo. Este bot nÃ£o confirma pagamentos automaticamente.'
         )
         .setColor('#000000')
         .setTimestamp();
@@ -1138,18 +1071,8 @@ async function openPurchaseTicket(interaction, roleId) {
             .setStyle(ButtonStyle.Danger)
     );
 
-    const purchaseTicketMentions = [adminRole, staffRole]
-        .filter((mentionedRole, index, roles) =>
-            mentionedRole && roles.findIndex(item => item?.id === mentionedRole.id) === index
-        )
-        .map(mentionedRole => `${mentionedRole}`)
-        .join(' ');
-
     await channel.send({
-        content: purchaseTicketMentions,
-        allowedMentions: {
-            roles: [adminRole?.id, staffRole?.id].filter(Boolean)
-        },
+        content: adminRole ? `${adminRole}` : '',
         embeds: [embed],
         components: [buttons]
     });
@@ -1180,7 +1103,7 @@ function serverPanel(guild) {
     const embed =
         new EmbedBuilder()
             .setTitle(
-                `📊 ${guild.name}`
+                `ðŸ“Š ${guild.name}`
             )
             .setThumbnail(
                 guild.iconURL({
@@ -1190,63 +1113,63 @@ function serverPanel(guild) {
             .setColor('#000000')
             .addFields(
                 {
-                    name: '👥 Membros',
+                    name: 'ðŸ‘¥ Membros',
                     value:
                         `${guild.memberCount}`,
                     inline: true
                 },
 
                 {
-                    name: '👤 Humanos',
+                    name: 'ðŸ‘¤ Humanos',
                     value:
                         `${humans}`,
                     inline: true
                 },
 
                 {
-                    name: '🤖 Bots',
+                    name: 'ðŸ¤– Bots',
                     value:
                         `${bots}`,
                     inline: true
                 },
 
                 {
-                    name: '💬 Canais',
+                    name: 'ðŸ’¬ Canais',
                     value:
                         `${guild.channels.cache.size}`,
                     inline: true
                 },
 
                 {
-                    name: '🎭 Cargos',
+                    name: 'ðŸŽ­ Cargos',
                     value:
                         `${guild.roles.cache.size}`,
                     inline: true
                 },
 
                 {
-                    name: '🚀 Boosts',
+                    name: 'ðŸš€ Boosts',
                     value:
                         `${guild.premiumSubscriptionCount || 0}`,
                     inline: true
                 },
 
                 {
-                    name: '👑 Dono',
+                    name: 'ðŸ‘‘ Dono',
                     value:
                         `<@${guild.ownerId}>`,
                     inline: true
                 },
 
                 {
-                    name: '📅 Criado em',
+                    name: 'ðŸ“… Criado em',
                     value:
                         `<t:${Math.floor(guild.createdTimestamp / 1000)}:D>`,
                     inline: true
                 },
 
                 {
-                    name: '🆔 ID',
+                    name: 'ðŸ†” ID',
                     value: guild.id,
                     inline: true
                 }
@@ -1258,15 +1181,15 @@ function serverPanel(guild) {
 }
 
 /* =========================
-   DIVERSÃO
+   DIVERSÃƒO
 ========================= */
 
 function funPanel() {
     const embed =
         new EmbedBuilder()
-            .setTitle('🎉 Diversão')
+            .setTitle('ðŸŽ‰ DiversÃ£o')
             .setDescription(
-                'Escolha uma das opções abaixo.'
+                'Escolha uma das opÃ§Ãµes abaixo.'
             )
             .setColor('#000000');
 
@@ -1278,7 +1201,7 @@ function funPanel() {
                         'fun_dice'
                     )
                     .setLabel('Dado')
-                    .setEmoji('🎲')
+                    .setEmoji('ðŸŽ²')
                     .setStyle(
                         ButtonStyle.Secondary
                     ),
@@ -1288,7 +1211,7 @@ function funPanel() {
                         'fun_coin'
                     )
                     .setLabel('Moeda')
-                    .setEmoji('🪙')
+                    .setEmoji('ðŸª™')
                     .setStyle(
                         ButtonStyle.Secondary
                     ),
@@ -1298,7 +1221,7 @@ function funPanel() {
                         'fun_8ball'
                     )
                     .setLabel('8Ball')
-                    .setEmoji('🎱')
+                    .setEmoji('ðŸŽ±')
                     .setStyle(
                         ButtonStyle.Secondary
                     ),
@@ -1307,8 +1230,8 @@ function funPanel() {
                     .setCustomId(
                         'fun_number'
                     )
-                    .setLabel('Número')
-                    .setEmoji('🔢')
+                    .setLabel('NÃºmero')
+                    .setEmoji('ðŸ”¢')
                     .setStyle(
                         ButtonStyle.Secondary
                     ),
@@ -1318,7 +1241,7 @@ function funPanel() {
                         'fun_choose'
                     )
                     .setLabel('Escolher')
-                    .setEmoji('🃏')
+                    .setEmoji('ðŸƒ')
                     .setStyle(
                         ButtonStyle.Secondary
                     ),
@@ -1328,7 +1251,7 @@ function funPanel() {
                         'fun_quiz'
                     )
                     .setLabel('Quiz')
-                    .setEmoji('🏆')
+                    .setEmoji('ðŸ†')
                     .setStyle(
                         ButtonStyle.Secondary
                     )
@@ -1341,7 +1264,7 @@ function funPanel() {
 }
 
 /* =========================
-   CONFIGURAÇÕES
+   CONFIGURAÃ‡Ã•ES
 ========================= */
 
 function configPanel(guild) {
@@ -1351,10 +1274,10 @@ function configPanel(guild) {
     const embed =
         new EmbedBuilder()
             .setTitle(
-                '⚙️ Configurações'
+                'âš™ï¸ ConfiguraÃ§Ãµes'
             )
             .setDescription(
-                'Configurações atuais do Seraphins.'
+                'ConfiguraÃ§Ãµes atuais do Seraphins.'
             )
             .setColor('#000000')
             .addFields(
@@ -1364,7 +1287,7 @@ function configPanel(guild) {
                     value:
                         cfg.ticketCanal
                             ? `<#${cfg.ticketCanal}>`
-                            : 'Não definido',
+                            : 'NÃ£o definido',
                     inline: true
                 },
 
@@ -1373,7 +1296,7 @@ function configPanel(guild) {
                     value:
                         cfg.ticketCategoria
                             ? `<#${cfg.ticketCategoria}>`
-                            : 'Não definida',
+                            : 'NÃ£o definida',
                     inline: true
                 },
 
@@ -1383,13 +1306,13 @@ function configPanel(guild) {
                     value:
                         cfg.ticketCargo
                             ? `<@&${cfg.ticketCargo}>`
-                            : 'Não definido',
+                            : 'NÃ£o definido',
                     inline: true
                 },
 
                 {
                     name:
-                        '🛡️ Anti-Spam',
+                        'ðŸ›¡ï¸ Anti-Spam',
                     value:
                         cfg.antiSpam
                             ? 'Ativado'
@@ -1399,7 +1322,7 @@ function configPanel(guild) {
 
                 {
                     name:
-                        '🚨 Anti-Raid',
+                        'ðŸš¨ Anti-Raid',
                     value:
                         cfg.antiRaid
                             ? 'Ativado'
@@ -1424,8 +1347,8 @@ function configPanel(guild) {
                     .setCustomId(
                         'config_protection'
                     )
-                    .setLabel('Proteção')
-                    .setEmoji('🛡️')
+                    .setLabel('ProteÃ§Ã£o')
+                    .setEmoji('ðŸ›¡ï¸')
                     .setStyle(
                         ButtonStyle.Secondary
                     )
@@ -1438,7 +1361,7 @@ function configPanel(guild) {
 }
 
 /* =========================
-   PROTEÇÃO
+   PROTEÃ‡ÃƒO
 ========================= */
 
 function protectionPanel(guild) {
@@ -1448,10 +1371,10 @@ function protectionPanel(guild) {
     const embed =
         new EmbedBuilder()
             .setTitle(
-                '🛡️ Proteção'
+                'ðŸ›¡ï¸ ProteÃ§Ã£o'
             )
             .setDescription(
-                'Configure os sistemas de proteção do servidor.'
+                'Configure os sistemas de proteÃ§Ã£o do servidor.'
             )
             .setColor('#000000')
             .addFields(
@@ -1460,8 +1383,8 @@ function protectionPanel(guild) {
                         'Anti-Spam',
                     value:
                         cfg.antiSpam
-                            ? '🟢 Ativado'
-                            : '🔴 Desativado',
+                            ? 'ðŸŸ¢ Ativado'
+                            : 'ðŸ”´ Desativado',
                     inline: true
                 },
 
@@ -1470,8 +1393,8 @@ function protectionPanel(guild) {
                         'Anti-Raid',
                     value:
                         cfg.antiRaid
-                            ? '🟢 Ativado'
-                            : '🔴 Desativado',
+                            ? 'ðŸŸ¢ Ativado'
+                            : 'ðŸ”´ Desativado',
                     inline: true
                 }
             );
@@ -1515,10 +1438,10 @@ function protectionPanel(guild) {
 function giveawayPanel() {
     const embed =
         new EmbedBuilder()
-            .setTitle('🎁 Sorteios')
+            .setTitle('ðŸŽ Sorteios')
             .setDescription(
                 'Gerencie os sorteios do servidor.\n\n' +
-                'Crie sorteios definindo prêmio, duração, vencedores e requisitos.'
+                'Crie sorteios definindo prÃªmio, duraÃ§Ã£o, vencedores e requisitos.'
             )
             .setColor('#000000');
 
@@ -1532,7 +1455,7 @@ function giveawayPanel() {
                     .setLabel(
                         'Criar Sorteio'
                     )
-                    .setEmoji('🎁')
+                    .setEmoji('ðŸŽ')
                     .setStyle(
                         ButtonStyle.Success
                     ),
@@ -1544,7 +1467,7 @@ function giveawayPanel() {
                     .setLabel(
                         'Sorteios Ativos'
                     )
-                    .setEmoji('📋')
+                    .setEmoji('ðŸ“‹')
                     .setStyle(
                         ButtonStyle.Secondary
                     )
@@ -1569,7 +1492,7 @@ function giveawayCreateModal() {
     const prize =
         new TextInputBuilder()
             .setCustomId('prize')
-            .setLabel('Prêmio')
+            .setLabel('PrÃªmio')
             .setPlaceholder(
                 'Ex: Nitro, Robux, cargo especial'
             )
@@ -1584,7 +1507,7 @@ function giveawayCreateModal() {
                 'duration'
             )
             .setLabel(
-                'Duração em minutos'
+                'DuraÃ§Ã£o em minutos'
             )
             .setPlaceholder(
                 'Ex: 60'
@@ -1647,6 +1570,7 @@ function parseGiveawayRequirements(
     const result = {
         roleId: null,
         minDays: 0,
+        minInvites: 0,
         text:
             requirements?.trim() ||
             'Nenhum requisito'
@@ -1677,6 +1601,16 @@ function parseGiveawayRequirements(
             Number(daysMatch[1]);
     }
 
+    const invitesMatch =
+        requirements.match(
+            /(\d+)\s*(?:convites?|invites?)/i
+        );
+
+    if (invitesMatch) {
+        result.minInvites =
+            Number(invitesMatch[1]);
+    }
+
     return result;
 }
 
@@ -1686,9 +1620,9 @@ function giveawayMessage(giveaway) {
         'Nenhum requisito';
 
     return new EmbedBuilder()
-        .setTitle('🎁 Sorteio')
+        .setTitle('ðŸŽ Sorteio')
         .setDescription(
-            `**Prêmio:** ${giveaway.prize}\n\n` +
+            `**PrÃªmio:** ${giveaway.prize}\n\n` +
             `**Vencedores:** ${giveaway.winners}\n` +
             `**Requisitos:** ${requirements}\n\n` +
             `**Participantes:** ${
@@ -1697,7 +1631,7 @@ function giveawayMessage(giveaway) {
             `**Termina:** <t:${Math.floor(
                 giveaway.end / 1000
             )}:R>\n\n` +
-            'Clique no botão abaixo para participar.'
+            'Clique no botÃ£o abaixo para participar.'
         )
         .setColor('#000000');
 }
@@ -1714,10 +1648,18 @@ function giveawayButtons(
                 .setLabel(
                     'Participar'
                 )
-                .setEmoji('🎁')
+                .setEmoji('ðŸŽ')
                 .setStyle(
                     ButtonStyle.Success
+                ),
+
+            new ButtonBuilder()
+                .setCustomId(
+                    `giveaway_list_${giveawayId}`
                 )
+                .setLabel('Ver participantes')
+                .setEmoji('ðŸ‘¥')
+                .setStyle(ButtonStyle.Secondary)
         );
 }
 
@@ -1729,7 +1671,7 @@ async function checkGiveawayRequirement(
         return {
             ok: false,
             reason:
-                'Você precisa estar no servidor para participar.'
+                'VocÃª precisa estar no servidor para participar.'
         };
     }
 
@@ -1737,7 +1679,7 @@ async function checkGiveawayRequirement(
         return {
             ok: false,
             reason:
-                'Bots não podem participar de sorteios.'
+                'Bots nÃ£o podem participar de sorteios.'
         };
     }
 
@@ -1750,7 +1692,7 @@ async function checkGiveawayRequirement(
         return {
             ok: false,
             reason:
-                `Você precisa possuir o cargo <@&${giveaway.requiredRole}> para participar.`
+                `VocÃª precisa possuir o cargo <@&${giveaway.requiredRole}> para participar.`
         };
     }
 
@@ -1770,7 +1712,7 @@ async function checkGiveawayRequirement(
             return {
                 ok: false,
                 reason:
-                    `Você precisa estar no servidor há pelo menos ${giveaway.minDays} dias.`
+                    `VocÃª precisa estar no servidor hÃ¡ pelo menos ${giveaway.minDays} dias.`
             };
         }
     }
@@ -1778,6 +1720,72 @@ async function checkGiveawayRequirement(
     return {
         ok: true
     };
+}
+
+async function checkGiveawayWinnerRequirement(
+    guild,
+    userId,
+    giveaway
+) {
+    const member =
+        guild.members.cache.get(userId) ||
+        await guild.members.fetch(userId).catch(() => null);
+
+    if (!member) {
+        return {
+            ok: false,
+            reason: 'A pessoa sorteada nÃ£o estÃ¡ mais no servidor.'
+        };
+    }
+
+    const base = await checkGiveawayRequirement(member, giveaway);
+    if (!base.ok) return base;
+
+    if (giveaway.minInvites > 0) {
+        const invites = await getUserInvites(guild, userId);
+        if (invites < giveaway.minInvites) {
+            return {
+                ok: false,
+                reason: `A pessoa sorteada possui **${invites}** convite(s), mas precisa de **${giveaway.minInvites}**.`
+            };
+        }
+    }
+
+    return { ok: true };
+}
+
+function randomParticipant(guild, giveaway, excluded = []) {
+    const eligible = getEligibleParticipants(guild, giveaway)
+        .filter(id => !excluded.includes(id));
+
+    return eligible.length ? randomItem(eligible) : null;
+}
+
+async function updateGiveawayMessage(guild, giveaway, embed, components = []) {
+    const channel = guild.channels.cache.get(giveaway.channelId);
+    if (!channel) return;
+
+    try {
+        const message = await channel.messages.fetch(giveaway.messageId);
+        await message.edit({
+            embeds: [embed],
+            components
+        });
+    } catch (error) {
+        console.log('NÃ£o foi possÃ­vel atualizar a mensagem do sorteio:', error.message);
+    }
+}
+
+function endedGiveawayEmbed(giveaway, winnerText, extra = '') {
+    return new EmbedBuilder()
+        .setTitle('ðŸŽ Sorteio Encerrado')
+        .setDescription(
+            `**PrÃªmio:** ${giveaway.prize}\n\n` +
+            `**Vencedor:** ${winnerText}\n\n` +
+            `**Participantes:** ${giveaway.participants?.length || 0}` +
+            (extra ? `\n\n${extra}` : '')
+        )
+        .setColor('#000000');
 }
 
 function getEligibleParticipants(
@@ -1840,146 +1848,231 @@ function getEligibleParticipants(
 async function finishGiveaway(
     giveawayId
 ) {
-    const giveaway =
-        sorteios[giveawayId];
+    const giveaway = sorteios[giveawayId];
+    if (!giveaway || giveaway.finished) return;
 
-    if (!giveaway) {
-        return;
-    }
-
-    if (giveaway.finished) {
+    const guild = client.guilds.cache.get(giveaway.guildId);
+    if (!guild) {
+        delete sorteios[giveawayId];
+        saveJSON('sorteios.json', sorteios);
         return;
     }
 
     giveaway.finished = true;
+    giveaway.rejectedParticipants = Array.isArray(giveaway.rejectedParticipants)
+        ? giveaway.rejectedParticipants
+        : [];
 
-    const guild =
-        client.guilds.cache.get(
-            giveaway.guildId
+    const candidate = randomParticipant(
+        guild,
+        giveaway,
+        giveaway.rejectedParticipants
+    );
+
+    if (!candidate) {
+        await updateGiveawayMessage(
+            guild,
+            giveaway,
+            endedGiveawayEmbed(
+                giveaway,
+                'Nenhum vencedor',
+                'NÃ£o houve participantes elegÃ­veis.'
+            )
         );
-
-    if (!guild) {
         delete sorteios[giveawayId];
-
-        saveJSON(
-            'sorteios.json',
-            sorteios
-        );
-
+        saveJSON('sorteios.json', sorteios);
         return;
     }
 
-    const channel =
-        guild.channels.cache.get(
-            giveaway.channelId
-        );
+    const requirement = await checkGiveawayWinnerRequirement(
+        guild,
+        candidate,
+        giveaway
+    );
 
-    const eligible =
-        getEligibleParticipants(
+    if (!requirement.ok) {
+        giveaway.pendingCandidate = candidate;
+        giveaway.rejectedParticipants.push(candidate);
+        saveJSON('sorteios.json', sorteios);
+
+        await updateGiveawayMessage(
             guild,
-            giveaway
+            giveaway,
+            endedGiveawayEmbed(
+                giveaway,
+                `<@${candidate}>`,
+                `âš ï¸ A pessoa sorteada nÃ£o cumpriu o requisito.\n${requirement.reason}\n\nClique em **Girar outra pessoa** para sortear outro participante.`
+            ),
+            [
+                new ActionRowBuilder().addComponents(
+                    new ButtonBuilder()
+                        .setCustomId(`giveaway_reroll_${giveawayId}`)
+                        .setLabel('Girar outra pessoa')
+                        .setEmoji('ðŸŽ²')
+                        .setStyle(ButtonStyle.Primary),
+                    new ButtonBuilder()
+                        .setCustomId(`giveaway_list_${giveawayId}`)
+                        .setLabel('Ver participantes')
+                        .setEmoji('ðŸ‘¥')
+                        .setStyle(ButtonStyle.Secondary)
+                )
+            ]
         );
-
-    const shuffled =
-        [...eligible];
-
-    for (
-        let i =
-            shuffled.length - 1;
-        i > 0;
-        i--
-    ) {
-        const j =
-            Math.floor(
-                Math.random() *
-                    (i + 1)
-            );
-
-        [
-            shuffled[i],
-            shuffled[j]
-        ] = [
-            shuffled[j],
-            shuffled[i]
-        ];
+        return;
     }
 
-    const winners =
-        shuffled.slice(
-            0,
-            Math.min(
-                giveaway.winners,
-                shuffled.length
-            )
-        );
+    giveaway.winner = candidate;
+    saveJSON('sorteios.json', sorteios);
 
+    await updateGiveawayMessage(
+        guild,
+        giveaway,
+        endedGiveawayEmbed(giveaway, `<@${candidate}>`)
+    );
+
+    const channel = guild.channels.cache.get(giveaway.channelId);
     if (channel) {
-        const winnerText =
-            winners.length
-                ? winners
-                      .map(
-                          id =>
-                              `<@${id}>`
-                      )
-                      .join(', ')
-                : 'Nenhum vencedor';
-
         try {
-            const oldMessage =
-                await channel.messages.fetch(
-                    giveaway.messageId
-                );
-
-            const endedEmbed =
-                new EmbedBuilder()
-                    .setTitle(
-                        '🎁 Sorteio Encerrado'
-                    )
-                    .setDescription(
-                        `**Prêmio:** ${giveaway.prize}\n\n` +
-                        `**Vencedores:** ${winnerText}\n\n` +
-                        `**Participantes:** ${giveaway.participants?.length || 0}`
-                    )
-                    .setColor(
-                        '#000000'
-                    );
-
-            await oldMessage.edit({
-                embeds: [
-                    endedEmbed
-                ],
-                components: []
-            });
-        } catch (error) {
-            console.log(
-                'Não foi possível editar a mensagem do sorteio:',
-                error.message
+            await channel.send(
+                `ðŸŽ‰ **Sorteio encerrado!**\n\n**PrÃªmio:** ${giveaway.prize}\n**Vencedor:** <@${candidate}>`
             );
-        }
-
-        try {
-            if (winners.length) {
-                await channel.send(
-                    `🎉 **Sorteio encerrado!**\n\n` +
-                    `**Prêmio:** ${giveaway.prize}\n` +
-                    `**Vencedor(es):** ${winnerText}`
-                );
-            } else {
-                await channel.send(
-                    `🎁 O sorteio de **${giveaway.prize}** terminou, mas não houve participantes elegíveis.`
-                );
-            }
         } catch {}
     }
 
-    delete sorteios[
-        giveawayId
-    ];
+    delete sorteios[giveawayId];
+    saveJSON('sorteios.json', sorteios);
+}
 
-    saveJSON(
-        'sorteios.json',
-        sorteios
+async function rerollGiveaway(giveawayId) {
+    const giveaway = sorteios[giveawayId];
+    if (!giveaway || !giveaway.finished) return null;
+
+    const guild = client.guilds.cache.get(giveaway.guildId);
+    if (!guild) return null;
+
+    const rejected = Array.isArray(giveaway.rejectedParticipants)
+        ? giveaway.rejectedParticipants
+        : [];
+
+    const candidate = randomParticipant(guild, giveaway, rejected);
+
+    if (!candidate) {
+        await updateGiveawayMessage(
+            guild,
+            giveaway,
+            endedGiveawayEmbed(
+                giveaway,
+                'Nenhum vencedor',
+                'Todos os participantes restantes foram eliminados pelos requisitos.'
+            )
+        );
+        delete sorteios[giveawayId];
+        saveJSON('sorteios.json', sorteios);
+        return null;
+    }
+
+    const requirement = await checkGiveawayWinnerRequirement(
+        guild,
+        candidate,
+        giveaway
     );
+
+    if (!requirement.ok) {
+        giveaway.pendingCandidate = candidate;
+        giveaway.rejectedParticipants = [...rejected, candidate];
+        saveJSON('sorteios.json', sorteios);
+
+        await updateGiveawayMessage(
+            guild,
+            giveaway,
+            endedGiveawayEmbed(
+                giveaway,
+                `<@${candidate}>`,
+                `âš ï¸ Essa pessoa tambÃ©m nÃ£o cumpriu o requisito.\n${requirement.reason}\n\nClique em **Girar outra pessoa** para continuar.`
+            ),
+            [
+                new ActionRowBuilder().addComponents(
+                    new ButtonBuilder()
+                        .setCustomId(`giveaway_reroll_${giveawayId}`)
+                        .setLabel('Girar outra pessoa')
+                        .setEmoji('ðŸŽ²')
+                        .setStyle(ButtonStyle.Primary),
+                    new ButtonBuilder()
+                        .setCustomId(`giveaway_list_${giveawayId}`)
+                        .setLabel('Ver participantes')
+                        .setEmoji('ðŸ‘¥')
+                        .setStyle(ButtonStyle.Secondary)
+                )
+            ]
+        );
+        return null;
+    }
+
+    giveaway.winner = candidate;
+    saveJSON('sorteios.json', sorteios);
+
+    await updateGiveawayMessage(
+        guild,
+        giveaway,
+        endedGiveawayEmbed(giveaway, `<@${candidate}>`)
+    );
+
+    const channel = guild.channels.cache.get(giveaway.channelId);
+    if (channel) {
+        try {
+            await channel.send(
+                `ðŸŽ‰ **Novo sorteio!**\n\n**PrÃªmio:** ${giveaway.prize}\n**Vencedor:** <@${candidate}>`
+            );
+        } catch {}
+    }
+
+    delete sorteios[giveawayId];
+    saveJSON('sorteios.json', sorteios);
+    return candidate;
+}
+
+function giveawayParticipantList(guild, giveaway, page = 0) {
+    const participants = Array.isArray(giveaway.participants)
+        ? giveaway.participants
+        : [];
+    const perPage = 20;
+    const totalPages = Math.max(1, Math.ceil(participants.length / perPage));
+    const currentPage = Math.min(Math.max(Number(page) || 0, 0), totalPages - 1);
+    const start = currentPage * perPage;
+    const slice = participants.slice(start, start + perPage);
+
+    const lines = slice.length
+        ? slice.map((id, index) => {
+            const member = guild.members.cache.get(id);
+            const name = member ? member.displayName : `UsuÃ¡rio ${id}`;
+            return `**${start + index + 1}.** ${member ? `${member}` : name}`;
+        }).join('\n')
+        : 'Nenhuma pessoa estÃ¡ participando.';
+
+    const embed = new EmbedBuilder()
+        .setTitle('ðŸ‘¥ Participantes do sorteio')
+        .setDescription(
+            `**PrÃªmio:** ${giveaway.prize}\n` +
+            `**Total:** ${participants.length}\n` +
+            `**PÃ¡gina:** ${currentPage + 1}/${totalPages}\n\n` +
+            lines
+        )
+        .setColor('#000000');
+
+    const row = new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+            .setCustomId(`giveaway_list_prev_${giveaway.id}_${currentPage}`)
+            .setLabel('Anterior')
+            .setStyle(ButtonStyle.Secondary)
+            .setDisabled(currentPage <= 0),
+        new ButtonBuilder()
+            .setCustomId(`giveaway_list_next_${giveaway.id}_${currentPage}`)
+            .setLabel('PrÃ³xima')
+            .setStyle(ButtonStyle.Secondary)
+            .setDisabled(currentPage >= totalPages - 1)
+    );
+
+    return { embeds: [embed], components: [row], ephemeral: true };
 }
 
 function scheduleGiveaway(
@@ -2097,7 +2190,7 @@ async function loadInvites(
         );
     } catch (error) {
         console.log(
-            `Não foi possível carregar convites de ${guild.name}`
+            `NÃ£o foi possÃ­vel carregar convites de ${guild.name}`
         );
     }
 }
@@ -2190,7 +2283,7 @@ client.on(
                         role.name
                             .toLowerCase()
                             .includes(
-                                'verificação'
+                                'verificaÃ§Ã£o'
                             )
                 );
 
@@ -2215,7 +2308,7 @@ client.once(
     'clientReady',
     async () => {
         console.log(
-            `🤖 ${client.user.tag} está online!`
+            `ðŸ¤– ${client.user.tag} estÃ¡ online!`
         );
 
         client.user.setActivity(
@@ -2237,11 +2330,11 @@ client.once(
         scheduleAllGiveaways();
 
         console.log(
-            '📨 Sistema de convites carregado.'
+            'ðŸ“¨ Sistema de convites carregado.'
         );
 
         console.log(
-            '🎁 Sistema de sorteios carregado.'
+            'ðŸŽ Sistema de sorteios carregado.'
         );
     }
 );
@@ -2254,7 +2347,7 @@ const commands = [
     {
         name: 'ping',
         description:
-            'Verifica a latência do bot'
+            'Verifica a latÃªncia do bot'
     },
 
     {
@@ -2272,7 +2365,7 @@ const commands = [
             {
                 name: 'canal',
                 description:
-                    'Canal onde o painel será enviado',
+                    'Canal onde o painel serÃ¡ enviado',
                 type: 7,
                 required: true
             }
@@ -2282,13 +2375,13 @@ const commands = [
     {
         name: 'convites',
         description:
-            'Mostra os convites de um usuário',
+            'Mostra os convites de um usuÃ¡rio',
 
         options: [
             {
                 name: 'usuario',
                 description:
-                    'Usuário',
+                    'UsuÃ¡rio',
                 type: 6,
                 required: false
             }
@@ -2305,7 +2398,7 @@ client.once(
             );
 
             console.log(
-                '✅ Comandos registrados!'
+                'âœ… Comandos registrados!'
             );
         } catch (error) {
             console.error(
@@ -2317,7 +2410,7 @@ client.once(
 );
 
 /* =========================
-   INTERAÇÕES
+   INTERAÃ‡Ã•ES
 ========================= */
 
 client.on(
@@ -2355,7 +2448,7 @@ client.on(
                         return interaction.reply(
                             {
                                 content:
-                                    '❌ Você não possui permissão para usar este comando.',
+                                    'âŒ VocÃª nÃ£o possui permissÃ£o para usar este comando.',
                                 ephemeral:
                                     true
                             }
@@ -2383,7 +2476,7 @@ client.on(
                         return interaction.reply(
                             {
                                 content:
-                                    'Você não possui permissão para configurar o suporte.',
+                                    'VocÃª nÃ£o possui permissÃ£o para configurar o suporte.',
                                 ephemeral:
                                     true
                             }
@@ -2399,7 +2492,7 @@ client.on(
                         return interaction.reply(
                             {
                                 content:
-                                    'Canal inválido.',
+                                    'Canal invÃ¡lido.',
                                 ephemeral:
                                     true
                             }
@@ -2426,7 +2519,7 @@ client.on(
                         return interaction.reply(
                             {
                                 content:
-                                    'Eu não tenho as permissões necessárias nesse canal.',
+                                    'Eu nÃ£o tenho as permissÃµes necessÃ¡rias nesse canal.',
                                 ephemeral:
                                     true
                             }
@@ -2463,7 +2556,7 @@ client.on(
                         return interaction.reply(
                             {
                                 content:
-                                    'Não foi possível enviar o painel nesse canal.',
+                                    'NÃ£o foi possÃ­vel enviar o painel nesse canal.',
                                 ephemeral:
                                     true
                             }
@@ -2496,22 +2589,11 @@ client.on(
                 }
             }
 
-            /* ===== BOTÕES ===== */
+            /* ===== BOTÃ•ES ===== */
 
             if (
                 interaction.isButton()
             ) {
-                const adminRolePageMatch = interaction.customId.match(/^shop_admin_role_page_(add|remove)_(-?\d+)$/);
-                if (adminRolePageMatch) {
-                    return interaction.update(purchaseRoleSelect(interaction.guild, adminRolePageMatch[1], Number(adminRolePageMatch[2])));
-                }
-                const shopPageMatch = interaction.customId.match(/^shop_customer_page_(\\d+)$/);
-                if (shopPageMatch) {
-                    return interaction.update(
-                        purchaseStorePanel(interaction.guild, Number(shopPageMatch[1]))
-                    );
-                }
-
                 /* ===== PAINEL PRINCIPAL ===== */
 
                 if (
@@ -2589,7 +2671,7 @@ client.on(
                 ) {
                     if (!isStaff(interaction.member)) {
                         return interaction.reply({
-                            content: '❌ Você não possui permissão para configurar a loja.',
+                            content: 'âŒ VocÃª nÃ£o possui permissÃ£o para configurar a loja.',
                             ephemeral: true
                         });
                     }
@@ -2605,7 +2687,7 @@ client.on(
                 ) {
                     if (!isStaff(interaction.member)) {
                         return interaction.reply({
-                            content: '❌ Sem permissão.',
+                            content: 'âŒ Sem permissÃ£o.',
                             ephemeral: true
                         });
                     }
@@ -2619,7 +2701,7 @@ client.on(
                 ) {
                     if (!isStaff(interaction.member)) {
                         return interaction.reply({
-                            content: '❌ Sem permissão.',
+                            content: 'âŒ Sem permissÃ£o.',
                             ephemeral: true
                         });
                     }
@@ -2635,14 +2717,14 @@ client.on(
                 ) {
                     if (!isStaff(interaction.member)) {
                         return interaction.reply({
-                            content: '❌ Sem permissão.',
+                            content: 'âŒ Sem permissÃ£o.',
                             ephemeral: true
                         });
                     }
 
                     if (!Object.keys(getLoja(interaction.guild.id).cargos).length) {
                         return interaction.reply({
-                            content: 'Ainda não há cargos cadastrados para remover.',
+                            content: 'Ainda nÃ£o hÃ¡ cargos cadastrados para remover.',
                             ephemeral: true
                         });
                     }
@@ -2658,7 +2740,7 @@ client.on(
                 ) {
                     if (!isStaff(interaction.member)) {
                         return interaction.reply({
-                            content: '❌ Sem permissão.',
+                            content: 'âŒ Sem permissÃ£o.',
                             ephemeral: true
                         });
                     }
@@ -2687,7 +2769,7 @@ client.on(
                 ) {
                     if (!isStaff(interaction.member)) {
                         return interaction.reply({
-                            content: '❌ Sem permissão.',
+                            content: 'âŒ Sem permissÃ£o.',
                             ephemeral: true
                         });
                     }
@@ -2699,7 +2781,7 @@ client.on(
 
                     if (!channel || channel.type !== ChannelType.GuildText) {
                         return interaction.reply({
-                            content: 'Defina primeiro um canal de texto válido para a loja.',
+                            content: 'Defina primeiro um canal de texto vÃ¡lido para a loja.',
                             ephemeral: true
                         });
                     }
@@ -2712,7 +2794,7 @@ client.on(
                         !permissions.has(PermissionFlagsBits.EmbedLinks)
                     ) {
                         return interaction.reply({
-                            content: 'Não tenho permissão para publicar a loja nesse canal.',
+                            content: 'NÃ£o tenho permissÃ£o para publicar a loja nesse canal.',
                             ephemeral: true
                         });
                     }
@@ -2739,13 +2821,13 @@ client.on(
                     } catch (error) {
                         console.error('Erro ao publicar loja:', error);
                         return interaction.reply({
-                            content: 'Não consegui publicar a loja. Confira as permissões do canal.',
+                            content: 'NÃ£o consegui publicar a loja. Confira as permissÃµes do canal.',
                             ephemeral: true
                         });
                     }
                 }
 
-                /* ===== MODERAÇÃO ===== */
+                /* ===== MODERAÃ‡ÃƒO ===== */
 
                 if (
                     [
@@ -2768,7 +2850,7 @@ client.on(
                         return interaction.reply(
                             {
                                 content:
-                                    '❌ Você não possui permissão para isso.',
+                                    'âŒ VocÃª nÃ£o possui permissÃ£o para isso.',
                                 ephemeral:
                                     true
                             }
@@ -2800,7 +2882,7 @@ client.on(
                         return interaction.reply(
                             {
                                 content:
-                                    '❌ Sem permissão.',
+                                    'âŒ Sem permissÃ£o.',
                                 ephemeral:
                                     true
                             }
@@ -2816,7 +2898,7 @@ client.on(
                     );
 
                     return interaction.reply(
-                        '🔒 Canal bloqueado.'
+                        'ðŸ”’ Canal bloqueado.'
                     );
                 }
 
@@ -2832,7 +2914,7 @@ client.on(
                         return interaction.reply(
                             {
                                 content:
-                                    '❌ Sem permissão.',
+                                    'âŒ Sem permissÃ£o.',
                                 ephemeral:
                                     true
                             }
@@ -2848,7 +2930,7 @@ client.on(
                     );
 
                     return interaction.reply(
-                        '🔓 Canal desbloqueado.'
+                        'ðŸ”“ Canal desbloqueado.'
                     );
                 }
 
@@ -2864,7 +2946,7 @@ client.on(
                         return interaction.reply(
                             {
                                 content:
-                                    '❌ Sem permissão.',
+                                    'âŒ Sem permissÃ£o.',
                                 ephemeral:
                                     true
                             }
@@ -2876,7 +2958,7 @@ client.on(
                     );
 
                     return interaction.reply(
-                        '🐢 Slowmode definido para 10 segundos.'
+                        'ðŸ¢ Slowmode definido para 10 segundos.'
                     );
                 }
 
@@ -2894,7 +2976,7 @@ client.on(
                         return interaction.reply(
                             {
                                 content:
-                                    'Sem permissão.',
+                                    'Sem permissÃ£o.',
                                 ephemeral:
                                     true
                             }
@@ -2951,7 +3033,7 @@ client.on(
                         return interaction.reply(
                             {
                                 content:
-                                    'Sem permissão.',
+                                    'Sem permissÃ£o.',
                                 ephemeral:
                                     true
                             }
@@ -3008,7 +3090,7 @@ client.on(
                         return interaction.reply(
                             {
                                 content:
-                                    'Sem permissão.',
+                                    'Sem permissÃ£o.',
                                 ephemeral:
                                     true
                             }
@@ -3065,7 +3147,7 @@ client.on(
                         return interaction.reply(
                             {
                                 content:
-                                    'Sem permissão.',
+                                    'Sem permissÃ£o.',
                                 ephemeral:
                                     true
                             }
@@ -3099,7 +3181,7 @@ client.on(
                         return interaction.reply(
                             {
                                 content:
-                                    'O canal configurado não existe.',
+                                    'O canal configurado nÃ£o existe.',
                                 ephemeral:
                                     true
                             }
@@ -3126,7 +3208,7 @@ client.on(
                         return interaction.reply(
                             {
                                 content:
-                                    'Eu não tenho as permissões necessárias nesse canal.',
+                                    'Eu nÃ£o tenho as permissÃµes necessÃ¡rias nesse canal.',
                                 ephemeral:
                                     true
                             }
@@ -3189,7 +3271,7 @@ client.on(
                     );
                 }
 
-                /* ===== AÇÕES TICKETS ===== */
+                /* ===== AÃ‡Ã•ES TICKETS ===== */
 
                 if (
                     interaction.customId ===
@@ -3203,7 +3285,7 @@ client.on(
                         return interaction.reply(
                             {
                                 content:
-                                    'Você não possui permissão para assumir este ticket.',
+                                    'VocÃª nÃ£o possui permissÃ£o para assumir este ticket.',
                                 ephemeral:
                                     true
                             }
@@ -3227,7 +3309,7 @@ client.on(
                         return interaction.reply(
                             {
                                 content:
-                                    'Você não possui permissão para chamar a equipe.',
+                                    'VocÃª nÃ£o possui permissÃ£o para chamar a equipe.',
                                 ephemeral:
                                     true
                             }
@@ -3249,7 +3331,7 @@ client.on(
                         return interaction.reply(
                             {
                                 content:
-                                    'O cargo ADM não está configurado.',
+                                    'O cargo ADM nÃ£o estÃ¡ configurado.',
                                 ephemeral:
                                     true
                             }
@@ -3272,7 +3354,7 @@ client.on(
                         return interaction.reply(
                             {
                                 content:
-                                    'Nenhum ADM disponível.',
+                                    'Nenhum ADM disponÃ­vel.',
                                 ephemeral:
                                     true
                             }
@@ -3327,7 +3409,7 @@ client.on(
                         return interaction.reply(
                             {
                                 content:
-                                    'Você não possui permissão para fechar este ticket.',
+                                    'VocÃª nÃ£o possui permissÃ£o para fechar este ticket.',
                                 ephemeral:
                                     true
                             }
@@ -3335,7 +3417,7 @@ client.on(
                     }
 
                     await interaction.reply(
-                        'Ticket será fechado em **5 segundos**...'
+                        'Ticket serÃ¡ fechado em **5 segundos**...'
                     );
 
                     setTimeout(
@@ -3350,7 +3432,7 @@ client.on(
                     return;
                 }
 
-                /* ===== PROTEÇÃO ===== */
+                /* ===== PROTEÃ‡ÃƒO ===== */
 
                 if (
                     interaction.customId ===
@@ -3364,7 +3446,7 @@ client.on(
                         return interaction.reply(
                             {
                                 content:
-                                    '❌ Sem permissão.',
+                                    'âŒ Sem permissÃ£o.',
                                 ephemeral:
                                     true
                             }
@@ -3398,7 +3480,7 @@ client.on(
                         return interaction.reply(
                             {
                                 content:
-                                    '❌ Sem permissão.',
+                                    'âŒ Sem permissÃ£o.',
                                 ephemeral:
                                     true
                             }
@@ -3434,7 +3516,7 @@ client.on(
                         return interaction.reply(
                             {
                                 content:
-                                    '❌ Sem permissão.',
+                                    'âŒ Sem permissÃ£o.',
                                 ephemeral:
                                     true
                             }
@@ -3467,7 +3549,7 @@ client.on(
                         return interaction.reply(
                             {
                                 content:
-                                    'Não existem sorteios ativos.',
+                                    'NÃ£o existem sorteios ativos.',
                                 ephemeral:
                                     true
                             }
@@ -3480,7 +3562,7 @@ client.on(
                                 active
                                     .map(
                                         giveaway =>
-                                            `🎁 **${giveaway.prize}** — **${giveaway.winners} vencedor(es)** — <t:${Math.floor(giveaway.end / 1000)}:R>\n> Participantes: **${giveaway.participants?.length || 0}**`
+                                            `ðŸŽ **${giveaway.prize}** â€” **${giveaway.winners} vencedor(es)** â€” <t:${Math.floor(giveaway.end / 1000)}:R>\n> Participantes: **${giveaway.participants?.length || 0}**`
                                     )
                                     .join(
                                         '\n\n'
@@ -3489,6 +3571,75 @@ client.on(
                                 true
                         }
                     );
+                }
+
+                /* ===== LISTA DE PARTICIPANTES ===== */
+
+                if (interaction.customId.startsWith('giveaway_list_')) {
+                    const parts = interaction.customId.split('_');
+                    const action = parts[2];
+
+                    if (action === 'prev' || action === 'next') {
+                        const page = Number(parts[parts.length - 1]) || 0;
+                        const giveawayId = parts.slice(3, -1).join('_');
+                        const giveaway = sorteios[giveawayId];
+
+                        if (!giveaway) {
+                            return interaction.reply({
+                                content: 'âŒ Esse sorteio nÃ£o estÃ¡ mais disponÃ­vel.',
+                                ephemeral: true
+                            });
+                        }
+
+                        const nextPage = action === 'next' ? page + 1 : page - 1;
+                        return interaction.update(
+                            giveawayParticipantList(interaction.guild, giveaway, nextPage)
+                        );
+                    }
+
+                    const giveawayId = interaction.customId.replace('giveaway_list_', '');
+                    const giveaway = sorteios[giveawayId];
+
+                    if (!giveaway) {
+                        return interaction.reply({
+                            content: 'âŒ Esse sorteio nÃ£o estÃ¡ mais disponÃ­vel.',
+                            ephemeral: true
+                        });
+                    }
+
+                    return interaction.reply(
+                        giveawayParticipantList(interaction.guild, giveaway, 0)
+                    );
+                }
+
+                /* ===== GIRAR OUTRA PESSOA ===== */
+
+                if (interaction.customId.startsWith('giveaway_reroll_')) {
+                    if (!isStaff(interaction.member)) {
+                        return interaction.reply({
+                            content: 'âŒ Sem permissÃ£o.',
+                            ephemeral: true
+                        });
+                    }
+
+                    const giveawayId = interaction.customId.replace('giveaway_reroll_', '');
+                    const giveaway = sorteios[giveawayId];
+
+                    if (!giveaway) {
+                        return interaction.reply({
+                            content: 'âŒ Esse sorteio jÃ¡ foi resolvido.',
+                            ephemeral: true
+                        });
+                    }
+
+                    await interaction.deferReply({ ephemeral: true });
+                    const winner = await rerollGiveaway(giveawayId);
+
+                    if (winner) {
+                        return interaction.editReply(`ðŸŽ‰ Novo vencedor: <@${winner}>`);
+                    }
+
+                    return interaction.editReply('ðŸŽ² O sorteio foi girado novamente. Confira a mensagem do sorteio.');
                 }
 
                 /* ===== PARTICIPAR ===== */
@@ -3513,7 +3664,7 @@ client.on(
                         return interaction.reply(
                             {
                                 content:
-                                    '❌ Esse sorteio não está mais ativo.',
+                                    'âŒ Esse sorteio nÃ£o estÃ¡ mais ativo.',
                                 ephemeral:
                                     true
                             }
@@ -3531,7 +3682,7 @@ client.on(
                         return interaction.reply(
                             {
                                 content:
-                                    '❌ Esse sorteio já terminou.',
+                                    'âŒ Esse sorteio jÃ¡ terminou.',
                                 ephemeral:
                                     true
                             }
@@ -3555,7 +3706,7 @@ client.on(
                         return interaction.reply(
                             {
                                 content:
-                                    '❌ Você já está participando desse sorteio.',
+                                    'âŒ VocÃª jÃ¡ estÃ¡ participando desse sorteio.',
                                 ephemeral:
                                     true
                             }
@@ -3579,7 +3730,7 @@ client.on(
                         return interaction.reply(
                             {
                                 content:
-                                    `❌ ${requirement.reason}`,
+                                    `âŒ ${requirement.reason}`,
                                 ephemeral:
                                     true
                             }
@@ -3620,14 +3771,14 @@ client.on(
                     return interaction.reply(
                         {
                             content:
-                                '🎁 Você entrou no sorteio!',
+                                'ðŸŽ VocÃª entrou no sorteio!',
                             ephemeral:
                                 true
                         }
                     );
                 }
 
-                /* ===== DIVERSÃO ===== */
+                /* ===== DIVERSÃƒO ===== */
 
                 if (
                     interaction.customId ===
@@ -3640,7 +3791,7 @@ client.on(
                         ) + 1;
 
                     return interaction.reply(
-                        `🎲 Você tirou **${number}**!`
+                        `ðŸŽ² VocÃª tirou **${number}**!`
                     );
                 }
 
@@ -3649,7 +3800,7 @@ client.on(
                     'fun_coin'
                 ) {
                     return interaction.reply(
-                        `🪙 Deu **${randomItem(
+                        `ðŸª™ Deu **${randomItem(
                             [
                                 'cara',
                                 'coroa'
@@ -3663,14 +3814,14 @@ client.on(
                     'fun_8ball'
                 ) {
                     return interaction.reply(
-                        `🎱 ${randomItem(
+                        `ðŸŽ± ${randomItem(
                             [
                                 'Sim.',
-                                'Não.',
+                                'NÃ£o.',
                                 'Talvez.',
                                 'Com certeza.',
                                 'Provavelmente.',
-                                'Não conte com isso.'
+                                'NÃ£o conte com isso.'
                             ]
                         )}`
                     );
@@ -3681,7 +3832,7 @@ client.on(
                     'fun_number'
                 ) {
                     return interaction.reply(
-                        `🔢 Número escolhido: **${Math.floor(
+                        `ðŸ”¢ NÃºmero escolhido: **${Math.floor(
                             Math.random() *
                                 100
                         ) + 1}**`
@@ -3695,7 +3846,7 @@ client.on(
                     return interaction.reply(
                         {
                             content:
-                                '🃏 Use `/escolher` quando disponível.',
+                                'ðŸƒ Use `/escolher` quando disponÃ­vel.',
                             ephemeral:
                                 true
                         }
@@ -3707,12 +3858,12 @@ client.on(
                     'fun_quiz'
                 ) {
                     return interaction.reply(
-                        `🏆 ${randomItem(
+                        `ðŸ† ${randomItem(
                             [
-                                'Você consegue!',
+                                'VocÃª consegue!',
                                 'Boa sorte!',
                                 'Hora do desafio!',
-                                'Mostre o que você sabe!'
+                                'Mostre o que vocÃª sabe!'
                             ]
                         )}`
                     );
@@ -3730,7 +3881,7 @@ client.on(
                 ) {
                     if (!isStaff(interaction.member)) {
                         return interaction.reply({
-                            content: '❌ Sem permissão.',
+                            content: 'âŒ Sem permissÃ£o.',
                             ephemeral: true
                         });
                     }
@@ -3739,7 +3890,7 @@ client.on(
 
                     if (!role || role.id === interaction.guild.id || role.managed) {
                         return interaction.reply({
-                            content: 'Esse cargo não pode ser configurado para venda.',
+                            content: 'Esse cargo nÃ£o pode ser configurado para venda.',
                             ephemeral: true
                         });
                     }
@@ -3749,7 +3900,7 @@ client.on(
                     if (interaction.customId === 'shop_select_remove') {
                         if (!loja.cargos[role.id]) {
                             return interaction.reply({
-                                content: 'Esse cargo não está cadastrado na loja.',
+                                content: 'Esse cargo nÃ£o estÃ¡ cadastrado na loja.',
                                 ephemeral: true
                             });
                         }
@@ -3765,11 +3916,11 @@ client.on(
 
                     const modal = new ModalBuilder()
                         .setCustomId(`modal_shop_price_${role.id}`)
-                        .setTitle('Definir preço do cargo');
+                        .setTitle('Definir preÃ§o do cargo');
 
                     const input = new TextInputBuilder()
                         .setCustomId('price')
-                        .setLabel('Preço em reais (ex: 9,90)')
+                        .setLabel('PreÃ§o em reais (ex: 9,90)')
                         .setPlaceholder('9,90')
                         .setStyle(TextInputStyle.Short)
                         .setRequired(true)
@@ -3788,36 +3939,6 @@ client.on(
             if (
                 interaction.isStringSelectMenu()
             ) {
-                if (interaction.customId === 'shop_admin_role_select_add' || interaction.customId === 'shop_admin_role_select_remove') {
-                    if (!isStaff(interaction.member)) {
-                        return interaction.reply({ content: '❌ Sem permissão.', ephemeral: true });
-                    }
-                    const role = interaction.guild.roles.cache.get(interaction.values[0]);
-                    if (!role || role.id === interaction.guild.id || role.managed) {
-                        return interaction.reply({ content: 'Esse cargo não pode ser configurado para venda.', ephemeral: true });
-                    }
-                    const loja = getLoja(interaction.guild.id);
-                    if (interaction.customId.endsWith('_remove')) {
-                        if (!loja.cargos[role.id]) {
-                            return interaction.reply({ content: 'Esse cargo não está cadastrado na loja.', ephemeral: true });
-                        }
-                        delete loja.cargos[role.id];
-                        saveLojas();
-                        return interaction.reply({ content: `O cargo **${role.name}** foi removido da loja.`, ephemeral: true });
-                    }
-                    const modal = new ModalBuilder()
-                        .setCustomId(`modal_shop_price_${role.id}`)
-                        .setTitle('Definir preço do cargo');
-                    const input = new TextInputBuilder()
-                        .setCustomId('price')
-                        .setLabel('Preço em reais (ex: 9,90)')
-                        .setPlaceholder('9,90')
-                        .setStyle(TextInputStyle.Short)
-                        .setRequired(true)
-                        .setMaxLength(12);
-                    modal.addComponents(new ActionRowBuilder().addComponents(input));
-                    return interaction.showModal(modal);
-                }
                 if (
                     interaction.customId === 'shop_customer_select'
                 ) {
@@ -3843,7 +3964,7 @@ client.on(
                         return interaction.update(
                             {
                                 content:
-                                    'ADM não encontrado.',
+                                    'ADM nÃ£o encontrado.',
                                 components:
                                     []
                             }
@@ -3871,7 +3992,7 @@ client.on(
                 ) {
                     if (!isStaff(interaction.member)) {
                         return interaction.reply({
-                            content: '❌ Sem permissão.',
+                            content: 'âŒ Sem permissÃ£o.',
                             ephemeral: true
                         });
                     }
@@ -3881,7 +4002,7 @@ client.on(
 
                     if (!channel || channel.type !== ChannelType.GuildText) {
                         return interaction.reply({
-                            content: 'Canal de texto inválido. Confira o ID e tente novamente.',
+                            content: 'Canal de texto invÃ¡lido. Confira o ID e tente novamente.',
                             ephemeral: true
                         });
                     }
@@ -3894,14 +4015,14 @@ client.on(
                         !permissions.has(PermissionFlagsBits.EmbedLinks)
                     ) {
                         return interaction.reply({
-                            content: 'Não tenho permissão para enviar mensagens e embeds nesse canal.',
+                            content: 'NÃ£o tenho permissÃ£o para enviar mensagens e embeds nesse canal.',
                             ephemeral: true
                         });
                     }
 
                     const loja = getLoja(interaction.guild.id);
                     loja.canalId = channel.id;
-                    // Se o canal mudou, a próxima publicação criará a mensagem nesse novo canal.
+                    // Se o canal mudou, a prÃ³xima publicaÃ§Ã£o criarÃ¡ a mensagem nesse novo canal.
                     loja.messageId = null;
                     saveLojas();
 
@@ -3916,7 +4037,7 @@ client.on(
                 ) {
                     if (!isStaff(interaction.member)) {
                         return interaction.reply({
-                            content: '❌ Sem permissão.',
+                            content: 'âŒ Sem permissÃ£o.',
                             ephemeral: true
                         });
                     }
@@ -3926,7 +4047,7 @@ client.on(
 
                     if (!role || role.id === interaction.guild.id || role.managed) {
                         return interaction.reply({
-                            content: 'Esse cargo não pode ser vendido.',
+                            content: 'Esse cargo nÃ£o pode ser vendido.',
                             ephemeral: true
                         });
                     }
@@ -3940,7 +4061,7 @@ client.on(
 
                     if (!/^\d+(\.\d{1,2})?$/.test(rawPrice)) {
                         return interaction.reply({
-                            content: 'Preço inválido. Use, por exemplo, 9,90 ou 10.',
+                            content: 'PreÃ§o invÃ¡lido. Use, por exemplo, 9,90 ou 10.',
                             ephemeral: true
                         });
                     }
@@ -3948,7 +4069,7 @@ client.on(
                     const price = Number(rawPrice);
                     if (!Number.isFinite(price) || price < 0) {
                         return interaction.reply({
-                            content: 'O preço precisa ser um número válido maior ou igual a zero.',
+                            content: 'O preÃ§o precisa ser um nÃºmero vÃ¡lido maior ou igual a zero.',
                             ephemeral: true
                         });
                     }
@@ -3963,7 +4084,7 @@ client.on(
                     });
                 }
 
-                /* ===== MODERAÇÃO ===== */
+                /* ===== MODERAÃ‡ÃƒO ===== */
 
                 if (
                     [
@@ -3986,7 +4107,7 @@ client.on(
                         return interaction.reply(
                             {
                                 content:
-                                    '❌ Sem permissão.',
+                                    'âŒ Sem permissÃ£o.',
                                 ephemeral:
                                     true
                             }
@@ -4053,7 +4174,7 @@ client.on(
                         );
 
                         return interaction.reply(
-                            `⚠️ Usuário <@${userId}> recebeu uma advertência.`
+                            `âš ï¸ UsuÃ¡rio <@${userId}> recebeu uma advertÃªncia.`
                         );
                     }
 
@@ -4071,12 +4192,12 @@ client.on(
                             !warns.length
                         ) {
                             return interaction.reply(
-                                `📋 <@${userId}> não possui advertências.`
+                                `ðŸ“‹ <@${userId}> nÃ£o possui advertÃªncias.`
                             );
                         }
 
                         return interaction.reply(
-                            `📋 <@${userId}> possui **${warns.length}** advertência(s).`
+                            `ðŸ“‹ <@${userId}> possui **${warns.length}** advertÃªncia(s).`
                         );
                     }
 
@@ -4094,7 +4215,7 @@ client.on(
                             !warns.length
                         ) {
                             return interaction.reply(
-                                `O usuário <@${userId}> não possui advertências.`
+                                `O usuÃ¡rio <@${userId}> nÃ£o possui advertÃªncias.`
                             );
                         }
 
@@ -4106,7 +4227,7 @@ client.on(
                         );
 
                         return interaction.reply(
-                            `🗑️ A última advertência de <@${userId}> foi removida.`
+                            `ðŸ—‘ï¸ A Ãºltima advertÃªncia de <@${userId}> foi removida.`
                         );
                     }
 
@@ -4121,7 +4242,7 @@ client.on(
                         return interaction.reply(
                             {
                                 content:
-                                    '❌ Usuário não encontrado no servidor.',
+                                    'âŒ UsuÃ¡rio nÃ£o encontrado no servidor.',
                                 ephemeral:
                                     true
                             }
@@ -4137,7 +4258,7 @@ client.on(
                         );
 
                         return interaction.reply(
-                            `👢 ${member.user.tag} foi expulso.`
+                            `ðŸ‘¢ ${member.user.tag} foi expulso.`
                         );
                     }
 
@@ -4152,7 +4273,7 @@ client.on(
                         );
 
                         return interaction.reply(
-                            `🔨 ${member.user.tag} foi banido.`
+                            `ðŸ”¨ ${member.user.tag} foi banido.`
                         );
                     }
 
@@ -4176,7 +4297,7 @@ client.on(
                             return interaction.reply(
                                 {
                                     content:
-                                        '❌ Duração inválida.',
+                                        'âŒ DuraÃ§Ã£o invÃ¡lida.',
                                     ephemeral:
                                         true
                                 }
@@ -4190,7 +4311,7 @@ client.on(
                         );
 
                         return interaction.reply(
-                            `⏱️ ${member.user.tag} recebeu timeout por ${duration}s.`
+                            `â±ï¸ ${member.user.tag} recebeu timeout por ${duration}s.`
                         );
                     }
 
@@ -4204,7 +4325,7 @@ client.on(
                         );
 
                         return interaction.reply(
-                            `🔓 Timeout de ${member.user.tag} removido.`
+                            `ðŸ”“ Timeout de ${member.user.tag} removido.`
                         );
                     }
                 }
@@ -4233,7 +4354,7 @@ client.on(
                         return interaction.reply(
                             {
                                 content:
-                                    'Canal inválido.',
+                                    'Canal invÃ¡lido.',
                                 ephemeral:
                                     true
                             }
@@ -4279,7 +4400,7 @@ client.on(
                         return interaction.reply(
                             {
                                 content:
-                                    'Categoria inválida.',
+                                    'Categoria invÃ¡lida.',
                                 ephemeral:
                                     true
                             }
@@ -4321,7 +4442,7 @@ client.on(
                         return interaction.reply(
                             {
                                 content:
-                                    'Cargo inválido.',
+                                    'Cargo invÃ¡lido.',
                                 ephemeral:
                                     true
                             }
@@ -4344,7 +4465,7 @@ client.on(
                 }
 
                 /* =========================
-                   CRIAÇÃO DO SORTEIO
+                   CRIAÃ‡ÃƒO DO SORTEIO
                 ========================= */
 
                 if (
@@ -4359,7 +4480,7 @@ client.on(
                         return interaction.reply(
                             {
                                 content:
-                                    '❌ Sem permissão.',
+                                    'âŒ Sem permissÃ£o.',
                                 ephemeral:
                                     true
                             }
@@ -4397,7 +4518,7 @@ client.on(
                         return interaction.reply(
                             {
                                 content:
-                                    '❌ Informe um prêmio.',
+                                    'âŒ Informe um prÃªmio.',
                                 ephemeral:
                                     true
                             }
@@ -4413,7 +4534,7 @@ client.on(
                         return interaction.reply(
                             {
                                 content:
-                                    '❌ A duração precisa ser um número maior que 0.',
+                                    'âŒ A duraÃ§Ã£o precisa ser um nÃºmero maior que 0.',
                                 ephemeral:
                                     true
                             }
@@ -4429,7 +4550,7 @@ client.on(
                         return interaction.reply(
                             {
                                 content:
-                                    '❌ A quantidade de vencedores precisa ser um número inteiro maior que 0.',
+                                    'âŒ A quantidade de vencedores precisa ser um nÃºmero inteiro maior que 0.',
                                 ephemeral:
                                     true
                             }
@@ -4450,7 +4571,7 @@ client.on(
                         return interaction.reply(
                             {
                                 content:
-                                    '❌ O cargo informado nos requisitos não existe neste servidor.',
+                                    'âŒ O cargo informado nos requisitos nÃ£o existe neste servidor.',
                                 ephemeral:
                                     true
                             }
@@ -4482,6 +4603,9 @@ client.on(
 
                         minDays:
                             parsed.minDays,
+
+                        minInvites:
+                            parsed.minInvites,
 
                         end:
                             Date.now() +
@@ -4540,7 +4664,7 @@ client.on(
                         return interaction.reply(
                             {
                                 content:
-                                    '🎁 Sorteio criado com sucesso!',
+                                    'ðŸŽ Sorteio criado com sucesso!',
                                 ephemeral:
                                     true
                             }
@@ -4563,7 +4687,7 @@ client.on(
                         return interaction.reply(
                             {
                                 content:
-                                    '❌ Não consegui enviar o sorteio neste canal.',
+                                    'âŒ NÃ£o consegui enviar o sorteio neste canal.',
                                 ephemeral:
                                     true
                             }
@@ -4573,7 +4697,7 @@ client.on(
             }
         } catch (error) {
             console.error(
-                'Erro na interação:',
+                'Erro na interaÃ§Ã£o:',
                 error
             );
 
@@ -4585,7 +4709,7 @@ client.on(
                     await interaction.reply(
                         {
                             content:
-                                '❌ Ocorreu um erro ao executar esta ação.',
+                                'âŒ Ocorreu um erro ao executar esta aÃ§Ã£o.',
                             ephemeral:
                                 true
                         }
@@ -4672,7 +4796,7 @@ client.on(
                     );
 
                     await message.channel.send(
-                        `🛡️ ${member} recebeu timeout por spam.`
+                        `ðŸ›¡ï¸ ${member} recebeu timeout por spam.`
                     );
 
                     spamTracker.delete(
