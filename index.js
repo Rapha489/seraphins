@@ -2393,9 +2393,14 @@ client.once(
     'clientReady',
     async () => {
         try {
-            await client.application.commands.set(
-                commands
-            );
+            const targetGuild = client.guilds.cache.get(OFFICIAL_SERVER_ID);
+            if (targetGuild) {
+                await targetGuild.commands.set(commands);
+                console.log(`✅ Comandos registrados no servidor ${targetGuild.name}!`);
+            } else {
+                await client.application.commands.set(commands);
+                console.log('⚠️ Servidor oficial não encontrado; comandos registrados globalmente.');
+            }
 
             console.log(
                 'âœ… Comandos registrados!'
@@ -4809,7 +4814,28 @@ client.on(
 );
 
 /* =========================
-   LOGIN
+   DIAGNÓSTICOS / LOGIN
 ========================= */
 
-client.login(TOKEN);
+client.on('error', error => {
+    console.error('❌ Erro do Discord:', error);
+});
+
+client.on('shardError', error => {
+    console.error('❌ Erro de conexão com o Discord:', error);
+});
+
+client.on('warn', warning => {
+    console.warn('⚠️ Discord:', warning);
+});
+
+if (!TOKEN) {
+    console.error('❌ TOKEN não encontrado. Verifique se o arquivo .env existe e contém: TOKEN=SEU_TOKEN');
+    process.exit(1);
+}
+
+client.login(TOKEN).catch(error => {
+    console.error('❌ Não foi possível iniciar o bot.');
+    console.error(error);
+    process.exit(1);
+});
