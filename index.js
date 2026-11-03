@@ -610,6 +610,9 @@ async function openTicket(
     interaction,
     type = 'duvida'
 ) {
+    // Confirma a interação imediatamente para evitar DiscordAPIError 10062.
+    await interaction.deferReply({ ephemeral: true });
+
     const guild =
         interaction.guild;
 
@@ -630,10 +633,8 @@ async function openTicket(
         );
 
     if (existing) {
-        return interaction.reply({
-            content:
-                `Você já possui um ticket aberto: ${existing}`,
-            ephemeral: true
+        return interaction.editReply({
+            content: `Você já possui um ticket aberto: ${existing}`
         });
     }
 
@@ -826,10 +827,8 @@ async function openTicket(
         components: [buttons]
     });
 
-    return interaction.reply({
-        content:
-            `Ticket de ${ticketType} criado: ${channel}`,
-        ephemeral: true
+    return interaction.editReply({
+        content: `Ticket de ${ticketType} criado: ${channel}`
     });
 }
 
