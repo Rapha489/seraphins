@@ -651,8 +651,6 @@ async function openTicket(
         );
     const staffRole =
         guild.roles.cache.get(STAFF_ROLE_ID);
-    const sorteioRole =
-        guild.roles.cache.get(SORTEIO_ROLE_ID);
 
     let username =
         interaction.user.username
@@ -748,23 +746,6 @@ async function openTicket(
         );
     }
 
-    if (
-        sorteioRole &&
-        sorteioRole.id !== role?.id &&
-        sorteioRole.id !== staffRole?.id
-    ) {
-        await channel.permissionOverwrites.create(
-            sorteioRole.id,
-            {
-                ViewChannel: true,
-                SendMessages: true,
-                ReadMessageHistory: true,
-                EmbedLinks: true,
-                AttachFiles: true
-            }
-        );
-    }
-
     const embed =
         new EmbedBuilder()
             .setTitle(
@@ -828,7 +809,7 @@ async function openTicket(
                     )
             );
 
-    const ticketMentions = [role, staffRole, sorteioRole]
+    const ticketMentions = [role, staffRole]
         .filter((mentionedRole, index, roles) =>
             mentionedRole && roles.findIndex(item => item?.id === mentionedRole.id) === index
         )
@@ -838,7 +819,7 @@ async function openTicket(
     await channel.send({
         content: `${ticketMentions} ${interaction.user}`.trim(),
         allowedMentions: {
-            roles: [role?.id, staffRole?.id, sorteioRole?.id].filter(Boolean),
+            roles: [role?.id, staffRole?.id].filter(Boolean),
             users: [interaction.user.id]
         },
         embeds: [embed],
