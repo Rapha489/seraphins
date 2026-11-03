@@ -16,8 +16,7 @@ const {
     TextInputStyle,
     StringSelectMenuBuilder,
     StringSelectMenuOptionBuilder,
-    RoleSelectMenuBuilder,
-    MessageFlags
+    RoleSelectMenuBuilder
 } = require('discord.js');
 
 const fs = require('fs');
@@ -27,6 +26,7 @@ const TOKEN = process.env.TOKEN;
 
 const ADM_ROLE_ID = '1454153278060367933';
 const STAFF_ROLE_ID = '1556456154643697797';
+const BOT_ADMIN_ROLE_ID = '1567273960935264348';
 const OFFICIAL_SERVER_ID = '1401231514812809256';
 
 const TICKET_BANNER_URL = 'https://cdn.imgchest.com/files/52cd34cf74ad.png';
@@ -154,7 +154,8 @@ function isStaff(member) {
             PermissionFlagsBits.Administrator
         ) ||
         member.roles.cache.has(ADM_ROLE_ID) ||
-        member.roles.cache.has(STAFF_ROLE_ID)
+        member.roles.cache.has(STAFF_ROLE_ID) ||
+        member.roles.cache.has(BOT_ADMIN_ROLE_ID)
     );
 }
 
@@ -205,6 +206,7 @@ function mainPanel() {
             new ButtonBuilder()
                 .setCustomId('panel_mod')
                 .setLabel('Moderação')
+                .setEmoji('🛡️')
                 .setStyle(ButtonStyle.Primary),
 
             new ButtonBuilder()
@@ -215,11 +217,13 @@ function mainPanel() {
             new ButtonBuilder()
                 .setCustomId('panel_protection')
                 .setLabel('Proteção')
+                .setEmoji('🛡️')
                 .setStyle(ButtonStyle.Secondary),
 
             new ButtonBuilder()
                 .setCustomId('panel_giveaway')
                 .setLabel('Sorteios')
+                .setEmoji('🎁')
                 .setStyle(ButtonStyle.Secondary)
         );
 
@@ -228,16 +232,19 @@ function mainPanel() {
             new ButtonBuilder()
                 .setCustomId('panel_server')
                 .setLabel('Servidor')
+                .setEmoji('📊')
                 .setStyle(ButtonStyle.Secondary),
 
             new ButtonBuilder()
                 .setCustomId('panel_fun')
                 .setLabel('Diversão')
+                .setEmoji('🎉')
                 .setStyle(ButtonStyle.Secondary),
 
             new ButtonBuilder()
                 .setCustomId('panel_config')
                 .setLabel('Configurações')
+                .setEmoji('⚙️')
                 .setStyle(ButtonStyle.Secondary)
         );
 
@@ -246,6 +253,7 @@ function mainPanel() {
             new ButtonBuilder()
                 .setCustomId('panel_compras')
                 .setLabel('Painel de Compras')
+                .setEmoji('🛒')
                 .setStyle(ButtonStyle.Success)
         );
 
@@ -261,7 +269,7 @@ function mainPanel() {
 
 function moderationPanel() {
     const embed = new EmbedBuilder()
-        .setTitle('ðŸ›¡ï¸ Moderação')
+        .setTitle('🛡️ Moderação')
         .setDescription(
             'Ferramentas de moderação do servidor.\n\n' +
             'Selecione uma ação abaixo.'
@@ -273,21 +281,25 @@ function moderationPanel() {
             new ButtonBuilder()
                 .setCustomId('mod_ban')
                 .setLabel('Banir')
+                .setEmoji('🔨')
                 .setStyle(ButtonStyle.Danger),
 
             new ButtonBuilder()
                 .setCustomId('mod_kick')
                 .setLabel('Expulsar')
+                .setEmoji('👢')
                 .setStyle(ButtonStyle.Danger),
 
             new ButtonBuilder()
                 .setCustomId('mod_timeout')
                 .setLabel('Timeout')
+                .setEmoji('⏱️')
                 .setStyle(ButtonStyle.Primary),
 
             new ButtonBuilder()
                 .setCustomId('mod_untimeout')
                 .setLabel('Remover Timeout')
+                .setEmoji('🔓')
                 .setStyle(ButtonStyle.Success)
         );
 
@@ -296,26 +308,31 @@ function moderationPanel() {
             new ButtonBuilder()
                 .setCustomId('mod_warn')
                 .setLabel('Advertir')
+                .setEmoji('⚠️')
                 .setStyle(ButtonStyle.Primary),
 
             new ButtonBuilder()
                 .setCustomId('mod_warns')
                 .setLabel('Advertências')
+                .setEmoji('📋')
                 .setStyle(ButtonStyle.Secondary),
 
             new ButtonBuilder()
                 .setCustomId('mod_delwarn')
                 .setLabel('Remover Advertência')
+                .setEmoji('🗑️')
                 .setStyle(ButtonStyle.Secondary),
 
             new ButtonBuilder()
                 .setCustomId('mod_lock')
                 .setLabel('Bloquear Canal')
+                .setEmoji('🔒')
                 .setStyle(ButtonStyle.Danger),
 
             new ButtonBuilder()
                 .setCustomId('mod_unlock')
                 .setLabel('Desbloquear Canal')
+                .setEmoji('🔓')
                 .setStyle(ButtonStyle.Success)
         );
 
@@ -324,6 +341,7 @@ function moderationPanel() {
             new ButtonBuilder()
                 .setCustomId('mod_slowmode')
                 .setLabel('Slowmode')
+                .setEmoji('🐢')
                 .setStyle(ButtonStyle.Secondary)
         );
 
@@ -592,8 +610,6 @@ async function openTicket(
     interaction,
     type = 'duvida'
 ) {
-    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
-
     const guild =
         interaction.guild;
 
@@ -614,10 +630,10 @@ async function openTicket(
         );
 
     if (existing) {
-        return safeInteractionReply(interaction, {
+        return interaction.reply({
             content:
                 `Você já possui um ticket aberto: ${existing}`,
-            flags: MessageFlags.Ephemeral
+            ephemeral: true
         });
     }
 
@@ -714,7 +730,7 @@ async function openTicket(
     const embed =
         new EmbedBuilder()
             .setTitle(
-                `Suporte â€¢ ${ticketType}`
+                `Suporte • ${ticketType}`
             )
             .setDescription(
                 `Olá ${interaction.user}!\n\n` +
@@ -783,10 +799,10 @@ async function openTicket(
         components: [buttons]
     });
 
-    return safeInteractionReply(interaction, {
+    return interaction.reply({
         content:
             `Ticket de ${ticketType} criado: ${channel}`,
-        flags: MessageFlags.Ephemeral
+        ephemeral: true
     });
 }
 
@@ -805,12 +821,12 @@ function purchaseConfigPanel(guild) {
         ? cargos.slice(0, 15).map(([roleId, data]) => {
             const role = guild.roles.cache.get(roleId);
             const price = Number(data.price || 0).toFixed(2).replace('.', ',');
-            return `â€¢ ${role ? role.name : `Cargo removido (${roleId})`} â€” R$ ${price}`;
+            return `• ${role ? role.name : `Cargo removido (${roleId})`} — R$ ${price}`;
         }).join('\n')
         : 'Nenhum cargo configurado ainda.';
 
     const embed = new EmbedBuilder()
-        .setTitle(' Painel de Compras')
+        .setTitle('🛒 Painel de Compras')
         .setDescription(
             `Configure os cargos que serão vendidos e o canal da loja.\n\n` +
             `**Canal da loja:** ${channel ? channel.toString() : 'Não definido'}\n\n` +
@@ -823,14 +839,17 @@ function purchaseConfigPanel(guild) {
         new ButtonBuilder()
             .setCustomId('shop_add_role')
             .setLabel('Adicionar/Editar Cargo')
+            .setEmoji('➕')
             .setStyle(ButtonStyle.Primary),
         new ButtonBuilder()
             .setCustomId('shop_remove_role')
             .setLabel('Remover Cargo')
+            .setEmoji('🗑️')
             .setStyle(ButtonStyle.Danger),
         new ButtonBuilder()
             .setCustomId('shop_set_channel')
             .setLabel('Definir Canal')
+            .setEmoji('📍')
             .setStyle(ButtonStyle.Secondary)
     );
 
@@ -838,6 +857,7 @@ function purchaseConfigPanel(guild) {
         new ButtonBuilder()
             .setCustomId('shop_publish')
             .setLabel('Publicar/Atualizar Loja')
+            .setEmoji('📢')
             .setStyle(ButtonStyle.Success),
         new ButtonBuilder()
             .setCustomId('shop_back')
@@ -848,7 +868,7 @@ function purchaseConfigPanel(guild) {
     return {
         embeds: [embed],
         components: [row1, row2],
-        flags: MessageFlags.Ephemeral
+        ephemeral: true
     };
 }
 
@@ -872,7 +892,7 @@ function purchaseRoleSelect(guild, mode) {
         components: [
             new ActionRowBuilder().addComponents(menu)
         ],
-        flags: MessageFlags.Ephemeral
+        ephemeral: true
     };
 }
 
@@ -886,7 +906,7 @@ function purchaseStorePanel(guild) {
         .slice(0, 25);
 
     const embed = new EmbedBuilder()
-        .setTitle(` Loja de ${guild.name}`)
+        .setTitle(`🛒 Loja de ${guild.name}`)
         .setDescription(
             entries.length
                 ? 'Selecione abaixo o cargo que deseja comprar. Um ticket será criado para o atendimento e confirmação do pagamento.'
@@ -923,24 +943,22 @@ function purchaseStorePanel(guild) {
 }
 
 async function openPurchaseTicket(interaction, roleId) {
-    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
-
     const guild = interaction.guild;
     const loja = getLoja(guild.id);
     const role = guild.roles.cache.get(roleId);
     const roleData = loja.cargos[roleId];
 
     if (!role || !roleData) {
-        return safeInteractionReply(interaction, {
+        return interaction.reply({
             content: 'Esse cargo não está mais disponível na loja.',
-            flags: MessageFlags.Ephemeral
+            ephemeral: true
         });
     }
 
     if (role.id === guild.id || role.managed) {
-        return safeInteractionReply(interaction, {
+        return interaction.reply({
             content: 'Esse cargo não pode ser vendido.',
-            flags: MessageFlags.Ephemeral
+            ephemeral: true
         });
     }
 
@@ -950,9 +968,9 @@ async function openPurchaseTicket(interaction, roleId) {
     );
 
     if (existing) {
-        return safeInteractionReply(interaction, {
+        return interaction.reply({
             content: `Você já possui um ticket de compra aberto para esse cargo: ${existing}`,
-            flags: MessageFlags.Ephemeral
+            ephemeral: true
         });
     }
 
@@ -1022,15 +1040,15 @@ async function openPurchaseTicket(interaction, roleId) {
         });
     } catch (error) {
         console.error('Erro ao criar ticket de compra:', error);
-        return safeInteractionReply(interaction, {
+        return interaction.reply({
             content: 'Não consegui criar o ticket. Verifique as permissões do bot.',
-            flags: MessageFlags.Ephemeral
+            ephemeral: true
         });
     }
 
     const price = Number(roleData.price || 0).toFixed(2).replace('.', ',');
     const embed = new EmbedBuilder()
-        .setTitle(' Solicitação de compra')
+        .setTitle('🛒 Solicitação de compra')
         .setDescription(
             `**Cliente:** ${interaction.user}\n` +
             `**Cargo:** ${role}\n` +
@@ -1061,9 +1079,9 @@ async function openPurchaseTicket(interaction, roleId) {
         components: [buttons]
     });
 
-    return safeInteractionReply(interaction, {
+    return interaction.reply({
         content: `Seu ticket de compra foi criado: ${channel}`,
-        flags: MessageFlags.Ephemeral
+        ephemeral: true
     });
 }
 
@@ -1087,7 +1105,7 @@ function serverPanel(guild) {
     const embed =
         new EmbedBuilder()
             .setTitle(
-                ` ${guild.name}`
+                `📊 ${guild.name}`
             )
             .setThumbnail(
                 guild.iconURL({
@@ -1097,63 +1115,63 @@ function serverPanel(guild) {
             .setColor('#000000')
             .addFields(
                 {
-                    name: ' Membros',
+                    name: '👥 Membros',
                     value:
                         `${guild.memberCount}`,
                     inline: true
                 },
 
                 {
-                    name: ' Humanos',
+                    name: '👤 Humanos',
                     value:
                         `${humans}`,
                     inline: true
                 },
 
                 {
-                    name: ' Bots',
+                    name: '🤖 Bots',
                     value:
                         `${bots}`,
                     inline: true
                 },
 
                 {
-                    name: ' Canais',
+                    name: '💬 Canais',
                     value:
                         `${guild.channels.cache.size}`,
                     inline: true
                 },
 
                 {
-                    name: 'ðŸŽ­ Cargos',
+                    name: '🎭 Cargos',
                     value:
                         `${guild.roles.cache.size}`,
                     inline: true
                 },
 
                 {
-                    name: ' Boosts',
+                    name: '🚀 Boosts',
                     value:
                         `${guild.premiumSubscriptionCount || 0}`,
                     inline: true
                 },
 
                 {
-                    name: 'ðŸ‘‘ Dono',
+                    name: '👑 Dono',
                     value:
                         `<@${guild.ownerId}>`,
                     inline: true
                 },
 
                 {
-                    name: 'ðŸ“… Criado em',
+                    name: '📅 Criado em',
                     value:
                         `<t:${Math.floor(guild.createdTimestamp / 1000)}:D>`,
                     inline: true
                 },
 
                 {
-                    name: 'ðŸ†” ID',
+                    name: '🆔 ID',
                     value: guild.id,
                     inline: true
                 }
@@ -1171,7 +1189,7 @@ function serverPanel(guild) {
 function funPanel() {
     const embed =
         new EmbedBuilder()
-            .setTitle(' Diversão')
+            .setTitle('🎉 Diversão')
             .setDescription(
                 'Escolha uma das opções abaixo.'
             )
@@ -1185,6 +1203,7 @@ function funPanel() {
                         'fun_dice'
                     )
                     .setLabel('Dado')
+                    .setEmoji('🎲')
                     .setStyle(
                         ButtonStyle.Secondary
                     ),
@@ -1194,6 +1213,7 @@ function funPanel() {
                         'fun_coin'
                     )
                     .setLabel('Moeda')
+                    .setEmoji('🪙')
                     .setStyle(
                         ButtonStyle.Secondary
                     ),
@@ -1203,6 +1223,7 @@ function funPanel() {
                         'fun_8ball'
                     )
                     .setLabel('8Ball')
+                    .setEmoji('🎱')
                     .setStyle(
                         ButtonStyle.Secondary
                     ),
@@ -1212,6 +1233,7 @@ function funPanel() {
                         'fun_number'
                     )
                     .setLabel('Número')
+                    .setEmoji('🔢')
                     .setStyle(
                         ButtonStyle.Secondary
                     ),
@@ -1221,6 +1243,7 @@ function funPanel() {
                         'fun_choose'
                     )
                     .setLabel('Escolher')
+                    .setEmoji('🃏')
                     .setStyle(
                         ButtonStyle.Secondary
                     ),
@@ -1230,6 +1253,7 @@ function funPanel() {
                         'fun_quiz'
                     )
                     .setLabel('Quiz')
+                    .setEmoji('🏆')
                     .setStyle(
                         ButtonStyle.Secondary
                     )
@@ -1252,7 +1276,7 @@ function configPanel(guild) {
     const embed =
         new EmbedBuilder()
             .setTitle(
-                'âš™ï¸ Configurações'
+                '⚙️ Configurações'
             )
             .setDescription(
                 'Configurações atuais do Seraphins.'
@@ -1290,7 +1314,7 @@ function configPanel(guild) {
 
                 {
                     name:
-                        'ðŸ›¡ï¸ Anti-Spam',
+                        '🛡️ Anti-Spam',
                     value:
                         cfg.antiSpam
                             ? 'Ativado'
@@ -1300,7 +1324,7 @@ function configPanel(guild) {
 
                 {
                     name:
-                        ' Anti-Raid',
+                        '🚨 Anti-Raid',
                     value:
                         cfg.antiRaid
                             ? 'Ativado'
@@ -1326,6 +1350,7 @@ function configPanel(guild) {
                         'config_protection'
                     )
                     .setLabel('Proteção')
+                    .setEmoji('🛡️')
                     .setStyle(
                         ButtonStyle.Secondary
                     )
@@ -1348,7 +1373,7 @@ function protectionPanel(guild) {
     const embed =
         new EmbedBuilder()
             .setTitle(
-                'ðŸ›¡ï¸ Proteção'
+                '🛡️ Proteção'
             )
             .setDescription(
                 'Configure os sistemas de proteção do servidor.'
@@ -1360,8 +1385,8 @@ function protectionPanel(guild) {
                         'Anti-Spam',
                     value:
                         cfg.antiSpam
-                            ? ' Ativado'
-                            : ' Desativado',
+                            ? '🟢 Ativado'
+                            : '🔴 Desativado',
                     inline: true
                 },
 
@@ -1370,8 +1395,8 @@ function protectionPanel(guild) {
                         'Anti-Raid',
                     value:
                         cfg.antiRaid
-                            ? ' Ativado'
-                            : ' Desativado',
+                            ? '🟢 Ativado'
+                            : '🔴 Desativado',
                     inline: true
                 }
             );
@@ -1415,7 +1440,7 @@ function protectionPanel(guild) {
 function giveawayPanel() {
     const embed =
         new EmbedBuilder()
-            .setTitle(' Sorteios')
+            .setTitle('🎁 Sorteios')
             .setDescription(
                 'Gerencie os sorteios do servidor.\n\n' +
                 'Crie sorteios definindo prêmio, duração, vencedores e requisitos.'
@@ -1432,6 +1457,7 @@ function giveawayPanel() {
                     .setLabel(
                         'Criar Sorteio'
                     )
+                    .setEmoji('🎁')
                     .setStyle(
                         ButtonStyle.Success
                     ),
@@ -1443,6 +1469,7 @@ function giveawayPanel() {
                     .setLabel(
                         'Sorteios Ativos'
                     )
+                    .setEmoji('📋')
                     .setStyle(
                         ButtonStyle.Secondary
                     )
@@ -1595,7 +1622,7 @@ function giveawayMessage(giveaway) {
         'Nenhum requisito';
 
     return new EmbedBuilder()
-        .setTitle(' Sorteio')
+        .setTitle('🎁 Sorteio')
         .setDescription(
             `**Prêmio:** ${giveaway.prize}\n\n` +
             `**Vencedores:** ${giveaway.winners}\n` +
@@ -1623,6 +1650,7 @@ function giveawayButtons(
                 .setLabel(
                     'Participar'
                 )
+                .setEmoji('🎁')
                 .setStyle(
                     ButtonStyle.Success
                 ),
@@ -1632,6 +1660,7 @@ function giveawayButtons(
                     `giveaway_list_${giveawayId}`
                 )
                 .setLabel('Ver participantes')
+                .setEmoji('👥')
                 .setStyle(ButtonStyle.Secondary)
         );
 }
@@ -1751,7 +1780,7 @@ async function updateGiveawayMessage(guild, giveaway, embed, components = []) {
 
 function endedGiveawayEmbed(giveaway, winnerText, extra = '') {
     return new EmbedBuilder()
-        .setTitle(' Sorteio Encerrado')
+        .setTitle('🎁 Sorteio Encerrado')
         .setDescription(
             `**Prêmio:** ${giveaway.prize}\n\n` +
             `**Vencedor:** ${winnerText}\n\n` +
@@ -1874,17 +1903,19 @@ async function finishGiveaway(
             endedGiveawayEmbed(
                 giveaway,
                 `<@${candidate}>`,
-                `âš ï¸ A pessoa sorteada não cumpriu o requisito.\n${requirement.reason}\n\nClique em **Girar outra pessoa** para sortear outro participante.`
+                `⚠️ A pessoa sorteada não cumpriu o requisito.\n${requirement.reason}\n\nClique em **Girar outra pessoa** para sortear outro participante.`
             ),
             [
                 new ActionRowBuilder().addComponents(
                     new ButtonBuilder()
                         .setCustomId(`giveaway_reroll_${giveawayId}`)
                         .setLabel('Girar outra pessoa')
+                        .setEmoji('🎲')
                         .setStyle(ButtonStyle.Primary),
                     new ButtonBuilder()
                         .setCustomId(`giveaway_list_${giveawayId}`)
                         .setLabel('Ver participantes')
+                        .setEmoji('👥')
                         .setStyle(ButtonStyle.Secondary)
                 )
             ]
@@ -1905,7 +1936,7 @@ async function finishGiveaway(
     if (channel) {
         try {
             await channel.send(
-                ` **Sorteio encerrado!**\n\n**Prêmio:** ${giveaway.prize}\n**Vencedor:** <@${candidate}>`
+                `🎉 **Sorteio encerrado!**\n\n**Prêmio:** ${giveaway.prize}\n**Vencedor:** <@${candidate}>`
             );
         } catch {}
     }
@@ -1959,17 +1990,19 @@ async function rerollGiveaway(giveawayId) {
             endedGiveawayEmbed(
                 giveaway,
                 `<@${candidate}>`,
-                `âš ï¸ Essa pessoa também não cumpriu o requisito.\n${requirement.reason}\n\nClique em **Girar outra pessoa** para continuar.`
+                `⚠️ Essa pessoa também não cumpriu o requisito.\n${requirement.reason}\n\nClique em **Girar outra pessoa** para continuar.`
             ),
             [
                 new ActionRowBuilder().addComponents(
                     new ButtonBuilder()
                         .setCustomId(`giveaway_reroll_${giveawayId}`)
                         .setLabel('Girar outra pessoa')
+                        .setEmoji('🎲')
                         .setStyle(ButtonStyle.Primary),
                     new ButtonBuilder()
                         .setCustomId(`giveaway_list_${giveawayId}`)
                         .setLabel('Ver participantes')
+                        .setEmoji('👥')
                         .setStyle(ButtonStyle.Secondary)
                 )
             ]
@@ -1990,7 +2023,7 @@ async function rerollGiveaway(giveawayId) {
     if (channel) {
         try {
             await channel.send(
-                ` **Novo sorteio!**\n\n**Prêmio:** ${giveaway.prize}\n**Vencedor:** <@${candidate}>`
+                `🎉 **Novo sorteio!**\n\n**Prêmio:** ${giveaway.prize}\n**Vencedor:** <@${candidate}>`
             );
         } catch {}
     }
@@ -2019,7 +2052,7 @@ function giveawayParticipantList(guild, giveaway, page = 0) {
         : 'Nenhuma pessoa está participando.';
 
     const embed = new EmbedBuilder()
-        .setTitle(' Participantes do sorteio')
+        .setTitle('👥 Participantes do sorteio')
         .setDescription(
             `**Prêmio:** ${giveaway.prize}\n` +
             `**Total:** ${participants.length}\n` +
@@ -2041,7 +2074,7 @@ function giveawayParticipantList(guild, giveaway, page = 0) {
             .setDisabled(currentPage >= totalPages - 1)
     );
 
-    return { embeds: [embed], components: [row], flags: MessageFlags.Ephemeral };
+    return { embeds: [embed], components: [row], ephemeral: true };
 }
 
 function scheduleGiveaway(
@@ -2277,7 +2310,7 @@ client.once(
     'clientReady',
     async () => {
         console.log(
-            ` ${client.user.tag} está online!`
+            `🤖 ${client.user.tag} está online!`
         );
 
         client.user.setActivity(
@@ -2299,11 +2332,11 @@ client.once(
         scheduleAllGiveaways();
 
         console.log(
-            ' Sistema de convites carregado.'
+            '📨 Sistema de convites carregado.'
         );
 
         console.log(
-            ' Sistema de sorteios carregado.'
+            '🎁 Sistema de sorteios carregado.'
         );
     }
 );
@@ -2362,15 +2395,13 @@ client.once(
     'clientReady',
     async () => {
         try {
-            const guild = client.guilds.cache.get(OFFICIAL_SERVER_ID);
+            await client.application.commands.set(
+                commands
+            );
 
-            if (guild) {
-                await guild.commands.set(commands);
-                console.log('Comandos registrados no servidor oficial!');
-            } else {
-                await client.application.commands.set(commands);
-                console.log('Servidor oficial nao encontrado; comandos registrados globalmente.');
-            }
+            console.log(
+                '✅ Comandos registrados!'
+            );
         } catch (error) {
             console.error(
                 'Erro ao registrar comandos:',
@@ -2383,12 +2414,6 @@ client.once(
 /* =========================
    INTERAÇÕES
 ========================= */
-
-async function safeInteractionReply(interaction, payload) {
-    if (interaction.deferred) return interaction.editReply(payload);
-    if (interaction.replied) return interaction.followUp(payload);
-    return interaction.reply(payload);
-}
 
 client.on(
     'interactionCreate',
@@ -2403,11 +2428,12 @@ client.on(
                     interaction.commandName ===
                     'ping'
                 ) {
-                    return safeInteractionReply(interaction, 
+                    return interaction.reply(
                         {
                             content:
                                 `Pong! ${client.ws.ping}ms`,
-                            flags: MessageFlags.Ephemeral
+                            ephemeral:
+                                true
                         }
                     );
                 }
@@ -2421,19 +2447,21 @@ client.on(
                             interaction.member
                         )
                     ) {
-                        return safeInteractionReply(interaction, 
+                        return interaction.reply(
                             {
                                 content:
-                                    'ERRO Você não possui permissão para usar este comando.',
-                                flags: MessageFlags.Ephemeral
+                                    '❌ Você não possui permissão para usar este comando.',
+                                ephemeral:
+                                    true
                             }
                         );
                     }
 
-                    return safeInteractionReply(interaction, 
+                    return interaction.reply(
                         {
                             ...mainPanel(),
-                            flags: MessageFlags.Ephemeral
+                            ephemeral:
+                                true
                         }
                     );
                 }
@@ -2447,11 +2475,12 @@ client.on(
                             interaction.member
                         )
                     ) {
-                        return safeInteractionReply(interaction, 
+                        return interaction.reply(
                             {
                                 content:
                                     'Você não possui permissão para configurar o suporte.',
-                                flags: MessageFlags.Ephemeral
+                                ephemeral:
+                                    true
                             }
                         );
                     }
@@ -2462,11 +2491,12 @@ client.on(
                         );
 
                     if (!canal) {
-                        return safeInteractionReply(interaction, 
+                        return interaction.reply(
                             {
                                 content:
                                     'Canal inválido.',
-                                flags: MessageFlags.Ephemeral
+                                ephemeral:
+                                    true
                             }
                         );
                     }
@@ -2488,11 +2518,12 @@ client.on(
                             PermissionFlagsBits.EmbedLinks
                         )
                     ) {
-                        return safeInteractionReply(interaction, 
+                        return interaction.reply(
                             {
                                 content:
                                     'Eu não tenho as permissões necessárias nesse canal.',
-                                flags: MessageFlags.Ephemeral
+                                ephemeral:
+                                    true
                             }
                         );
                     }
@@ -2506,16 +2537,16 @@ client.on(
                         canal.id;
 
                     try {
-                        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
                         await canal.send(
                             ticketOpenPanel()
                         );
 
-                        return safeInteractionReply(interaction, 
+                        return interaction.reply(
                             {
                                 content:
                                     `Painel de suporte enviado em ${canal}.`,
-                                flags: MessageFlags.Ephemeral
+                                ephemeral:
+                                    true
                             }
                         );
                     } catch (error) {
@@ -2524,11 +2555,12 @@ client.on(
                             error
                         );
 
-                        return safeInteractionReply(interaction, 
+                        return interaction.reply(
                             {
                                 content:
                                     'Não foi possível enviar o painel nesse canal.',
-                                flags: MessageFlags.Ephemeral
+                                ephemeral:
+                                    true
                             }
                         );
                     }
@@ -2544,15 +2576,13 @@ client.on(
                         ) ||
                         interaction.user;
 
-                    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
-
                     const total =
                         await getUserInvites(
                             interaction.guild,
                             user.id
                         );
 
-                    return safeInteractionReply(interaction, 
+                    return interaction.reply(
                         {
                             content:
                                 `${user} possui **${total}** convite(s).`
@@ -2642,13 +2672,13 @@ client.on(
                     'panel_compras'
                 ) {
                     if (!isStaff(interaction.member)) {
-                        return safeInteractionReply(interaction, {
-                            content: 'ERRO Você não possui permissão para configurar a loja.',
-                            flags: MessageFlags.Ephemeral
+                        return interaction.reply({
+                            content: '❌ Você não possui permissão para configurar a loja.',
+                            ephemeral: true
                         });
                     }
 
-                    return safeInteractionReply(interaction, 
+                    return interaction.reply(
                         purchaseConfigPanel(interaction.guild)
                     );
                 }
@@ -2658,9 +2688,9 @@ client.on(
                     'shop_back'
                 ) {
                     if (!isStaff(interaction.member)) {
-                        return safeInteractionReply(interaction, {
-                            content: 'ERRO Sem permissão.',
-                            flags: MessageFlags.Ephemeral
+                        return interaction.reply({
+                            content: '❌ Sem permissão.',
+                            ephemeral: true
                         });
                     }
 
@@ -2672,13 +2702,13 @@ client.on(
                     'shop_add_role'
                 ) {
                     if (!isStaff(interaction.member)) {
-                        return safeInteractionReply(interaction, {
-                            content: 'ERRO Sem permissão.',
-                            flags: MessageFlags.Ephemeral
+                        return interaction.reply({
+                            content: '❌ Sem permissão.',
+                            ephemeral: true
                         });
                     }
 
-                    return safeInteractionReply(interaction, 
+                    return interaction.reply(
                         purchaseRoleSelect(interaction.guild, 'add')
                     );
                 }
@@ -2688,20 +2718,20 @@ client.on(
                     'shop_remove_role'
                 ) {
                     if (!isStaff(interaction.member)) {
-                        return safeInteractionReply(interaction, {
-                            content: 'ERRO Sem permissão.',
-                            flags: MessageFlags.Ephemeral
+                        return interaction.reply({
+                            content: '❌ Sem permissão.',
+                            ephemeral: true
                         });
                     }
 
                     if (!Object.keys(getLoja(interaction.guild.id).cargos).length) {
-                        return safeInteractionReply(interaction, {
+                        return interaction.reply({
                             content: 'Ainda não há cargos cadastrados para remover.',
-                            flags: MessageFlags.Ephemeral
+                            ephemeral: true
                         });
                     }
 
-                    return safeInteractionReply(interaction, 
+                    return interaction.reply(
                         purchaseRoleSelect(interaction.guild, 'remove')
                     );
                 }
@@ -2711,9 +2741,9 @@ client.on(
                     'shop_set_channel'
                 ) {
                     if (!isStaff(interaction.member)) {
-                        return safeInteractionReply(interaction, {
-                            content: 'ERRO Sem permissão.',
-                            flags: MessageFlags.Ephemeral
+                        return interaction.reply({
+                            content: '❌ Sem permissão.',
+                            ephemeral: true
                         });
                     }
 
@@ -2740,9 +2770,9 @@ client.on(
                     'shop_publish'
                 ) {
                     if (!isStaff(interaction.member)) {
-                        return safeInteractionReply(interaction, {
-                            content: 'ERRO Sem permissão.',
-                            flags: MessageFlags.Ephemeral
+                        return interaction.reply({
+                            content: '❌ Sem permissão.',
+                            ephemeral: true
                         });
                     }
 
@@ -2752,9 +2782,9 @@ client.on(
                         : null;
 
                     if (!channel || channel.type !== ChannelType.GuildText) {
-                        return safeInteractionReply(interaction, {
+                        return interaction.reply({
                             content: 'Defina primeiro um canal de texto válido para a loja.',
-                            flags: MessageFlags.Ephemeral
+                            ephemeral: true
                         });
                     }
 
@@ -2765,14 +2795,13 @@ client.on(
                         !permissions.has(PermissionFlagsBits.SendMessages) ||
                         !permissions.has(PermissionFlagsBits.EmbedLinks)
                     ) {
-                        return safeInteractionReply(interaction, {
+                        return interaction.reply({
                             content: 'Não tenho permissão para publicar a loja nesse canal.',
-                            flags: MessageFlags.Ephemeral
+                            ephemeral: true
                         });
                     }
 
                     try {
-                        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
                         let message = null;
 
                         if (loja.messageId) {
@@ -2787,15 +2816,15 @@ client.on(
                             saveLojas();
                         }
 
-                        return safeInteractionReply(interaction, {
+                        return interaction.reply({
                             content: `Loja publicada/atualizada em ${channel}.`,
-                            flags: MessageFlags.Ephemeral
+                            ephemeral: true
                         });
                     } catch (error) {
                         console.error('Erro ao publicar loja:', error);
-                        return safeInteractionReply(interaction, {
+                        return interaction.reply({
                             content: 'Não consegui publicar a loja. Confira as permissões do canal.',
-                            flags: MessageFlags.Ephemeral
+                            ephemeral: true
                         });
                     }
                 }
@@ -2820,11 +2849,12 @@ client.on(
                             interaction.member
                         )
                     ) {
-                        return safeInteractionReply(interaction, 
+                        return interaction.reply(
                             {
                                 content:
-                                    'ERRO Você não possui permissão para isso.',
-                                flags: MessageFlags.Ephemeral
+                                    '❌ Você não possui permissão para isso.',
+                                ephemeral:
+                                    true
                             }
                         );
                     }
@@ -2851,16 +2881,16 @@ client.on(
                             interaction.member
                         )
                     ) {
-                        return safeInteractionReply(interaction, 
+                        return interaction.reply(
                             {
                                 content:
-                                    'ERRO Sem permissão.',
-                                flags: MessageFlags.Ephemeral
+                                    '❌ Sem permissão.',
+                                ephemeral:
+                                    true
                             }
                         );
                     }
 
-                    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
                     await interaction.channel.permissionOverwrites.edit(
                         interaction.guild.roles.everyone,
                         {
@@ -2869,8 +2899,8 @@ client.on(
                         }
                     );
 
-                    return safeInteractionReply(interaction, 
-                        ' Canal bloqueado.'
+                    return interaction.reply(
+                        '🔒 Canal bloqueado.'
                     );
                 }
 
@@ -2883,16 +2913,16 @@ client.on(
                             interaction.member
                         )
                     ) {
-                        return safeInteractionReply(interaction, 
+                        return interaction.reply(
                             {
                                 content:
-                                    'ERRO Sem permissão.',
-                                flags: MessageFlags.Ephemeral
+                                    '❌ Sem permissão.',
+                                ephemeral:
+                                    true
                             }
                         );
                     }
 
-                    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
                     await interaction.channel.permissionOverwrites.edit(
                         interaction.guild.roles.everyone,
                         {
@@ -2901,8 +2931,8 @@ client.on(
                         }
                     );
 
-                    return safeInteractionReply(interaction, 
-                        'ðŸ”“ Canal desbloqueado.'
+                    return interaction.reply(
+                        '🔓 Canal desbloqueado.'
                     );
                 }
 
@@ -2915,22 +2945,22 @@ client.on(
                             interaction.member
                         )
                     ) {
-                        return safeInteractionReply(interaction, 
+                        return interaction.reply(
                             {
                                 content:
-                                    'ERRO Sem permissão.',
-                                flags: MessageFlags.Ephemeral
+                                    '❌ Sem permissão.',
+                                ephemeral:
+                                    true
                             }
                         );
                     }
 
-                    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
                     await interaction.channel.setRateLimitPerUser(
                         10
                     );
 
-                    return safeInteractionReply(interaction, 
-                        'ðŸ¢ Slowmode definido para 10 segundos.'
+                    return interaction.reply(
+                        '🐢 Slowmode definido para 10 segundos.'
                     );
                 }
 
@@ -2945,11 +2975,12 @@ client.on(
                             interaction.member
                         )
                     ) {
-                        return safeInteractionReply(interaction, 
+                        return interaction.reply(
                             {
                                 content:
                                     'Sem permissão.',
-                                flags: MessageFlags.Ephemeral
+                                ephemeral:
+                                    true
                             }
                         );
                     }
@@ -3001,11 +3032,12 @@ client.on(
                             interaction.member
                         )
                     ) {
-                        return safeInteractionReply(interaction, 
+                        return interaction.reply(
                             {
                                 content:
                                     'Sem permissão.',
-                                flags: MessageFlags.Ephemeral
+                                ephemeral:
+                                    true
                             }
                         );
                     }
@@ -3057,11 +3089,12 @@ client.on(
                             interaction.member
                         )
                     ) {
-                        return safeInteractionReply(interaction, 
+                        return interaction.reply(
                             {
                                 content:
                                     'Sem permissão.',
-                                flags: MessageFlags.Ephemeral
+                                ephemeral:
+                                    true
                             }
                         );
                     }
@@ -3113,11 +3146,12 @@ client.on(
                             interaction.member
                         )
                     ) {
-                        return safeInteractionReply(interaction, 
+                        return interaction.reply(
                             {
                                 content:
                                     'Sem permissão.',
-                                flags: MessageFlags.Ephemeral
+                                ephemeral:
+                                    true
                             }
                         );
                     }
@@ -3130,11 +3164,12 @@ client.on(
                     if (
                         !cfg.ticketCanal
                     ) {
-                        return safeInteractionReply(interaction, 
+                        return interaction.reply(
                             {
                                 content:
                                     'Defina o canal do painel primeiro.',
-                                flags: MessageFlags.Ephemeral
+                                ephemeral:
+                                    true
                             }
                         );
                     }
@@ -3145,11 +3180,12 @@ client.on(
                         );
 
                     if (!channel) {
-                        return safeInteractionReply(interaction, 
+                        return interaction.reply(
                             {
                                 content:
                                     'O canal configurado não existe.',
-                                flags: MessageFlags.Ephemeral
+                                ephemeral:
+                                    true
                             }
                         );
                     }
@@ -3171,11 +3207,12 @@ client.on(
                             PermissionFlagsBits.EmbedLinks
                         )
                     ) {
-                        return safeInteractionReply(interaction, 
+                        return interaction.reply(
                             {
                                 content:
                                     'Eu não tenho as permissões necessárias nesse canal.',
-                                flags: MessageFlags.Ephemeral
+                                ephemeral:
+                                    true
                             }
                         );
                     }
@@ -3184,11 +3221,12 @@ client.on(
                         ticketOpenPanel()
                     );
 
-                    return safeInteractionReply(interaction, 
+                    return interaction.reply(
                         {
                             content:
                                 'Painel de suporte enviado.',
-                            flags: MessageFlags.Ephemeral
+                            ephemeral:
+                                true
                         }
                     );
                 }
@@ -3246,16 +3284,17 @@ client.on(
                             interaction.member
                         )
                     ) {
-                        return safeInteractionReply(interaction, 
+                        return interaction.reply(
                             {
                                 content:
                                     'Você não possui permissão para assumir este ticket.',
-                                flags: MessageFlags.Ephemeral
+                                ephemeral:
+                                    true
                             }
                         );
                     }
 
-                    return safeInteractionReply(interaction, 
+                    return interaction.reply(
                         `${interaction.user} assumiu este ticket.`
                     );
                 }
@@ -3269,11 +3308,12 @@ client.on(
                             interaction.member
                         )
                     ) {
-                        return safeInteractionReply(interaction, 
+                        return interaction.reply(
                             {
                                 content:
                                     'Você não possui permissão para chamar a equipe.',
-                                flags: MessageFlags.Ephemeral
+                                ephemeral:
+                                    true
                             }
                         );
                     }
@@ -3290,11 +3330,12 @@ client.on(
                         );
 
                     if (!role) {
-                        return safeInteractionReply(interaction, 
+                        return interaction.reply(
                             {
                                 content:
                                     'O cargo ADM não está configurado.',
-                                flags: MessageFlags.Ephemeral
+                                ephemeral:
+                                    true
                             }
                         );
                     }
@@ -3312,11 +3353,12 @@ client.on(
                     if (
                         !members.length
                     ) {
-                        return safeInteractionReply(interaction, 
+                        return interaction.reply(
                             {
                                 content:
                                     'Nenhum ADM disponível.',
-                                flags: MessageFlags.Ephemeral
+                                ephemeral:
+                                    true
                             }
                         );
                     }
@@ -3342,7 +3384,7 @@ client.on(
                                 )
                             );
 
-                    return safeInteractionReply(interaction, 
+                    return interaction.reply(
                         {
                             content:
                                 'Escolha o ADM que deseja chamar.',
@@ -3351,7 +3393,8 @@ client.on(
                                     menu
                                 )
                             ],
-                            flags: MessageFlags.Ephemeral
+                            ephemeral:
+                                true
                         }
                     );
                 }
@@ -3365,11 +3408,12 @@ client.on(
                             interaction.member
                         )
                     ) {
-                        return safeInteractionReply(interaction, 
+                        return interaction.reply(
                             {
                                 content:
                                     'Você não possui permissão para fechar este ticket.',
-                                flags: MessageFlags.Ephemeral
+                                ephemeral:
+                                    true
                             }
                         );
                     }
@@ -3401,11 +3445,12 @@ client.on(
                             interaction.member
                         )
                     ) {
-                        return safeInteractionReply(interaction, 
+                        return interaction.reply(
                             {
                                 content:
-                                    'ERRO Sem permissão.',
-                                flags: MessageFlags.Ephemeral
+                                    '❌ Sem permissão.',
+                                ephemeral:
+                                    true
                             }
                         );
                     }
@@ -3434,11 +3479,12 @@ client.on(
                             interaction.member
                         )
                     ) {
-                        return safeInteractionReply(interaction, 
+                        return interaction.reply(
                             {
                                 content:
-                                    'ERRO Sem permissão.',
-                                flags: MessageFlags.Ephemeral
+                                    '❌ Sem permissão.',
+                                ephemeral:
+                                    true
                             }
                         );
                     }
@@ -3469,11 +3515,12 @@ client.on(
                             interaction.member
                         )
                     ) {
-                        return safeInteractionReply(interaction, 
+                        return interaction.reply(
                             {
                                 content:
-                                    'ERRO Sem permissão.',
-                                flags: MessageFlags.Ephemeral
+                                    '❌ Sem permissão.',
+                                ephemeral:
+                                    true
                             }
                         );
                     }
@@ -3501,27 +3548,29 @@ client.on(
                     if (
                         !active.length
                     ) {
-                        return safeInteractionReply(interaction, 
+                        return interaction.reply(
                             {
                                 content:
                                     'Não existem sorteios ativos.',
-                                flags: MessageFlags.Ephemeral
+                                ephemeral:
+                                    true
                             }
                         );
                     }
 
-                    return safeInteractionReply(interaction, 
+                    return interaction.reply(
                         {
                             content:
                                 active
                                     .map(
                                         giveaway =>
-                                            ` **${giveaway.prize}** â€” **${giveaway.winners} vencedor(es)** â€” <t:${Math.floor(giveaway.end / 1000)}:R>\n> Participantes: **${giveaway.participants?.length || 0}**`
+                                            `🎁 **${giveaway.prize}** — **${giveaway.winners} vencedor(es)** — <t:${Math.floor(giveaway.end / 1000)}:R>\n> Participantes: **${giveaway.participants?.length || 0}**`
                                     )
                                     .join(
                                         '\n\n'
                                     ),
-                            flags: MessageFlags.Ephemeral
+                            ephemeral:
+                                true
                         }
                     );
                 }
@@ -3538,9 +3587,9 @@ client.on(
                         const giveaway = sorteios[giveawayId];
 
                         if (!giveaway) {
-                            return safeInteractionReply(interaction, {
-                                content: 'ERRO Esse sorteio não está mais disponível.',
-                                flags: MessageFlags.Ephemeral
+                            return interaction.reply({
+                                content: '❌ Esse sorteio não está mais disponível.',
+                                ephemeral: true
                             });
                         }
 
@@ -3554,13 +3603,13 @@ client.on(
                     const giveaway = sorteios[giveawayId];
 
                     if (!giveaway) {
-                        return safeInteractionReply(interaction, {
-                            content: 'ERRO Esse sorteio não está mais disponível.',
-                            flags: MessageFlags.Ephemeral
+                        return interaction.reply({
+                            content: '❌ Esse sorteio não está mais disponível.',
+                            ephemeral: true
                         });
                     }
 
-                    return safeInteractionReply(interaction, 
+                    return interaction.reply(
                         giveawayParticipantList(interaction.guild, giveaway, 0)
                     );
                 }
@@ -3569,9 +3618,9 @@ client.on(
 
                 if (interaction.customId.startsWith('giveaway_reroll_')) {
                     if (!isStaff(interaction.member)) {
-                        return safeInteractionReply(interaction, {
-                            content: 'ERRO Sem permissão.',
-                            flags: MessageFlags.Ephemeral
+                        return interaction.reply({
+                            content: '❌ Sem permissão.',
+                            ephemeral: true
                         });
                     }
 
@@ -3579,20 +3628,20 @@ client.on(
                     const giveaway = sorteios[giveawayId];
 
                     if (!giveaway) {
-                        return safeInteractionReply(interaction, {
-                            content: 'ERRO Esse sorteio já foi resolvido.',
-                            flags: MessageFlags.Ephemeral
+                        return interaction.reply({
+                            content: '❌ Esse sorteio já foi resolvido.',
+                            ephemeral: true
                         });
                     }
 
-                    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+                    await interaction.deferReply({ ephemeral: true });
                     const winner = await rerollGiveaway(giveawayId);
 
                     if (winner) {
-                        return interaction.editReply(` Novo vencedor: <@${winner}>`);
+                        return interaction.editReply(`🎉 Novo vencedor: <@${winner}>`);
                     }
 
-                    return interaction.editReply(' O sorteio foi girado novamente. Confira a mensagem do sorteio.');
+                    return interaction.editReply('🎲 O sorteio foi girado novamente. Confira a mensagem do sorteio.');
                 }
 
                 /* ===== PARTICIPAR ===== */
@@ -3614,11 +3663,12 @@ client.on(
                         ];
 
                     if (!giveaway) {
-                        return safeInteractionReply(interaction, 
+                        return interaction.reply(
                             {
                                 content:
-                                    'ERRO Esse sorteio não está mais ativo.',
-                                flags: MessageFlags.Ephemeral
+                                    '❌ Esse sorteio não está mais ativo.',
+                                ephemeral:
+                                    true
                             }
                         );
                     }
@@ -3631,11 +3681,12 @@ client.on(
                             giveawayId
                         );
 
-                        return safeInteractionReply(interaction, 
+                        return interaction.reply(
                             {
                                 content:
-                                    'ERRO Esse sorteio já terminou.',
-                                flags: MessageFlags.Ephemeral
+                                    '❌ Esse sorteio já terminou.',
+                                ephemeral:
+                                    true
                             }
                         );
                     }
@@ -3654,16 +3705,15 @@ client.on(
                             interaction.user.id
                         )
                     ) {
-                        return safeInteractionReply(interaction, 
+                        return interaction.reply(
                             {
                                 content:
-                                    'ERRO Você já está participando desse sorteio.',
-                                flags: MessageFlags.Ephemeral
+                                    '❌ Você já está participando desse sorteio.',
+                                ephemeral:
+                                    true
                             }
                         );
                     }
-
-                    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
                     const member =
                         interaction.guild.members.cache.get(
@@ -3679,11 +3729,12 @@ client.on(
                     if (
                         !requirement.ok
                     ) {
-                        return safeInteractionReply(interaction, 
+                        return interaction.reply(
                             {
                                 content:
-                                    `ERRO ${requirement.reason}`,
-                                flags: MessageFlags.Ephemeral
+                                    `❌ ${requirement.reason}`,
+                                ephemeral:
+                                    true
                             }
                         );
                     }
@@ -3719,11 +3770,12 @@ client.on(
                         );
                     } catch {}
 
-                    return safeInteractionReply(interaction, 
+                    return interaction.reply(
                         {
                             content:
-                                ' Você entrou no sorteio!',
-                            flags: MessageFlags.Ephemeral
+                                '🎁 Você entrou no sorteio!',
+                            ephemeral:
+                                true
                         }
                     );
                 }
@@ -3740,8 +3792,8 @@ client.on(
                                 6
                         ) + 1;
 
-                    return safeInteractionReply(interaction, 
-                        ` Você tirou **${number}**!`
+                    return interaction.reply(
+                        `🎲 Você tirou **${number}**!`
                     );
                 }
 
@@ -3749,8 +3801,8 @@ client.on(
                     interaction.customId ===
                     'fun_coin'
                 ) {
-                    return safeInteractionReply(interaction, 
-                        `ðŸª™ Deu **${randomItem(
+                    return interaction.reply(
+                        `🪙 Deu **${randomItem(
                             [
                                 'cara',
                                 'coroa'
@@ -3763,8 +3815,8 @@ client.on(
                     interaction.customId ===
                     'fun_8ball'
                 ) {
-                    return safeInteractionReply(interaction, 
-                        `ðŸŽ± ${randomItem(
+                    return interaction.reply(
+                        `🎱 ${randomItem(
                             [
                                 'Sim.',
                                 'Não.',
@@ -3781,8 +3833,8 @@ client.on(
                     interaction.customId ===
                     'fun_number'
                 ) {
-                    return safeInteractionReply(interaction, 
-                        `ðŸ”¢ Número escolhido: **${Math.floor(
+                    return interaction.reply(
+                        `🔢 Número escolhido: **${Math.floor(
                             Math.random() *
                                 100
                         ) + 1}**`
@@ -3793,11 +3845,12 @@ client.on(
                     interaction.customId ===
                     'fun_choose'
                 ) {
-                    return safeInteractionReply(interaction, 
+                    return interaction.reply(
                         {
                             content:
-                                'ðŸƒ Use `/escolher` quando disponível.',
-                            flags: MessageFlags.Ephemeral
+                                '🃏 Use `/escolher` quando disponível.',
+                            ephemeral:
+                                true
                         }
                     );
                 }
@@ -3806,8 +3859,8 @@ client.on(
                     interaction.customId ===
                     'fun_quiz'
                 ) {
-                    return safeInteractionReply(interaction, 
-                        ` ${randomItem(
+                    return interaction.reply(
+                        `🏆 ${randomItem(
                             [
                                 'Você consegue!',
                                 'Boa sorte!',
@@ -3829,18 +3882,18 @@ client.on(
                     interaction.customId === 'shop_select_remove'
                 ) {
                     if (!isStaff(interaction.member)) {
-                        return safeInteractionReply(interaction, {
-                            content: 'ERRO Sem permissão.',
-                            flags: MessageFlags.Ephemeral
+                        return interaction.reply({
+                            content: '❌ Sem permissão.',
+                            ephemeral: true
                         });
                     }
 
                     const role = interaction.roles.first();
 
                     if (!role || role.id === interaction.guild.id || role.managed) {
-                        return safeInteractionReply(interaction, {
+                        return interaction.reply({
                             content: 'Esse cargo não pode ser configurado para venda.',
-                            flags: MessageFlags.Ephemeral
+                            ephemeral: true
                         });
                     }
 
@@ -3848,18 +3901,18 @@ client.on(
 
                     if (interaction.customId === 'shop_select_remove') {
                         if (!loja.cargos[role.id]) {
-                            return safeInteractionReply(interaction, {
+                            return interaction.reply({
                                 content: 'Esse cargo não está cadastrado na loja.',
-                                flags: MessageFlags.Ephemeral
+                                ephemeral: true
                             });
                         }
 
                         delete loja.cargos[role.id];
                         saveLojas();
 
-                        return safeInteractionReply(interaction, {
+                        return interaction.reply({
                             content: `O cargo **${role.name}** foi removido da loja.`,
-                            flags: MessageFlags.Ephemeral
+                            ephemeral: true
                         });
                     }
 
@@ -3940,9 +3993,9 @@ client.on(
                     interaction.customId === 'modal_shop_channel'
                 ) {
                     if (!isStaff(interaction.member)) {
-                        return safeInteractionReply(interaction, {
-                            content: 'ERRO Sem permissão.',
-                            flags: MessageFlags.Ephemeral
+                        return interaction.reply({
+                            content: '❌ Sem permissão.',
+                            ephemeral: true
                         });
                     }
 
@@ -3950,9 +4003,9 @@ client.on(
                     const channel = interaction.guild.channels.cache.get(channelId);
 
                     if (!channel || channel.type !== ChannelType.GuildText) {
-                        return safeInteractionReply(interaction, {
+                        return interaction.reply({
                             content: 'Canal de texto inválido. Confira o ID e tente novamente.',
-                            flags: MessageFlags.Ephemeral
+                            ephemeral: true
                         });
                     }
 
@@ -3963,9 +4016,9 @@ client.on(
                         !permissions.has(PermissionFlagsBits.SendMessages) ||
                         !permissions.has(PermissionFlagsBits.EmbedLinks)
                     ) {
-                        return safeInteractionReply(interaction, {
+                        return interaction.reply({
                             content: 'Não tenho permissão para enviar mensagens e embeds nesse canal.',
-                            flags: MessageFlags.Ephemeral
+                            ephemeral: true
                         });
                     }
 
@@ -3975,9 +4028,9 @@ client.on(
                     loja.messageId = null;
                     saveLojas();
 
-                    return safeInteractionReply(interaction, {
+                    return interaction.reply({
                         content: `Canal da loja definido como ${channel}.`,
-                        flags: MessageFlags.Ephemeral
+                        ephemeral: true
                     });
                 }
 
@@ -3985,9 +4038,9 @@ client.on(
                     interaction.customId.startsWith('modal_shop_price_')
                 ) {
                     if (!isStaff(interaction.member)) {
-                        return safeInteractionReply(interaction, {
-                            content: 'ERRO Sem permissão.',
-                            flags: MessageFlags.Ephemeral
+                        return interaction.reply({
+                            content: '❌ Sem permissão.',
+                            ephemeral: true
                         });
                     }
 
@@ -3995,9 +4048,9 @@ client.on(
                     const role = interaction.guild.roles.cache.get(roleId);
 
                     if (!role || role.id === interaction.guild.id || role.managed) {
-                        return safeInteractionReply(interaction, {
+                        return interaction.reply({
                             content: 'Esse cargo não pode ser vendido.',
-                            flags: MessageFlags.Ephemeral
+                            ephemeral: true
                         });
                     }
 
@@ -4009,17 +4062,17 @@ client.on(
                         .replace(',', '.');
 
                     if (!/^\d+(\.\d{1,2})?$/.test(rawPrice)) {
-                        return safeInteractionReply(interaction, {
+                        return interaction.reply({
                             content: 'Preço inválido. Use, por exemplo, 9,90 ou 10.',
-                            flags: MessageFlags.Ephemeral
+                            ephemeral: true
                         });
                     }
 
                     const price = Number(rawPrice);
                     if (!Number.isFinite(price) || price < 0) {
-                        return safeInteractionReply(interaction, {
+                        return interaction.reply({
                             content: 'O preço precisa ser um número válido maior ou igual a zero.',
-                            flags: MessageFlags.Ephemeral
+                            ephemeral: true
                         });
                     }
 
@@ -4027,9 +4080,9 @@ client.on(
                     loja.cargos[role.id] = { price };
                     saveLojas();
 
-                    return safeInteractionReply(interaction, {
+                    return interaction.reply({
                         content: `Cargo **${role.name}** cadastrado por R$ ${price.toFixed(2).replace('.', ',')}.`,
-                        flags: MessageFlags.Ephemeral
+                        ephemeral: true
                     });
                 }
 
@@ -4053,11 +4106,12 @@ client.on(
                             interaction.member
                         )
                     ) {
-                        return safeInteractionReply(interaction, 
+                        return interaction.reply(
                             {
                                 content:
-                                    'ERRO Sem permissão.',
-                                flags: MessageFlags.Ephemeral
+                                    '❌ Sem permissão.',
+                                ephemeral:
+                                    true
                             }
                         );
                     }
@@ -4121,8 +4175,8 @@ client.on(
                             advertencias
                         );
 
-                        return safeInteractionReply(interaction, 
-                            `âš ï¸ Usuário <@${userId}> recebeu uma advertência.`
+                        return interaction.reply(
+                            `⚠️ Usuário <@${userId}> recebeu uma advertência.`
                         );
                     }
 
@@ -4139,13 +4193,13 @@ client.on(
                         if (
                             !warns.length
                         ) {
-                            return safeInteractionReply(interaction, 
-                                `ðŸ“‹ <@${userId}> não possui advertências.`
+                            return interaction.reply(
+                                `📋 <@${userId}> não possui advertências.`
                             );
                         }
 
-                        return safeInteractionReply(interaction, 
-                            `ðŸ“‹ <@${userId}> possui **${warns.length}** advertência(s).`
+                        return interaction.reply(
+                            `📋 <@${userId}> possui **${warns.length}** advertência(s).`
                         );
                     }
 
@@ -4162,7 +4216,7 @@ client.on(
                         if (
                             !warns.length
                         ) {
-                            return safeInteractionReply(interaction, 
+                            return interaction.reply(
                                 `O usuário <@${userId}> não possui advertências.`
                             );
                         }
@@ -4174,12 +4228,10 @@ client.on(
                             advertencias
                         );
 
-                        return safeInteractionReply(interaction, 
-                            `ï¸ A última advertência de <@${userId}> foi removida.`
+                        return interaction.reply(
+                            `🗑️ A última advertência de <@${userId}> foi removida.`
                         );
                     }
-
-                    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
                     const member =
                         await guild.members
@@ -4189,11 +4241,12 @@ client.on(
                             );
 
                     if (!member) {
-                        return safeInteractionReply(interaction, 
+                        return interaction.reply(
                             {
                                 content:
-                                    'ERRO Usuário não encontrado no servidor.',
-                                flags: MessageFlags.Ephemeral
+                                    '❌ Usuário não encontrado no servidor.',
+                                ephemeral:
+                                    true
                             }
                         );
                     }
@@ -4206,8 +4259,8 @@ client.on(
                             reason
                         );
 
-                        return safeInteractionReply(interaction, 
-                            `ðŸ‘¢ ${member.user.tag} foi expulso.`
+                        return interaction.reply(
+                            `👢 ${member.user.tag} foi expulso.`
                         );
                     }
 
@@ -4221,8 +4274,8 @@ client.on(
                             }
                         );
 
-                        return safeInteractionReply(interaction, 
-                            ` ${member.user.tag} foi banido.`
+                        return interaction.reply(
+                            `🔨 ${member.user.tag} foi banido.`
                         );
                     }
 
@@ -4243,11 +4296,12 @@ client.on(
                             ) ||
                             duration <= 0
                         ) {
-                            return safeInteractionReply(interaction, 
+                            return interaction.reply(
                                 {
                                     content:
-                                        'ERRO Duração inválida.',
-                                    flags: MessageFlags.Ephemeral
+                                        '❌ Duração inválida.',
+                                    ephemeral:
+                                        true
                                 }
                             );
                         }
@@ -4258,8 +4312,8 @@ client.on(
                             reason
                         );
 
-                        return safeInteractionReply(interaction, 
-                            `â±ï¸ ${member.user.tag} recebeu timeout por ${duration}s.`
+                        return interaction.reply(
+                            `⏱️ ${member.user.tag} recebeu timeout por ${duration}s.`
                         );
                     }
 
@@ -4272,8 +4326,8 @@ client.on(
                             reason
                         );
 
-                        return safeInteractionReply(interaction, 
-                            `ðŸ”“ Timeout de ${member.user.tag} removido.`
+                        return interaction.reply(
+                            `🔓 Timeout de ${member.user.tag} removido.`
                         );
                     }
                 }
@@ -4299,11 +4353,12 @@ client.on(
                         channel.type !==
                             ChannelType.GuildText
                     ) {
-                        return safeInteractionReply(interaction, 
+                        return interaction.reply(
                             {
                                 content:
                                     'Canal inválido.',
-                                flags: MessageFlags.Ephemeral
+                                ephemeral:
+                                    true
                             }
                         );
                     }
@@ -4313,11 +4368,12 @@ client.on(
                     ).ticketCanal =
                         id;
 
-                    return safeInteractionReply(interaction, 
+                    return interaction.reply(
                         {
                             content:
                                 `Canal de suporte definido como ${channel}.`,
-                            flags: MessageFlags.Ephemeral
+                            ephemeral:
+                                true
                         }
                     );
                 }
@@ -4343,11 +4399,12 @@ client.on(
                         category.type !==
                             ChannelType.GuildCategory
                     ) {
-                        return safeInteractionReply(interaction, 
+                        return interaction.reply(
                             {
                                 content:
                                     'Categoria inválida.',
-                                flags: MessageFlags.Ephemeral
+                                ephemeral:
+                                    true
                             }
                         );
                     }
@@ -4357,11 +4414,12 @@ client.on(
                     ).ticketCategoria =
                         id;
 
-                    return safeInteractionReply(interaction, 
+                    return interaction.reply(
                         {
                             content:
                                 `Categoria definida como ${category}.`,
-                            flags: MessageFlags.Ephemeral
+                            ephemeral:
+                                true
                         }
                     );
                 }
@@ -4383,11 +4441,12 @@ client.on(
                         );
 
                     if (!role) {
-                        return safeInteractionReply(interaction, 
+                        return interaction.reply(
                             {
                                 content:
                                     'Cargo inválido.',
-                                flags: MessageFlags.Ephemeral
+                                ephemeral:
+                                    true
                             }
                         );
                     }
@@ -4397,11 +4456,12 @@ client.on(
                     ).ticketCargo =
                         id;
 
-                    return safeInteractionReply(interaction, 
+                    return interaction.reply(
                         {
                             content:
                                 `Cargo ADM definido como ${role}.`,
-                            flags: MessageFlags.Ephemeral
+                            ephemeral:
+                                true
                         }
                     );
                 }
@@ -4419,11 +4479,12 @@ client.on(
                             interaction.member
                         )
                     ) {
-                        return safeInteractionReply(interaction, 
+                        return interaction.reply(
                             {
                                 content:
-                                    'ERRO Sem permissão.',
-                                flags: MessageFlags.Ephemeral
+                                    '❌ Sem permissão.',
+                                ephemeral:
+                                    true
                             }
                         );
                     }
@@ -4456,11 +4517,12 @@ client.on(
                     if (
                         !prize
                     ) {
-                        return safeInteractionReply(interaction, 
+                        return interaction.reply(
                             {
                                 content:
-                                    'ERRO Informe um prêmio.',
-                                flags: MessageFlags.Ephemeral
+                                    '❌ Informe um prêmio.',
+                                ephemeral:
+                                    true
                             }
                         );
                     }
@@ -4471,11 +4533,12 @@ client.on(
                         ) ||
                         duration <= 0
                     ) {
-                        return safeInteractionReply(interaction, 
+                        return interaction.reply(
                             {
                                 content:
-                                    'ERRO A duração precisa ser um número maior que 0.',
-                                flags: MessageFlags.Ephemeral
+                                    '❌ A duração precisa ser um número maior que 0.',
+                                ephemeral:
+                                    true
                             }
                         );
                     }
@@ -4486,11 +4549,12 @@ client.on(
                         ) ||
                         winners <= 0
                     ) {
-                        return safeInteractionReply(interaction, 
+                        return interaction.reply(
                             {
                                 content:
-                                    'ERRO A quantidade de vencedores precisa ser um número inteiro maior que 0.',
-                                flags: MessageFlags.Ephemeral
+                                    '❌ A quantidade de vencedores precisa ser um número inteiro maior que 0.',
+                                ephemeral:
+                                    true
                             }
                         );
                     }
@@ -4506,11 +4570,12 @@ client.on(
                             parsed.roleId
                         )
                     ) {
-                        return safeInteractionReply(interaction, 
+                        return interaction.reply(
                             {
                                 content:
-                                    'ERRO O cargo informado nos requisitos não existe neste servidor.',
-                                flags: MessageFlags.Ephemeral
+                                    '❌ O cargo informado nos requisitos não existe neste servidor.',
+                                ephemeral:
+                                    true
                             }
                         );
                     }
@@ -4598,11 +4663,12 @@ client.on(
                             giveawayId
                         );
 
-                        return safeInteractionReply(interaction, 
+                        return interaction.reply(
                             {
                                 content:
-                                    ' Sorteio criado com sucesso!',
-                                flags: MessageFlags.Ephemeral
+                                    '🎁 Sorteio criado com sucesso!',
+                                ephemeral:
+                                    true
                             }
                         );
                     } catch (error) {
@@ -4620,11 +4686,12 @@ client.on(
                             sorteios
                         );
 
-                        return safeInteractionReply(interaction, 
+                        return interaction.reply(
                             {
                                 content:
-                                    'ERRO Não consegui enviar o sorteio neste canal.',
-                                flags: MessageFlags.Ephemeral
+                                    '❌ Não consegui enviar o sorteio neste canal.',
+                                ephemeral:
+                                    true
                             }
                         );
                     }
@@ -4644,8 +4711,9 @@ client.on(
                     await interaction.reply(
                         {
                             content:
-                                'ERRO Ocorreu um erro ao executar esta ação.',
-                            flags: MessageFlags.Ephemeral
+                                '❌ Ocorreu um erro ao executar esta ação.',
+                            ephemeral:
+                                true
                         }
                     );
                 } catch {}
@@ -4730,7 +4798,7 @@ client.on(
                     );
 
                     await message.channel.send(
-                        `ðŸ›¡ï¸ ${member} recebeu timeout por spam.`
+                        `🛡️ ${member} recebeu timeout por spam.`
                     );
 
                     spamTracker.delete(
