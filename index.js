@@ -1729,12 +1729,22 @@ function giveawayButtons(
                 .setEmoji('🎁')
                 .setStyle(
                     ButtonStyle.Success
-                )
+                ),
+            new ButtonBuilder()
+                .setCustomId(`giveaway_participants_${giveawayId}`)
+                .setLabel('Ver participantes')
+                .setEmoji('👥')
+                .setStyle(ButtonStyle.Secondary)
         );
 }
 
 function giveawayRerollButton(giveawayId) {
     return new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+            .setCustomId(`giveaway_participants_${giveawayId}`)
+            .setLabel('Ver participantes')
+            .setEmoji('👥')
+            .setStyle(ButtonStyle.Secondary),
         new ButtonBuilder()
             .setCustomId(`giveaway_reroll_${giveawayId}`)
             .setLabel('Girar outro participante')
@@ -3511,6 +3521,29 @@ client.on(
                                 true
                         }
                     );
+                }
+
+                /* ===== VER PARTICIPANTES DO SORTEIO ===== */
+                if (interaction.customId.startsWith('giveaway_participants_')) {
+                    const giveawayId = interaction.customId.replace('giveaway_participants_', '');
+                    const giveaway = sorteios[giveawayId];
+                    if (!giveaway) {
+                        return interaction.reply({ content: '❌ Sorteio não encontrado.', ephemeral: true });
+                    }
+                    const participants = giveaway.participants || [];
+                    if (!participants.length) {
+                        return interaction.reply({ content: 'Ainda não há participantes nesse sorteio.', ephemeral: true });
+                    }
+                    const lines = participants.map((id, index) => `${index + 1}. <@${id}>`);
+                    let content = `👥 **Participantes do sorteio: ${giveaway.prize}**\n\n`;
+                    for (const line of lines) {
+                        if ((content + line + '\n').length > 1850) {
+                            content += `\n... e mais ${participants.length - lines.indexOf(line)} participante(s). A lista foi limitada pelo tamanho da mensagem.`;
+                            break;
+                        }
+                        content += line + '\n';
+                    }
+                    return interaction.reply({ content, ephemeral: true });
                 }
 
                 /* ===== GIRAR NOVO GANHADOR ===== */
