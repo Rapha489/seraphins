@@ -26,7 +26,6 @@ const TOKEN = process.env.TOKEN;
 
 const ADM_ROLE_ID = '1454153278060367933';
 const STAFF_ROLE_ID = '1556456154643697797';
-const BOT_ADMIN_ROLE_ID = '1567273960935264348';
 const OFFICIAL_SERVER_ID = '1401231514812809256';
 
 const TICKET_BANNER_URL = 'https://cdn.imgchest.com/files/52cd34cf74ad.png';
@@ -154,8 +153,7 @@ function isStaff(member) {
             PermissionFlagsBits.Administrator
         ) ||
         member.roles.cache.has(ADM_ROLE_ID) ||
-        member.roles.cache.has(STAFF_ROLE_ID) ||
-        member.roles.cache.has(BOT_ADMIN_ROLE_ID)
+        member.roles.cache.has(STAFF_ROLE_ID)
     );
 }
 
@@ -649,6 +647,8 @@ async function openTicket(
             cfg.ticketCargo ||
                 ADM_ROLE_ID
         );
+    const staffRole =
+        guild.roles.cache.get(STAFF_ROLE_ID);
 
     let username =
         interaction.user.username
@@ -698,7 +698,9 @@ async function openTicket(
                     allow: [
                         PermissionFlagsBits.ViewChannel,
                         PermissionFlagsBits.SendMessages,
-                        PermissionFlagsBits.ReadMessageHistory
+                        PermissionFlagsBits.ReadMessageHistory,
+                        PermissionFlagsBits.EmbedLinks,
+                        PermissionFlagsBits.AttachFiles
                     ]
                 },
 
@@ -722,7 +724,22 @@ async function openTicket(
             {
                 ViewChannel: true,
                 SendMessages: true,
-                ReadMessageHistory: true
+                ReadMessageHistory: true,
+                EmbedLinks: true,
+                AttachFiles: true
+            }
+        );
+    }
+
+    if (staffRole && staffRole.id !== role?.id) {
+        await channel.permissionOverwrites.create(
+            staffRole.id,
+            {
+                ViewChannel: true,
+                SendMessages: true,
+                ReadMessageHistory: true,
+                EmbedLinks: true,
+                AttachFiles: true
             }
         );
     }
@@ -790,11 +807,19 @@ async function openTicket(
                     )
             );
 
-    await channel.send({
-        content: role
-            ? `${role} ${interaction.user}`
-            : `${interaction.user}`,
+    const ticketMentions = [role, staffRole]
+        .filter((mentionedRole, index, roles) =>
+            mentionedRole && roles.findIndex(item => item?.id === mentionedRole.id) === index
+        )
+        .map(mentionedRole => `${mentionedRole}`)
+        .join(' ');
 
+    await channel.send({
+        content: `${ticketMentions} ${interaction.user}`.trim(),
+        allowedMentions: {
+            roles: [role?.id, staffRole?.id].filter(Boolean),
+            users: [interaction.user.id]
+        },
         embeds: [embed],
         components: [buttons]
     });
@@ -872,44 +897,70 @@ function purchaseConfigPanel(guild) {
     };
 }
 
-function purchaseRoleSelect(guild, mode) {
-    const menu = new RoleSelectMenuBuilder()
-        .setCustomId(
-            mode === 'remove' ? 'shop_select_remove' : 'shop_select_price'
-        )
-        .setPlaceholder(
-            mode === 'remove'
-                ? 'Selecione o cargo que deseja remover'
-                : 'Selecione o cargo que deseja vender'
-        )
-        .setMinValues(1)
-        .setMaxValues(1);
+function purchaseRoleSelect(guild, mode, page = 0) {
+    const loja = getLoja(guild.id);
+    const isRemove = mode === 'remove';
+    const entries = [...guild.roles.cache.values()]
+        .filter(role => role.id !== guild.id && !role.managed)
+        .filter(role => !isRemove || Boolean(loja.cargos?.[role.id]))
+        .sort((a, b) => b.position - a.position);
+    const pageSize = 25;
+    const totalPages = Math.max(1, Math.ceil(entries.length / pageSize));
+    const currentPage = Math.min(Math.max(0, Number(page) || 0), totalPages - 1);
+    const pageEntries = entries.slice(currentPage * pageSize, (currentPage + 1) * pageSize);
+    const components = [];
+
+    if (pageEntries.length) {
+        const menu = new StringSelectMenuBuilder()
+            .setCustomId(`shop_admin_role_select_${isRemove ? 'remove' : 'add'}`)
+            .setPlaceholder(isRemove ? 'Escolha o cargo para remover' : 'Escolha o cargo para configurar')
+            .addOptions(pageEntries.map(role => new StringSelectMenuOptionBuilder()
+                .setLabel(role.name.slice(0, 100))
+                .setValue(role.id)
+                .setDescription(`Cargo do servidor`.slice(0, 100))));
+        components.push(new ActionRowBuilder().addComponents(menu));
+    }
+
+    if (totalPages > 1) {
+        components.push(new ActionRowBuilder().addComponents(
+            new ButtonBuilder()
+                .setCustomId(`shop_admin_role_page_${isRemove ? 'remove' : 'add'}_${currentPage - 1}`)
+                .setLabel('◀ Anterior')
+                .setStyle(ButtonStyle.Secondary)
+                .setDisabled(currentPage === 0),
+            new ButtonBuilder()
+                .setCustomId(`shop_admin_role_page_${isRemove ? 'remove' : 'add'}_${currentPage + 1}`)
+                .setLabel('Próxima ▶')
+                .setStyle(ButtonStyle.Secondary)
+                .setDisabled(currentPage >= totalPages - 1)
+        ));
+    }
 
     return {
-        content: mode === 'remove'
-            ? 'Selecione um cargo que já esteja cadastrado na loja.'
-            : 'Selecione o cargo que deseja cadastrar ou editar o preço.',
-        components: [
-            new ActionRowBuilder().addComponents(menu)
-        ],
+        content: `${isRemove ? 'Selecione um cargo cadastrado na loja para remover.' : 'Selecione o cargo que deseja cadastrar ou editar o preço.'}\n\nPágina **${currentPage + 1}/${totalPages}** · ${entries.length} cargo(s) disponível(is).`,
+        components,
         ephemeral: true
     };
 }
 
-function purchaseStorePanel(guild) {
+function purchaseStorePanel(guild, page = 0) {
     const loja = getLoja(guild.id);
-    const entries = Object.entries(loja.cargos || {})
+    const allEntries = Object.entries(loja.cargos || {})
         .filter(([roleId]) => {
             const role = guild.roles.cache.get(roleId);
             return role && role.id !== guild.id && !role.managed;
-        })
-        .slice(0, 25);
+        });
+
+    const pageSize = 25;
+    const totalPages = Math.max(1, Math.ceil(allEntries.length / pageSize));
+    const currentPage = Math.min(Math.max(0, Number(page) || 0), totalPages - 1);
+    const entries = allEntries.slice(currentPage * pageSize, (currentPage + 1) * pageSize);
 
     const embed = new EmbedBuilder()
         .setTitle(`🛒 Loja de ${guild.name}`)
         .setDescription(
-            entries.length
-                ? 'Selecione abaixo o cargo que deseja comprar. Um ticket será criado para o atendimento e confirmação do pagamento.'
+            allEntries.length
+                ? `Selecione abaixo o cargo que deseja comprar. Um ticket será criado para o atendimento e confirmação do pagamento.\n\nPágina **${currentPage + 1}/${totalPages}** • **${allEntries.length}** cargos disponíveis.`
                 : 'A loja ainda não possui cargos disponíveis.'
         )
         .setColor('#000000');
@@ -931,15 +982,24 @@ function purchaseStorePanel(guild) {
                 })
             );
 
-        components.push(
-            new ActionRowBuilder().addComponents(menu)
-        );
+        components.push(new ActionRowBuilder().addComponents(menu));
+
+        if (totalPages > 1) {
+            const prev = new ButtonBuilder()
+                .setCustomId(`shop_customer_page_${currentPage - 1}`)
+                .setLabel('⬅️ Anterior')
+                .setStyle(ButtonStyle.Secondary)
+                .setDisabled(currentPage === 0);
+            const next = new ButtonBuilder()
+                .setCustomId(`shop_customer_page_${currentPage + 1}`)
+                .setLabel('Próxima ➡️')
+                .setStyle(ButtonStyle.Secondary)
+                .setDisabled(currentPage >= totalPages - 1);
+            components.push(new ActionRowBuilder().addComponents(prev, next));
+        }
     }
 
-    return {
-        embeds: [embed],
-        components
-    };
+    return { embeds: [embed], components };
 }
 
 async function openPurchaseTicket(interaction, roleId) {
@@ -977,6 +1037,7 @@ async function openPurchaseTicket(interaction, roleId) {
     const config = getConfig(guild.id);
     const adminRoleId = config.ticketCargo || ADM_ROLE_ID;
     const adminRole = guild.roles.cache.get(adminRoleId);
+    const staffRole = guild.roles.cache.get(STAFF_ROLE_ID);
 
     const safeRoleName = role.name
         .toLowerCase()
@@ -1024,7 +1085,22 @@ async function openPurchaseTicket(interaction, roleId) {
             allow: [
                 PermissionFlagsBits.ViewChannel,
                 PermissionFlagsBits.SendMessages,
-                PermissionFlagsBits.ReadMessageHistory
+                PermissionFlagsBits.ReadMessageHistory,
+                PermissionFlagsBits.EmbedLinks,
+                PermissionFlagsBits.AttachFiles
+            ]
+        });
+    }
+
+    if (staffRole && staffRole.id !== adminRole?.id) {
+        overwrites.push({
+            id: staffRole.id,
+            allow: [
+                PermissionFlagsBits.ViewChannel,
+                PermissionFlagsBits.SendMessages,
+                PermissionFlagsBits.ReadMessageHistory,
+                PermissionFlagsBits.EmbedLinks,
+                PermissionFlagsBits.AttachFiles
             ]
         });
     }
@@ -1073,8 +1149,18 @@ async function openPurchaseTicket(interaction, roleId) {
             .setStyle(ButtonStyle.Danger)
     );
 
+    const purchaseTicketMentions = [adminRole, staffRole]
+        .filter((mentionedRole, index, roles) =>
+            mentionedRole && roles.findIndex(item => item?.id === mentionedRole.id) === index
+        )
+        .map(mentionedRole => `${mentionedRole}`)
+        .join(' ');
+
     await channel.send({
-        content: adminRole ? `${adminRole}` : '',
+        content: purchaseTicketMentions,
+        allowedMentions: {
+            roles: [adminRole?.id, staffRole?.id].filter(Boolean)
+        },
         embeds: [embed],
         components: [buttons]
     });
@@ -1572,7 +1658,6 @@ function parseGiveawayRequirements(
     const result = {
         roleId: null,
         minDays: 0,
-        minInvites: 0,
         text:
             requirements?.trim() ||
             'Nenhum requisito'
@@ -1601,16 +1686,6 @@ function parseGiveawayRequirements(
     if (daysMatch) {
         result.minDays =
             Number(daysMatch[1]);
-    }
-
-    const invitesMatch =
-        requirements.match(
-            /(\d+)\s*(?:convites?|invites?)/i
-        );
-
-    if (invitesMatch) {
-        result.minInvites =
-            Number(invitesMatch[1]);
     }
 
     return result;
@@ -1653,15 +1728,7 @@ function giveawayButtons(
                 .setEmoji('🎁')
                 .setStyle(
                     ButtonStyle.Success
-                ),
-
-            new ButtonBuilder()
-                .setCustomId(
-                    `giveaway_list_${giveawayId}`
                 )
-                .setLabel('Ver participantes')
-                .setEmoji('👥')
-                .setStyle(ButtonStyle.Secondary)
         );
 }
 
@@ -1724,72 +1791,6 @@ async function checkGiveawayRequirement(
     };
 }
 
-async function checkGiveawayWinnerRequirement(
-    guild,
-    userId,
-    giveaway
-) {
-    const member =
-        guild.members.cache.get(userId) ||
-        await guild.members.fetch(userId).catch(() => null);
-
-    if (!member) {
-        return {
-            ok: false,
-            reason: 'A pessoa sorteada não está mais no servidor.'
-        };
-    }
-
-    const base = await checkGiveawayRequirement(member, giveaway);
-    if (!base.ok) return base;
-
-    if (giveaway.minInvites > 0) {
-        const invites = await getUserInvites(guild, userId);
-        if (invites < giveaway.minInvites) {
-            return {
-                ok: false,
-                reason: `A pessoa sorteada possui **${invites}** convite(s), mas precisa de **${giveaway.minInvites}**.`
-            };
-        }
-    }
-
-    return { ok: true };
-}
-
-function randomParticipant(guild, giveaway, excluded = []) {
-    const eligible = getEligibleParticipants(guild, giveaway)
-        .filter(id => !excluded.includes(id));
-
-    return eligible.length ? randomItem(eligible) : null;
-}
-
-async function updateGiveawayMessage(guild, giveaway, embed, components = []) {
-    const channel = guild.channels.cache.get(giveaway.channelId);
-    if (!channel) return;
-
-    try {
-        const message = await channel.messages.fetch(giveaway.messageId);
-        await message.edit({
-            embeds: [embed],
-            components
-        });
-    } catch (error) {
-        console.log('Não foi possível atualizar a mensagem do sorteio:', error.message);
-    }
-}
-
-function endedGiveawayEmbed(giveaway, winnerText, extra = '') {
-    return new EmbedBuilder()
-        .setTitle('🎁 Sorteio Encerrado')
-        .setDescription(
-            `**Prêmio:** ${giveaway.prize}\n\n` +
-            `**Vencedor:** ${winnerText}\n\n` +
-            `**Participantes:** ${giveaway.participants?.length || 0}` +
-            (extra ? `\n\n${extra}` : '')
-        )
-        .setColor('#000000');
-}
-
 function getEligibleParticipants(
     guild,
     giveaway
@@ -1850,231 +1851,146 @@ function getEligibleParticipants(
 async function finishGiveaway(
     giveawayId
 ) {
-    const giveaway = sorteios[giveawayId];
-    if (!giveaway || giveaway.finished) return;
+    const giveaway =
+        sorteios[giveawayId];
 
-    const guild = client.guilds.cache.get(giveaway.guildId);
-    if (!guild) {
-        delete sorteios[giveawayId];
-        saveJSON('sorteios.json', sorteios);
+    if (!giveaway) {
+        return;
+    }
+
+    if (giveaway.finished) {
         return;
     }
 
     giveaway.finished = true;
-    giveaway.rejectedParticipants = Array.isArray(giveaway.rejectedParticipants)
-        ? giveaway.rejectedParticipants
-        : [];
 
-    const candidate = randomParticipant(
-        guild,
-        giveaway,
-        giveaway.rejectedParticipants
-    );
-
-    if (!candidate) {
-        await updateGiveawayMessage(
-            guild,
-            giveaway,
-            endedGiveawayEmbed(
-                giveaway,
-                'Nenhum vencedor',
-                'Não houve participantes elegíveis.'
-            )
+    const guild =
+        client.guilds.cache.get(
+            giveaway.guildId
         );
+
+    if (!guild) {
         delete sorteios[giveawayId];
-        saveJSON('sorteios.json', sorteios);
+
+        saveJSON(
+            'sorteios.json',
+            sorteios
+        );
+
         return;
     }
 
-    const requirement = await checkGiveawayWinnerRequirement(
-        guild,
-        candidate,
-        giveaway
-    );
-
-    if (!requirement.ok) {
-        giveaway.pendingCandidate = candidate;
-        giveaway.rejectedParticipants.push(candidate);
-        saveJSON('sorteios.json', sorteios);
-
-        await updateGiveawayMessage(
-            guild,
-            giveaway,
-            endedGiveawayEmbed(
-                giveaway,
-                `<@${candidate}>`,
-                `⚠️ A pessoa sorteada não cumpriu o requisito.\n${requirement.reason}\n\nClique em **Girar outra pessoa** para sortear outro participante.`
-            ),
-            [
-                new ActionRowBuilder().addComponents(
-                    new ButtonBuilder()
-                        .setCustomId(`giveaway_reroll_${giveawayId}`)
-                        .setLabel('Girar outra pessoa')
-                        .setEmoji('🎲')
-                        .setStyle(ButtonStyle.Primary),
-                    new ButtonBuilder()
-                        .setCustomId(`giveaway_list_${giveawayId}`)
-                        .setLabel('Ver participantes')
-                        .setEmoji('👥')
-                        .setStyle(ButtonStyle.Secondary)
-                )
-            ]
+    const channel =
+        guild.channels.cache.get(
+            giveaway.channelId
         );
-        return;
-    }
 
-    giveaway.winner = candidate;
-    saveJSON('sorteios.json', sorteios);
-
-    await updateGiveawayMessage(
-        guild,
-        giveaway,
-        endedGiveawayEmbed(giveaway, `<@${candidate}>`)
-    );
-
-    const channel = guild.channels.cache.get(giveaway.channelId);
-    if (channel) {
-        try {
-            await channel.send(
-                `🎉 **Sorteio encerrado!**\n\n**Prêmio:** ${giveaway.prize}\n**Vencedor:** <@${candidate}>`
-            );
-        } catch {}
-    }
-
-    delete sorteios[giveawayId];
-    saveJSON('sorteios.json', sorteios);
-}
-
-async function rerollGiveaway(giveawayId) {
-    const giveaway = sorteios[giveawayId];
-    if (!giveaway || !giveaway.finished) return null;
-
-    const guild = client.guilds.cache.get(giveaway.guildId);
-    if (!guild) return null;
-
-    const rejected = Array.isArray(giveaway.rejectedParticipants)
-        ? giveaway.rejectedParticipants
-        : [];
-
-    const candidate = randomParticipant(guild, giveaway, rejected);
-
-    if (!candidate) {
-        await updateGiveawayMessage(
+    const eligible =
+        getEligibleParticipants(
             guild,
-            giveaway,
-            endedGiveawayEmbed(
-                giveaway,
-                'Nenhum vencedor',
-                'Todos os participantes restantes foram eliminados pelos requisitos.'
+            giveaway
+        );
+
+    const shuffled =
+        [...eligible];
+
+    for (
+        let i =
+            shuffled.length - 1;
+        i > 0;
+        i--
+    ) {
+        const j =
+            Math.floor(
+                Math.random() *
+                    (i + 1)
+            );
+
+        [
+            shuffled[i],
+            shuffled[j]
+        ] = [
+            shuffled[j],
+            shuffled[i]
+        ];
+    }
+
+    const winners =
+        shuffled.slice(
+            0,
+            Math.min(
+                giveaway.winners,
+                shuffled.length
             )
         );
-        delete sorteios[giveawayId];
-        saveJSON('sorteios.json', sorteios);
-        return null;
-    }
 
-    const requirement = await checkGiveawayWinnerRequirement(
-        guild,
-        candidate,
-        giveaway
-    );
-
-    if (!requirement.ok) {
-        giveaway.pendingCandidate = candidate;
-        giveaway.rejectedParticipants = [...rejected, candidate];
-        saveJSON('sorteios.json', sorteios);
-
-        await updateGiveawayMessage(
-            guild,
-            giveaway,
-            endedGiveawayEmbed(
-                giveaway,
-                `<@${candidate}>`,
-                `⚠️ Essa pessoa também não cumpriu o requisito.\n${requirement.reason}\n\nClique em **Girar outra pessoa** para continuar.`
-            ),
-            [
-                new ActionRowBuilder().addComponents(
-                    new ButtonBuilder()
-                        .setCustomId(`giveaway_reroll_${giveawayId}`)
-                        .setLabel('Girar outra pessoa')
-                        .setEmoji('🎲')
-                        .setStyle(ButtonStyle.Primary),
-                    new ButtonBuilder()
-                        .setCustomId(`giveaway_list_${giveawayId}`)
-                        .setLabel('Ver participantes')
-                        .setEmoji('👥')
-                        .setStyle(ButtonStyle.Secondary)
-                )
-            ]
-        );
-        return null;
-    }
-
-    giveaway.winner = candidate;
-    saveJSON('sorteios.json', sorteios);
-
-    await updateGiveawayMessage(
-        guild,
-        giveaway,
-        endedGiveawayEmbed(giveaway, `<@${candidate}>`)
-    );
-
-    const channel = guild.channels.cache.get(giveaway.channelId);
     if (channel) {
+        const winnerText =
+            winners.length
+                ? winners
+                      .map(
+                          id =>
+                              `<@${id}>`
+                      )
+                      .join(', ')
+                : 'Nenhum vencedor';
+
         try {
-            await channel.send(
-                `🎉 **Novo sorteio!**\n\n**Prêmio:** ${giveaway.prize}\n**Vencedor:** <@${candidate}>`
+            const oldMessage =
+                await channel.messages.fetch(
+                    giveaway.messageId
+                );
+
+            const endedEmbed =
+                new EmbedBuilder()
+                    .setTitle(
+                        '🎁 Sorteio Encerrado'
+                    )
+                    .setDescription(
+                        `**Prêmio:** ${giveaway.prize}\n\n` +
+                        `**Vencedores:** ${winnerText}\n\n` +
+                        `**Participantes:** ${giveaway.participants?.length || 0}`
+                    )
+                    .setColor(
+                        '#000000'
+                    );
+
+            await oldMessage.edit({
+                embeds: [
+                    endedEmbed
+                ],
+                components: []
+            });
+        } catch (error) {
+            console.log(
+                'Não foi possível editar a mensagem do sorteio:',
+                error.message
             );
+        }
+
+        try {
+            if (winners.length) {
+                await channel.send(
+                    `🎉 **Sorteio encerrado!**\n\n` +
+                    `**Prêmio:** ${giveaway.prize}\n` +
+                    `**Vencedor(es):** ${winnerText}`
+                );
+            } else {
+                await channel.send(
+                    `🎁 O sorteio de **${giveaway.prize}** terminou, mas não houve participantes elegíveis.`
+                );
+            }
         } catch {}
     }
 
-    delete sorteios[giveawayId];
-    saveJSON('sorteios.json', sorteios);
-    return candidate;
-}
+    delete sorteios[
+        giveawayId
+    ];
 
-function giveawayParticipantList(guild, giveaway, page = 0) {
-    const participants = Array.isArray(giveaway.participants)
-        ? giveaway.participants
-        : [];
-    const perPage = 20;
-    const totalPages = Math.max(1, Math.ceil(participants.length / perPage));
-    const currentPage = Math.min(Math.max(Number(page) || 0, 0), totalPages - 1);
-    const start = currentPage * perPage;
-    const slice = participants.slice(start, start + perPage);
-
-    const lines = slice.length
-        ? slice.map((id, index) => {
-            const member = guild.members.cache.get(id);
-            const name = member ? member.displayName : `Usuário ${id}`;
-            return `**${start + index + 1}.** ${member ? `${member}` : name}`;
-        }).join('\n')
-        : 'Nenhuma pessoa está participando.';
-
-    const embed = new EmbedBuilder()
-        .setTitle('👥 Participantes do sorteio')
-        .setDescription(
-            `**Prêmio:** ${giveaway.prize}\n` +
-            `**Total:** ${participants.length}\n` +
-            `**Página:** ${currentPage + 1}/${totalPages}\n\n` +
-            lines
-        )
-        .setColor('#000000');
-
-    const row = new ActionRowBuilder().addComponents(
-        new ButtonBuilder()
-            .setCustomId(`giveaway_list_prev_${giveaway.id}_${currentPage}`)
-            .setLabel('Anterior')
-            .setStyle(ButtonStyle.Secondary)
-            .setDisabled(currentPage <= 0),
-        new ButtonBuilder()
-            .setCustomId(`giveaway_list_next_${giveaway.id}_${currentPage}`)
-            .setLabel('Próxima')
-            .setStyle(ButtonStyle.Secondary)
-            .setDisabled(currentPage >= totalPages - 1)
+    saveJSON(
+        'sorteios.json',
+        sorteios
     );
-
-    return { embeds: [embed], components: [row], ephemeral: true };
 }
 
 function scheduleGiveaway(
@@ -2596,6 +2512,17 @@ client.on(
             if (
                 interaction.isButton()
             ) {
+                const adminRolePageMatch = interaction.customId.match(/^shop_admin_role_page_(add|remove)_(-?\d+)$/);
+                if (adminRolePageMatch) {
+                    return interaction.update(purchaseRoleSelect(interaction.guild, adminRolePageMatch[1], Number(adminRolePageMatch[2])));
+                }
+                const shopPageMatch = interaction.customId.match(/^shop_customer_page_(\\d+)$/);
+                if (shopPageMatch) {
+                    return interaction.update(
+                        purchaseStorePanel(interaction.guild, Number(shopPageMatch[1]))
+                    );
+                }
+
                 /* ===== PAINEL PRINCIPAL ===== */
 
                 if (
@@ -3575,75 +3502,6 @@ client.on(
                     );
                 }
 
-                /* ===== LISTA DE PARTICIPANTES ===== */
-
-                if (interaction.customId.startsWith('giveaway_list_')) {
-                    const parts = interaction.customId.split('_');
-                    const action = parts[2];
-
-                    if (action === 'prev' || action === 'next') {
-                        const page = Number(parts[parts.length - 1]) || 0;
-                        const giveawayId = parts.slice(3, -1).join('_');
-                        const giveaway = sorteios[giveawayId];
-
-                        if (!giveaway) {
-                            return interaction.reply({
-                                content: '❌ Esse sorteio não está mais disponível.',
-                                ephemeral: true
-                            });
-                        }
-
-                        const nextPage = action === 'next' ? page + 1 : page - 1;
-                        return interaction.update(
-                            giveawayParticipantList(interaction.guild, giveaway, nextPage)
-                        );
-                    }
-
-                    const giveawayId = interaction.customId.replace('giveaway_list_', '');
-                    const giveaway = sorteios[giveawayId];
-
-                    if (!giveaway) {
-                        return interaction.reply({
-                            content: '❌ Esse sorteio não está mais disponível.',
-                            ephemeral: true
-                        });
-                    }
-
-                    return interaction.reply(
-                        giveawayParticipantList(interaction.guild, giveaway, 0)
-                    );
-                }
-
-                /* ===== GIRAR OUTRA PESSOA ===== */
-
-                if (interaction.customId.startsWith('giveaway_reroll_')) {
-                    if (!isStaff(interaction.member)) {
-                        return interaction.reply({
-                            content: '❌ Sem permissão.',
-                            ephemeral: true
-                        });
-                    }
-
-                    const giveawayId = interaction.customId.replace('giveaway_reroll_', '');
-                    const giveaway = sorteios[giveawayId];
-
-                    if (!giveaway) {
-                        return interaction.reply({
-                            content: '❌ Esse sorteio já foi resolvido.',
-                            ephemeral: true
-                        });
-                    }
-
-                    await interaction.deferReply({ ephemeral: true });
-                    const winner = await rerollGiveaway(giveawayId);
-
-                    if (winner) {
-                        return interaction.editReply(`🎉 Novo vencedor: <@${winner}>`);
-                    }
-
-                    return interaction.editReply('🎲 O sorteio foi girado novamente. Confira a mensagem do sorteio.');
-                }
-
                 /* ===== PARTICIPAR ===== */
 
                 if (
@@ -3941,6 +3799,36 @@ client.on(
             if (
                 interaction.isStringSelectMenu()
             ) {
+                if (interaction.customId === 'shop_admin_role_select_add' || interaction.customId === 'shop_admin_role_select_remove') {
+                    if (!isStaff(interaction.member)) {
+                        return interaction.reply({ content: '❌ Sem permissão.', ephemeral: true });
+                    }
+                    const role = interaction.guild.roles.cache.get(interaction.values[0]);
+                    if (!role || role.id === interaction.guild.id || role.managed) {
+                        return interaction.reply({ content: 'Esse cargo não pode ser configurado para venda.', ephemeral: true });
+                    }
+                    const loja = getLoja(interaction.guild.id);
+                    if (interaction.customId.endsWith('_remove')) {
+                        if (!loja.cargos[role.id]) {
+                            return interaction.reply({ content: 'Esse cargo não está cadastrado na loja.', ephemeral: true });
+                        }
+                        delete loja.cargos[role.id];
+                        saveLojas();
+                        return interaction.reply({ content: `O cargo **${role.name}** foi removido da loja.`, ephemeral: true });
+                    }
+                    const modal = new ModalBuilder()
+                        .setCustomId(`modal_shop_price_${role.id}`)
+                        .setTitle('Definir preço do cargo');
+                    const input = new TextInputBuilder()
+                        .setCustomId('price')
+                        .setLabel('Preço em reais (ex: 9,90)')
+                        .setPlaceholder('9,90')
+                        .setStyle(TextInputStyle.Short)
+                        .setRequired(true)
+                        .setMaxLength(12);
+                    modal.addComponents(new ActionRowBuilder().addComponents(input));
+                    return interaction.showModal(modal);
+                }
                 if (
                     interaction.customId === 'shop_customer_select'
                 ) {
@@ -4605,9 +4493,6 @@ client.on(
 
                         minDays:
                             parsed.minDays,
-
-                        minInvites:
-                            parsed.minInvites,
 
                         end:
                             Date.now() +
