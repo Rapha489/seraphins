@@ -1733,6 +1733,16 @@ function giveawayButtons(
         );
 }
 
+function giveawayRerollButton(giveawayId) {
+    return new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+            .setCustomId(`giveaway_reroll_${giveawayId}`)
+            .setLabel('Girar outro participante')
+            .setEmoji('🔄')
+            .setStyle(ButtonStyle.Secondary)
+    );
+}
+
 async function checkGiveawayRequirement(
     member,
     giveaway
@@ -1960,7 +1970,7 @@ async function finishGiveaway(
                 embeds: [
                     endedEmbed
                 ],
-                components: []
+                components: [giveawayRerollButton(giveawayId)]
             });
         } catch (error) {
             console.log(
@@ -1984,9 +1994,9 @@ async function finishGiveaway(
         } catch {}
     }
 
-    delete sorteios[
-        giveawayId
-    ];
+    giveaway.winnersSelected = winners;
+    giveaway.rerolledWinners = giveaway.rerolledWinners || [];
+    giveaway.finishedAt = Date.now();
 
     saveJSON(
         'sorteios.json',
@@ -3501,6 +3511,34 @@ client.on(
                                 true
                         }
                     );
+                }
+
+                /* ===== GIRAR NOVO GANHADOR ===== */
+                if (interaction.customId.startsWith('giveaway_reroll_')) {
+                    if (!isStaff(interaction.member)) {
+                        return interaction.reply({ content: '❌ Sem permissão para girar outro participante.', ephemeral: true });
+                    }
+                    const giveawayId = interaction.customId.replace('giveaway_reroll_', '');
+                    const giveaway = sorteios[giveawayId];
+                    if (!giveaway || !giveaway.finished) {
+                        return interaction.reply({ content: '❌ Sorteio não encontrado ou ainda não encerrado.', ephemeral: true });
+                    }
+                    const guild = interaction.guild;
+                    const alreadyWon = new Set([
+                        ...(giveaway.winnersSelected || []),
+                        ...(giveaway.rerolledWinners || [])
+                    ]);
+                    const eligible = getEligibleParticipants(guild, giveaway).filter(id => !alreadyWon.has(id));
+                    if (!eligible.length) {
+                        return interaction.reply({ content: '❌ Não há outros participantes que cumpram os requisitos para girar.', ephemeral: true });
+                    }
+                    const newWinner = eligible[Math.floor(Math.random() * eligible.length)];
+                    giveaway.rerolledWinners = giveaway.rerolledWinners || [];
+                    giveaway.rerolledWinners.push(newWinner);
+                    saveJSON('sorteios.json', sorteios);
+                    await interaction.reply({ content: `🔄 **Novo participante sorteado:** <@${newWinner}>
+Prêmio: **${giveaway.prize}**`, ephemeral: false });
+                    return;
                 }
 
                 /* ===== PARTICIPAR ===== */
